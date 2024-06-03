@@ -1,0 +1,14 @@
+{
+  "files": {
+    "main.css": "/static/css/main.867a739f.css",
+    "main.js": "/static/js/main.c3f9b6f6.js",
+    "static/media/Jost-VariableFont_wght.ttf": "/static/media/Jost-VariableFont_wght.6de07354a7108bacf175.ttf",
+    "index.html": "/index.html",
+    "main.867a739f.css.map": "/static/css/main.867a739f.css.map",
+    "main.c3f9b6f6.js.map": "/static/js/main.c3f9b6f6.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.867a739f.css",
+    "static/js/main.c3f9b6f6.js"
+  ]
+}
