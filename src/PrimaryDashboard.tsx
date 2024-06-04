@@ -70,6 +70,7 @@ const PrimaryDashboard = () => {
     setReachabilityError(undefined);
     try {
       if (peerId !== "") {
+        let done = false;
         const pb = base58_to_binary(peerId);
         const p64 = Buffer.from(pb).toString('base64');
         if (!selfTestData || !selfTestTime || selfTestTime.getTime() < (Date.now() - (5 * 60 * 1000))) {
@@ -111,10 +112,20 @@ const PrimaryDashboard = () => {
             } else {
               setSelfTestError("Could not find peer.");
             }
-            setTesting(false);
+            
+            if (done) {
+              setTesting(false);
+            } else {
+              done = true;
+            }
           }).catch((e) => {
             setSelfTestError(e.message);
-            setTesting(false);
+            
+            if (done) {
+              setTesting(false);
+            } else {
+              done = true;
+            }
           });
         } else {
           let found: {
@@ -150,7 +161,11 @@ const PrimaryDashboard = () => {
           } else {
             setSelfTestError("Could not find peer.");
           }
-          setTesting(false);
+          if (done) {
+            setTesting(false);
+          } else {
+            done = true;
+          }
         }
         fetch(`https://dashboard-api.quilibrium.com/peer-test?peerId=${peerId}`).then(async (r) => {
           const results = (await r.json());
@@ -159,6 +174,11 @@ const PrimaryDashboard = () => {
           } else {
             setReachable(false);
             setReachabilityError(results["error"]);
+          }
+          if (done) {
+            setTesting(false);
+          } else {
+            done = true;
           }
         });
       }
