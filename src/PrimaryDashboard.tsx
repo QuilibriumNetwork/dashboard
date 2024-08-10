@@ -190,6 +190,9 @@ const PrimaryDashboard = () => {
 
   return (
     <>
+    <div className="flex flex-row mx-8 bg-slate-400/20 border border-slate-800/20 p-4 rounded-xl my-8 mx-8 text-white">
+      <span className="rounded-full border border-white px-[5pt] mr-2">ℹ</span> <span>Note: while we are migrating to 2.0, the below graph will be much lower than expected due to most bootstrap servers being unresponsive to nodes running 1.4.x.</span>
+    </div>
     <div className="flex flex-col mx-8 bg-slate-100/20 p-4 rounded-xl">
       <div className="text-xl text-white">Live Peers</div>
       <div className="w-full h-80">
