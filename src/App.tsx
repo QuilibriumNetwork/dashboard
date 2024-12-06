@@ -2,10 +2,12 @@ import React from 'react';
 import { Route, RouterProvider, createRoutesFromElements } from 'react-router';
 import { Link, createBrowserRouter } from 'react-router-dom';
 import PrimaryDashboard from './PrimaryDashboard';
+import Frame from './Frame';
 
 const router = createBrowserRouter(
   createRoutesFromElements(<>
       <Route path="/" element={<PrimaryDashboard/>}/>
+      <Route path="/frame/:filter/:frameNumber" element={<Frame/>}/>
     </>)
 );
 
