@@ -285,7 +285,7 @@ const Frame = () => {
           {ringMap.map(ring => <Pie key={`pie-${ring.ring}`} data={ring.workers} dataKey="parallelism" cx="50%" cy="50%" innerRadius={ring.ring*(400/ringMap.length) + (ring.ring ? 10 : 0)} outerRadius={(ring.ring+1)*(400/ringMap.length)} fill="#FF0271" labelLine={false} label={renderCustomizedLabel}>
             {
               ring.workers.map((entry, index) => (
-                <Cell key={`cell-${ring.ring}-${index}`} strokeWidth={0}/>
+                <Cell key={`cell-${ring.ring}-${index}`} strokeWidth={0.1}/>
               ))
             }
             </Pie>)}
