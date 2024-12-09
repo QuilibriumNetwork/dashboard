@@ -150,9 +150,6 @@ const PrimaryDashboard = () => {
 
   return (
     <>
-    {frames && frames[0].timestamp < (Date.now()-360)*1000 && <div className="flex flex-row mx-8 bg-slate-400/20 border border-slate-800/20 p-4 rounded-xl my-8 mx-8 text-white">
-      <span className="rounded-full border border-white px-[5pt] mr-2">ℹ</span> <span>The dashboard is being backfilled, this data may not reflect the latest network info.</span>
-    </div>}
     <div className="grid grid-cols-1 px-8 md:grid-cols-2 gap-8 lg:grid-cols-4">
       <div className="flex flex-col bg-slate-100/20 p-4 rounded-xl grow">
         <div className="text-xl text-white">Live Reachable Peers</div>
@@ -181,7 +178,7 @@ const PrimaryDashboard = () => {
       <div className="flex flex-col bg-slate-100/20 p-4 rounded-xl grow">
         <div className="text-xl text-white">Estimated Daily Emissions</div>
         <div className="text-white text-3xl">
-          {!loadingFrames && !error && frames && <span>{Math.floor(512*60*60*24/((frames[0].timestamp - frames[9].timestamp)/10000)).toLocaleString()} QUIL</span>}
+          {!loadingFrames && !error && frames && <span>{Math.floor(1024*60*60*24/((frames[0].timestamp - frames[10].timestamp)/10000)).toLocaleString()} QUIL</span>}
           {loadingFrames && <Loading/>}
           {error && <>An error occurred, please refresh.</>}
         </div>
@@ -189,7 +186,7 @@ const PrimaryDashboard = () => {
       <div className="flex flex-col bg-slate-100/20 p-4 rounded-xl grow">
         <div className="text-xl text-white">Avg. Frame Duration</div>
         <div className="text-white text-3xl">
-          {!loadingFrames && !error && frames && <span>{((frames[0].timestamp - frames[9].timestamp)/10000)} seconds</span>}
+          {!loadingFrames && !error && frames && <span>{((frames[0].timestamp - frames[10].timestamp)/10000)} seconds</span>}
           {loadingFrames && <Loading/>}
           {error && <>An error occurred, please refresh.</>}
         </div>
@@ -197,7 +194,7 @@ const PrimaryDashboard = () => {
       <div className="flex flex-col bg-slate-100/20 p-4 rounded-xl grow">
         <div className="text-xl text-white">Avg. Workers</div>
         <div className="text-white text-3xl">
-          {!loadingFrames && !error && frames && <span>{(frames.map((f)=>f.workers.reduce((a,b) => a + b.parallelism, BigInt(0).valueOf())).reduce((a,b)=>a+b,BigInt(0).valueOf())/(BigInt(10).valueOf())).toLocaleString()}</span>}
+          {!loadingFrames && !error && frames && <span>{(frames.map((f)=>f.workers.reduce((a,b) => a + b.parallelism, BigInt(0).valueOf())).reduce((a,b)=>a+b,BigInt(0).valueOf())/(BigInt(11).valueOf())).toLocaleString()}</span>}
           {loadingFrames && <Loading/>}
           {error && <>An error occurred, please refresh.</>}
         </div>
