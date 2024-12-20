@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useVirtualizer } from '@tanstack/react-virtual';
 import Loading from './Loading';
-import { useParams } from 'react-router';
+import { useNavigate, useParams } from 'react-router';
 
 const Tx = () => {
   const [loading, setLoading] = useState(true);
@@ -14,11 +14,12 @@ const Tx = () => {
     outputs: any[],
     request: any,
   }>();
+  const navigate = useNavigate();
   const outputRef = React.useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (!init && filter && frameNumber) {
-      setInit(false);
+      setInit(true);
       (async () => {
         try {
           const r = await fetch("https://dashboard-api.quilibrium.com/tx/" + filter + "/" + frameNumber +"/" + seqNo);
@@ -205,6 +206,14 @@ const Tx = () => {
                 transform: `translateY(${virtualItem.start}px)`,
               }}
               className={"hover:bg-slate-200/20 hover:cursor-pointer rounded-xl pt-1 pl-4"}
+              onClick={() => {
+                if (tx.outputs[virtualItem.index].Output[t].owner?.Account?.ImplicitAccount?.address) {
+                  navigate("/account/" + Buffer.from(
+                    tx.outputs[virtualItem.index].Output[t].owner?.Account?.ImplicitAccount?.address,
+                    'base64',
+                  ).toString('hex'));
+                }
+              }}
             >
               <div className="grid grid-cols-5">
                 <div className="flex flex-col">

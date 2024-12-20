@@ -38,7 +38,7 @@ const Frame = () => {
 
   useEffect(() => {
     if (!init && filter && frameNumber) {
-      setInit(false);
+      setInit(true);
       (async () => {
         try {
           const r = await fetch("https://dashboard-api.quilibrium.com/frame/" + filter + "/" + frameNumber);
@@ -242,7 +242,6 @@ const Frame = () => {
                 height: `${virtualItem.size}px`,
                 transform: `translateY(${virtualItem.start}px)`,
               }}
-              onClick={() => navigate("/tx/" + filter + "/" + frameNumber + "/" + virtualItem.index)}
               className={"hover:bg-slate-200/20 hover:cursor-pointer rounded-xl pt-1 pl-4"}
             >
               <div className="grid grid-cols-5">

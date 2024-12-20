@@ -4,12 +4,14 @@ import { Link, createBrowserRouter } from 'react-router-dom';
 import PrimaryDashboard from './PrimaryDashboard';
 import Frame from './Frame';
 import Tx from './Tx';
+import Account from './Account';
 
 const router = createBrowserRouter(
   createRoutesFromElements(<>
       <Route path="/" element={<PrimaryDashboard/>}/>
       <Route path="/frame/:filter/:frameNumber" element={<Frame/>}/>
       <Route path="/tx/:filter/:frameNumber/:seqNo" element={<Tx/>}/>
+      <Route path="/account/:account" element={<Account/>}/>
     </>)
 );
 
