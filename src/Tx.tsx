@@ -59,7 +59,7 @@ const Tx = () => {
         return <>
           {request.Mint.proofs.map((c: any, i: number) => {
           return <div key={"mint-" + i} className="grid grid-cols-5">
-            <div className="flex flex-col">{i === 0 ? "Commitment:" : i === 1 ? "Parallelism:" : i === 2 ? "Frame Number:" : (i >= 3 && i <= request.Mint.proofs.length - 3) ? "Merkle Proof:" : i === request.Mint.proofs.length - 2 ? "Path:" : "Wesolowski Proof:"}</div>
+            <div className="flex flex-col">{i === 0 ? "Commitment:" : i === 1 ? "Parallelism:" : i === 2 ? "Frame Number:" : "Proof:"}</div>
             <code className="flex flex-col break-words col-span-4">0x{Buffer.from(c, 'base64').toString('hex')}</code>
           </div>;
           })}
