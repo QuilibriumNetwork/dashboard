@@ -178,7 +178,7 @@ const PrimaryDashboard = () => {
       <div className="flex flex-col bg-slate-100/20 p-4 rounded-xl grow">
         <div className="text-xl text-white">Estimated Daily Emissions</div>
         <div className="text-white text-3xl">
-          {!loadingFrames && !error && frames && <span>{Math.floor(1024*60*60*24/((frames[0].timestamp - frames[10].timestamp)/10000)).toLocaleString()} QUIL</span>}
+          {!loadingFrames && !error && frames && <span>{Math.floor(512*60*60*24/((frames[0].timestamp - frames[10].timestamp)/10000)).toLocaleString()} QUIL</span>}
           {loadingFrames && <Loading/>}
           {error && <>An error occurred, please refresh.</>}
         </div>
