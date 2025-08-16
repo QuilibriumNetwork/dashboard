@@ -5,22 +5,23 @@ import PrimaryDashboard from './PrimaryDashboard';
 import Frame from './Frame';
 import Tx from './Tx';
 import Account from './Account';
+import Logo from './Logo';
 
 const router = createBrowserRouter(
   createRoutesFromElements(<>
       <Route path="/" element={<PrimaryDashboard/>}/>
-      <Route path="/frame/:filter/:frameNumber" element={<Frame/>}/>
+      {/* <Route path="/frame/:filter/:frameNumber" element={<Frame/>}/>
       <Route path="/tx/:filter/:frameNumber/:seqNo" element={<Tx/>}/>
-      <Route path="/account/:account" element={<Account/>}/>
+      <Route path="/account/:account" element={<Account/>}/> */}
     </>)
 );
 
 function App() {
   return (
-    <div className="flex flex-col min-h-screen min-w-screen bg-gradient-to-br from-pink-950 to-orange-950">
+    <div className="flex flex-col min-h-screen min-w-screen   bg-burgundy-pink-4">
       <div className="flex flex-row z-10 p-4">
-        <div className="p-3 basis-48 hidden md:inline-block">
-          <img src={process.env.PUBLIC_URL + "/logo.png"} title="Quilibrium" alt="Quilibrium"/>
+        <div className="pt-3 pl-3 basis-48 hidden md:inline-block">
+          <Logo/>
         </div>
         <div className="p-3 w-14 md:hidden inline-block">
           <img src={process.env.PUBLIC_URL + "/qlogo.png"} title="Quilibrium" alt="Quilibrium"/>

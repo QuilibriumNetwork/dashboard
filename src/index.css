@@ -8,11 +8,54 @@
     url("/public/Jost/Jost-VariableFont_wght.ttf") format("truetype");
 }
 
+@font-face {
+  font-family: "AtAero";
+  src: url("/public/AtAero/AtAero-Regular.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "AtAero";
+  src: url("/public/AtAero/AtAero-Medium.woff2") format("woff2");
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "AtAero";
+  src: url("/public/AtAero/AtAero-Semibold.woff2") format("woff2");
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+:root {
+  /* Colors */
+  --white: #ffffff;
+  --pink: #ff056d;
+  --burgundy: #40001b;
+  --blue: #0287f2;
+  --purple: #6330ca;
+  --green: #22a941;
+  --orange: #ff6000;
+}
+
 body {
   margin: 0;
-  font-family: "Jost", -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+  font-family: "AtAero", -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
     'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
     sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+.bg-burgundy-pink-4 {
+  background: linear-gradient(
+    236deg,
+    var(--pink) -12.1%,
+    #6d012e 73.57%,
+    var(--burgundy) 106.11%
+  );
 }
