@@ -1,12 +1,15 @@
 {
   "files": {
-    "main.css": "/static/css/main.a220c96b.css",
-    "main.js": "/static/js/main.2ef38d49.js",
+    "main.css": "/static/css/main.63e9ab98.css",
+    "main.js": "/static/js/main.70bdd710.js",
     "static/media/Jost-VariableFont_wght.ttf": "/static/media/Jost-VariableFont_wght.6de07354a7108bacf175.ttf",
+    "static/media/AtAero-Semibold.woff2": "/static/media/AtAero-Semibold.0fd60abc90b4c8112cf3.woff2",
+    "static/media/AtAero-Regular.woff2": "/static/media/AtAero-Regular.ea391a89e18962b50720.woff2",
+    "static/media/AtAero-Medium.woff2": "/static/media/AtAero-Medium.b17d4fb6531a6ed5277f.woff2",
     "index.html": "/index.html"
   },
   "entrypoints": [
-    "static/css/main.a220c96b.css",
-    "static/js/main.2ef38d49.js"
+    "static/css/main.63e9ab98.css",
+    "static/js/main.70bdd710.js"
   ]
 }
