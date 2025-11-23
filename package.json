@@ -1,57 +1,51 @@
 {
-  "name": "dashboard",
-  "version": "0.1.0",
+  "name": "quilibrium",
   "private": true,
-  "dependencies": {
-    "@tanstack/react-virtual": "^3.10.9",
-    "@testing-library/jest-dom": "^5.17.0",
-    "@testing-library/react": "^13.4.0",
-    "@testing-library/user-event": "^13.5.0",
-    "@types/jest": "^27.5.2",
-    "@types/node": "^16.18.97",
-    "@types/react": "^18.3.3",
-    "@types/react-dom": "^18.3.0",
-    "base58-js": "^2.0.0",
-    "buffer": "^6.0.3",
-    "react": "^18.3.1",
-    "react-charts": "^3.0.0-beta.57",
-    "react-dom": "^18.3.1",
-    "react-router": "^6.23.1",
-    "react-router-dom": "^6.23.1",
-    "react-scripts": "5.0.1",
-    "recharts": "^2.14.1",
-    "typescript": "^4.9.5",
-    "web-vitals": "^2.1.4"
-  },
-  "resolutions": {
-    "postcss": "^8.4.38",
-    "nth-check": "^2.1.1"
-  },
+  "version": "0.0.1",
+  "type": "module",
   "scripts": {
-    "start": "react-scripts start",
-    "build": "GENERATE_SOURCEMAP=false react-scripts build",
-    "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "dev": "vite",
+    "build": "vite build",
+    "lint": "eslint .",
+    "preview": "vite preview"
   },
-  "eslintConfig": {
-    "extends": [
-      "react-app",
-      "react-app/jest"
-    ]
-  },
-  "browserslist": {
-    "production": [
-      ">0.2%",
-      "not dead",
-      "not op_mini all"
-    ],
-    "development": [
-      "last 1 chrome version",
-      "last 1 firefox version",
-      "last 1 safari version"
-    ]
+  "dependencies": {
+    "@iden3/js-crypto": "^1.3.1",
+    "@radix-ui/react-accordion": "^1.2.10",
+    "@radix-ui/react-navigation-menu": "^1.2.12",
+    "@tanstack/react-virtual": "^3.13.9",
+    "base58-js": "^3.0.2",
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
+    "decimal.js": "^10.5.0",
+    "framer-motion": "^12.12.1",
+    "gsap": "^3.13.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-helmet-async": "^2.0.5",
+    "react-router-dom": "^7.6.0",
+    "tailwind-merge": "^3.3.0",
+    "thirdweb": "^5.100.0"
   },
   "devDependencies": {
-    "tailwindcss": "^3.4.3"
+    "@eslint/js": "^9.25.0",
+    "@types/node": "^22.15.18",
+    "@types/react": "^18.3.21",
+    "@types/react-dom": "^18.3.7",
+    "@vitejs/plugin-react": "^4.4.1",
+    "autoprefixer": "^10.4.16",
+    "eslint": "^9.25.0",
+    "eslint-plugin-react-hooks": "^5.2.0",
+    "eslint-plugin-react-refresh": "^0.4.19",
+    "globals": "^16.0.0",
+    "postcss": "^8.4.31",
+    "rollup-plugin-visualizer": "^5.14.0",
+    "tailwindcss": "^3.4.17",
+    "typescript": "~5.8.3",
+    "typescript-eslint": "^8.30.1",
+    "vite": "^6.3.5"
+  },
+  "engines": {
+    "node": ">=18"
   }
 }

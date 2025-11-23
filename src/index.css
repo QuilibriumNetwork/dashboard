@@ -2,35 +2,15 @@
 @tailwind components;
 @tailwind utilities;
 
-@font-face {
-  font-family: "Jost";
-  src: local("Jost"),
-    url("/public/Jost/Jost-VariableFont_wght.ttf") format("truetype");
-}
+/* -------------------------------------------------- */
+/* CSS Variables (Palette + Utilities) */
+/* -------------------------------------------------- */
 
-@font-face {
-  font-family: "AtAero";
-  src: url("/public/AtAero/AtAero-Regular.woff2") format("woff2");
-  font-weight: 400;
-  font-style: normal;
-  font-display: swap;
-}
+/*debug layout*/
+/* * {
+  outline: 1px solid red;
+} */
 
-@font-face {
-  font-family: "AtAero";
-  src: url("/public/AtAero/AtAero-Medium.woff2") format("woff2");
-  font-weight: 500;
-  font-style: normal;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: "AtAero";
-  src: url("/public/AtAero/AtAero-Semibold.woff2") format("woff2");
-  font-weight: 600;
-  font-style: normal;
-  font-display: swap;
-}
 :root {
   /* Colors */
   --white: #ffffff;
@@ -40,22 +20,383 @@
   --purple: #6330ca;
   --green: #22a941;
   --orange: #ff6000;
+
+  --beige: #f0e9e4;
+  --dark-grey: #beb8b4;
+  --light-grey: #f8f8f8;
+
+  --light-pink: #ffe6f0;
+  --light-blue: #daeeff;
+  --light-purple: #e7ddff;
+  --light-green: #dbf4dc;
+  --light-orange: #ffe8df;
+
+  /* Animations */
+  --default-transition-timing-function: cubic-bezier(0, 0, 0.5, 1);
+  --default-transition-duration: 0.3s;
+
+  /* fonts */
+  --font-inter-sans: "Inter", sans-serif;
+  --font-at-aero: "AtAero", sans-serif;
+}
+
+/* These custom theme variables won't be processed by Tailwind
+   but are usable in your CSS with var(--...) */
+
+@layer base {
+  :root {
+    --color-white: var(--white);
+    --color-pink: var(--pink);
+    --color-burgundy: var(--burgundy);
+    --color-blue: var(--blue);
+    --color-purple: var(--purple);
+    --color-green: var(--green);
+    --color-orange: var(--orange);
+
+    --color-beige: var(--beige);
+    --color-light-grey: var(--light-grey);
+    --color-dark-grey: var(--dark-grey);
+
+    --color-light-pink: var(--light-pink);
+    --color-light-blue: var(--light-blue);
+    --color-light-purple: var(--light-purple);
+    --color-light-green: var(--light-green);
+    --color-light-orange: var(--light-orange);
+  }
+}
+
+/* -------------------------------------------------- */
+/* Base Layout & Typography */
+/* -------------------------------------------------- */
+
+@font-face {
+  font-family: "Inter";
+  src: url("/src/assets/fonts/Inter-Regular.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Inter";
+  src: url("/src/assets/fonts/Inter-Medium.woff2") format("woff2");
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Inter";
+  src: url("/src/assets/fonts/Inter-Bold.woff2") format("woff2");
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "AtAero";
+  src: url("/src/assets/fonts/AtAero-Regular.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "AtAero";
+  src: url("/src/assets/fonts/AtAero-Medium.woff2") format("woff2");
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "AtAero";
+  src: url("/src/assets/fonts/AtAero-Semibold.woff2") format("woff2");
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+
+html {
+  scroll-behavior: smooth;
 }
 
 body {
-  margin: 0;
-  font-family: "AtAero", -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-    sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+  background: var(--light-grey);
+  color: var(--burgundy);
+  font-family: var(--font-inter-sans);
 }
 
-.bg-burgundy-pink-4 {
-  background: linear-gradient(
-    236deg,
-    var(--pink) -12.1%,
-    #6d012e 73.57%,
-    var(--burgundy) 106.11%
-  );
+@media (prefers-color-scheme: dark) {
+  body {
+    background: #0b0513;
+    color: var(--white);
+  }
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6, nav {
+  font-family: var(--font-at-aero);
+}
+
+@layer base {
+  h1 {
+    @apply text-5xl sm:text-6xl lg:text-7xl font-bold text-[color:var(--burgundy)] font-["AtAero-Semibold"] mb-6 dark:text-white;
+  }
+  h2 {
+    @apply text-3xl sm:text-4xl lg:text-5xl font-semibold text-[color:var(--burgundy)] font-["AtAero-Semibold"] mb-5 dark:text-white;
+  }
+  h3 {
+    @apply text-2xl sm:text-3xl lg:text-4xl font-medium text-[color:var(--burgundy)] font-["AtAero-Semibold"] mb-4 dark:text-white;
+  }
+  h4 {
+    @apply text-xl sm:text-2xl lg:text-3xl font-medium text-[color:var(--burgundy)] font-["AtAero-Semibold"] mb-3 dark:text-white;
+  }
+  h5 {
+    @apply text-lg sm:text-xl lg:text-2xl font-medium text-[color:var(--burgundy)] font-["AtAero-Semibold"] mb-2 dark:text-white;
+  }
+
+  strong,
+  b {
+    font-weight: 600;
+  }
+
+  code {
+    @apply break-all;
+  }
+}
+
+/* -------------------------------------------------- */
+/* Utilities (spacing, layout, gradients, etc.) */
+/* -------------------------------------------------- */
+
+@layer utilities {
+  .container {
+    @apply mx-auto lg:max-w-[1440px] px-4 sm:px-6 lg:px-20;
+  }
+
+  .container-lg {
+    @apply container mx-auto lg:max-w-[1440px] px-4 sm:px-6 lg:px-10;
+  }
+
+  .bg-burgundy-pink {
+    background: linear-gradient(120deg, var(--burgundy), var(--pink));
+  }
+
+  .bg-burgundy-pink-2 {
+    background: linear-gradient(to top right, var(--burgundy), var(--pink));
+  }
+
+  .bg-burgundy-pink-3 {
+    background: linear-gradient(30deg, var(--burgundy) 0%, var(--pink) 100%);
+  }
+
+  .bg-burgundy-pink-4 {
+    background: linear-gradient(
+      236deg,
+      var(--pink) -12.1%,
+      #6d012e 73.57%,
+      var(--burgundy) 106.11%
+    );
+  }
+
+  .bg-pink-burgundy {
+    background: linear-gradient(120deg, var(--pink), var(--burgundy));
+  }
+
+  .bg-white-beige {
+    background: linear-gradient(180deg, var(--white), var(--beige));
+  }
+
+  .bg-beige-white {
+    background: linear-gradient(180deg, var(--beige), var(--white));
+  }
+
+  .bg-beige-white-2 {
+    background: linear-gradient(0deg, var(--beige) 0%, var(--white) 40%);
+  }
+
+  .bg-white-beige-radial {
+    background: radial-gradient(
+      circle at center,
+      var(--white) 0%,
+      var(--white) 20%,
+      var(--beige) 50%,
+      var(--beige) 100%
+    );
+  }
+
+  .gradient-sweep {
+    display: block;
+    background-size: 200% auto;
+    background-clip: text;
+    -webkit-background-clip: text;
+    color: transparent;
+    -webkit-text-fill-color: transparent;
+    animation: gradient-sweep 10s linear infinite;
+    background-image: linear-gradient(
+      120deg,
+      var(--pink) 0%,
+      var(--burgundy) 50%,
+      var(--pink) 100%
+    );
+  }
+
+  .gradient-sweep--dark {
+    display: block;
+    background-size: 200% auto;
+    background-clip: text;
+    -webkit-background-clip: text;
+    color: transparent;
+    -webkit-text-fill-color: transparent;
+    animation: gradient-sweep 10s linear infinite;
+    background-image: linear-gradient(
+      120deg,
+      var(--white) 0%,
+      var(--pink) 50%,
+      var(--white) 100%
+    );
+  }
+
+  @keyframes gradient-sweep {
+    0% {
+      background-position: 200% center;
+    }
+    100% {
+      background-position: -200% center;
+    }
+  }
+
+  .drop-shadow-box {
+    box-shadow: 0px 8px 8px rgba(0, 0, 0, 0.02);
+  }
+
+  @keyframes spinner-animation {
+    0%,
+    100% {
+      transform: scale(0.9);
+      opacity: 0.3;
+    }
+    50% {
+      transform: scale(1.1);
+      opacity: 1;
+    }
+  }
+
+  .spinner-animation {
+    animation: spinner-animation 3s ease-in-out infinite;
+  }
+}
+
+/* -------------------------------------------------- */
+/* Components (shared background colors) */
+/* -------------------------------------------------- */
+
+@layer components {
+  .text-link {
+    @apply relative inline-block text-pink visited:text-purple font-normal transition-colors duration-500;
+  }
+
+  .text-link::after {
+    content: "";
+    @apply absolute left-0 bottom-0 w-0 h-[2px] transition-all duration-500;
+    background-color: currentColor;
+  }
+
+  .text-link:hover::after {
+    @apply w-full;
+  }
+
+  .text-link:visited:hover::after {
+    background-color: var(--purple);
+  }
+
+  .bg-pink {
+    background-color: var(--pink);
+  }
+  .bg-burgundy {
+    background-color: var(--burgundy);
+  }
+  .bg-dark-grey {
+    background-color: var(--dark-grey);
+  }
+  .bg-beige {
+    background-color: var(--beige);
+  }
+  .bg-light-grey {
+    background-color: var(--light-grey);
+  }
+  .bg-light-pink {
+    background-color: var(--light-pink);
+  }
+  .bg-light-blue {
+    background-color: var(--light-blue);
+  }
+  .bg-light-purple {
+    background-color: var(--light-purple);
+  }
+  .bg-light-green {
+    background-color: var(--light-green);
+  }
+  .bg-light-orange {
+    background-color: var(--light-orange);
+  }
+
+  /*lists custom styles for bullets*/
+  .ul-default {
+    @apply list-disc pl-5;
+  }
+
+  .ul-default li::marker {
+    color: currentColor;
+  }
+
+  .ul-pink {
+    @apply list-disc pl-5;
+  }
+
+  .ul-pink li::marker {
+    color: var(--pink);
+  }
+
+  .code-block {
+    @apply w-full max-w-full rounded-lg bg-gray-100 border border-gray-300 text-sm p-4 font-mono break-words overflow-x-auto;
+  }
+
+  /*mainly used in Bridge.tsx*/
+  .input-base {
+    @apply w-full border border-slate-600/30 px-4 py-2 text-sm mb-4 rounded-xl focus:outline-none focus:ring-4 focus:ring-pink/20 focus:ring-offset-0 transition-colors;
+  }
+}
+
+/* -------------------------------------------------- */
+/* Particle Animations & SVG Effects */
+/* -------------------------------------------------- */
+
+@layer utilities {
+  .pa--particle-glow {
+    transition: opacity 0.2s ease;
+  }
+  .pa--particle-glow--pink {
+    fill: var(--pink);
+    filter: drop-shadow(0 0 4px var(--pink)) drop-shadow(0 0 10px var(--pink));
+  }
+  .pa--particle-glow--white {
+    fill: white;
+    filter: drop-shadow(0 0 6px white) drop-shadow(0 0 14px white);
+  }
+
+  .svg-tags {
+    opacity: 1;
+    transition: opacity 0.3s ease, filter 0.3s ease;
+    filter: brightness(0.9);
+  }
+
+  .svg-tags:hover {
+    filter: brightness(1.75) drop-shadow(0 0 6px var(--pink));
+  }
 }
