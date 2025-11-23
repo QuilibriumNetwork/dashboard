@@ -1,0 +1,29 @@
+<svg id="home-section-discover-svg" width="1360" height="549" viewBox="0 0 1360 549" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path id="path-home-discover_4" d="M1073 2.563e-05L1073 104C1073 121.673 1087.33 136 1105 136L1360 136" stroke="url(#paint0_linear_2164_76)" strokeWidth="2"/>
+<path id="path-home-discover_3" d="M1211 407.809V379C1211 361.327 1196.67 347 1179 347H868C850.327 347 836 361.327 836 379V418" stroke="url(#paint1_linear_2164_76)" strokeWidth="2"/>
+<path id="path-home-discover_2" opacity="0.7" d="M455 124V77C455 59.3269 440.673 45 423 45H0.5" stroke="url(#paint2_linear_2164_76)" strokeWidth="2"/>
+<path id="path-home-discover_1" opacity="0.5" d="M342 249H149.5C131.827 249 117.5 263.327 117.5 281L117.5 390.818C117.5 408.491 103.173 422.818 85.4999 422.818H26" stroke="url(#paint3_linear_2164_76)" strokeWidth="2"/>
+<defs>
+<linearGradient id="paint0_linear_2164_76" x1="1891" y1="332" x2="1746.53" y2="-218.864" gradientUnits="userSpaceOnUse">
+<stop stop-color="white" stop-opacity="0"/>
+<stop offset="0.298554" stop-color="#FF056D"/>
+<stop offset="1" stop-color="white" stop-opacity="0"/>
+</linearGradient>
+<linearGradient id="paint1_linear_2164_76" x1="1629.5" y1="-17.5005" x2="1039.14" y2="-269.295" gradientUnits="userSpaceOnUse">
+<stop offset="0.143379" stop-color="white" stop-opacity="0"/>
+<stop offset="0.84335" stop-color="#FF056D"/>
+<stop offset="1" stop-color="white" stop-opacity="0"/>
+</linearGradient>
+<linearGradient id="paint2_linear_2164_76" x1="515" y1="-51.5" x2="474.103" y2="145.843" gradientUnits="userSpaceOnUse">
+<stop stop-color="white" stop-opacity="0"/>
+<stop offset="0.454402" stop-color="#FF056D"/>
+<stop offset="1" stop-color="white" stop-opacity="0"/>
+</linearGradient>
+<linearGradient id="paint3_linear_2164_76" x1="302.11" y1="97.5975" x2="-54.6483" y2="304.384" gradientUnits="userSpaceOnUse">
+<stop stop-color="#FF056D" stop-opacity="0"/>
+<stop offset="0.347329" stop-color="#FF056D" stop-opacity="0.77"/>
+<stop offset="1" stop-color="#FF056D" stop-opacity="0"/>
+</linearGradient>
+</defs>
+    <g id="pa--particles-layer"></g>
+</svg>
