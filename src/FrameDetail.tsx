@@ -10,6 +10,75 @@ import {
   formatRelative,
 } from "@/lib/format";
 import Spinner from "@/components/ui/Spinner";
+import Icon from "@/components/ui/Icons";
+import ChevronDown from "@/components/ui/ChevronDown";
+
+function CopyFrameDataButton() {
+  const [copied, setCopied] = useState(false);
+
+  const handleCopy = async () => {
+    try {
+      const frameDataElement = document.querySelector('[data-frame-info]');
+      const frameData = frameDataElement?.getAttribute('data-frame-info');
+
+      if (frameData) {
+        await navigator.clipboard.writeText(frameData);
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000);
+      }
+    } catch (err) {
+      console.error("Copy failed", err);
+    }
+  };
+
+  return (
+    <button
+      onClick={handleCopy}
+      className="flex items-center gap-2 px-2 py-1 text-sm font-semibold uppercase tracking-[0.2em] text-burgundy/70 hover:text-burgundy dark:text-white/70 transition-colors bg-transparent hover:bg-transparent"
+    >
+      <Icon name="emptyclipboard" className="w-4 h-4 flex-shrink-0" />
+      <span>{copied ? 'Copied!' : 'Copy data'}</span>
+    </button>
+  );
+}
+
+function HoverableCopyText({ text, children }: { text: string; children: React.ReactNode }) {
+  const [isHovered, setIsHovered] = useState(false);
+  const [copied, setCopied] = useState(false);
+
+  const handleCopy = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    try {
+      await navigator.clipboard.writeText(text);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch (err) {
+      console.error("Copy failed", err);
+    }
+  };
+
+  return (
+    <span
+      className="relative inline-flex items-center gap-1.5 group cursor-pointer"
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+      onClick={handleCopy}
+    >
+      <span className={`group-hover:underline transition-colors ${copied ? 'text-green dark:text-light-green' : ''}`}>
+        {children}
+      </span>
+      {isHovered && (
+        <>
+          <span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 px-2 py-1 text-xs text-white bg-gray-900 dark:bg-gray-700 rounded whitespace-nowrap pointer-events-none z-10 shadow-lg">
+            {copied ? 'Copied!' : 'Click to copy'}
+            <span className="absolute top-full left-1/2 -translate-x-1/2 -mt-1 border-4 border-transparent border-t-gray-900 dark:border-t-gray-700" />
+          </span>
+          <Icon name="emptyclipboard" className="w-3 h-3 text-burgundy/60 dark:text-white/60 flex-shrink-0" />
+        </>
+      )}
+    </span>
+  );
+}
 
 export default function FrameDetail() {
   const { frameNumber } = useParams<{ frameNumber: string }>();
@@ -55,6 +124,11 @@ export default function FrameDetail() {
     frame?.requests?.reduce((sum, bundle) => sum + (bundle.requests?.length ?? 0), 0) ?? 0
   ), [frame]);
 
+  const frameDataJson = useMemo(() => {
+    if (!frame) return '';
+    return JSON.stringify(frame, null, 2);
+  }, [frame]);
+
   if (loading) {
     return (
       <div className="flex min-h-[50vh] items-center justify-center">
@@ -74,6 +148,15 @@ export default function FrameDetail() {
       <div className="pointer-events-none absolute left-1/2 top-[420px] h-80 w-80 -translate-x-1/2 rounded-full bg-light-green/60 blur-3xl dark:bg-green/30" />
 
       <div className="relative mx-auto max-w-6xl px-6">
+        {/* Hidden element with frame data for copying */}
+        {frame && (
+          <div
+            data-frame-info={frameDataJson}
+            className="hidden"
+            aria-hidden="true"
+          />
+        )}
+
         <div className="flex items-center justify-between gap-4">
           <Link to="/" className="text-sm font-semibold uppercase tracking-[0.3em] text-burgundy/70 hover:text-burgundy dark:text-white/70">
             ← Back
@@ -92,7 +175,14 @@ export default function FrameDetail() {
         )}
 
         <section className="mt-6 rounded-3xl border border-burgundy/10 bg-white/95 p-8 text-burgundy shadow-[0_35px_80px_-50px_rgba(57,31,91,0.45)] dark:border-white/10 dark:bg-[#1a0f27]/95 dark:text-white">
-          <h1 className="text-3xl font-semibold">Frame #{header?.frameNumber.toLocaleString() ?? frameNumber}</h1>
+          <div className="flex items-start justify-between gap-4 -mt-2">
+            <h1 className="text-3xl font-semibold">Frame #{header?.frameNumber.toLocaleString() ?? frameNumber}</h1>
+            {frame && (
+              <div className="-mt-2 -mr-4">
+                <CopyFrameDataButton />
+              </div>
+            )}
+          </div>
           <div className="mt-6 grid gap-6 md:grid-cols-2">
             <div className="rounded-2xl border border-burgundy/10 bg-white/90 p-5 dark:border-white/10 dark:bg-[#211430]">
               <div className="text-xs font-semibold uppercase tracking-[0.3em] text-burgundy/60 dark:text-white/60">Rank</div>
@@ -101,14 +191,20 @@ export default function FrameDetail() {
             </div>
             <div className="rounded-2xl border border-burgundy/10 bg-white/90 p-5 dark:border-white/10 dark:bg-[#211430]">
               <div className="text-xs font-semibold uppercase tracking-[0.3em] text-burgundy/60 dark:text-white/60">Prover</div>
-              <div className="mt-2 font-mono text-lg">{formatBase64Bytes(header?.prover)}</div>
+              {header?.prover && (
+                <div className="mt-2 font-mono text-lg">
+                  <HoverableCopyText text={header.prover}>
+                    {formatBase64Bytes(header.prover)}
+                  </HoverableCopyText>
+                </div>
+              )}
             </div>
           </div>
           <div className="mt-6 grid gap-4 md:grid-cols-2">
-            <DetailCard label="Output" value={formatBase64Bytes(header?.output)} />
-            <DetailCard label="Parent selector" value={formatBase64Bytes(header?.parentSelector)} />
-            <DetailCard label="Requests root" value={formatBase64Bytes(header?.requestsRoot)} />
-            <DetailCard label="Prover tree commitment" value={formatBase64Bytes(header?.proverTreeCommitment)} />
+            <DetailCard label="Output" value={formatBase64Bytes(header?.output)} copyValue={header?.output} />
+            <DetailCard label="Parent selector" value={formatBase64Bytes(header?.parentSelector)} copyValue={header?.parentSelector} />
+            <DetailCard label="Requests root" value={formatBase64Bytes(header?.requestsRoot)} copyValue={header?.requestsRoot} />
+            <DetailCard label="Prover tree commitment" value={formatBase64Bytes(header?.proverTreeCommitment)} copyValue={header?.proverTreeCommitment} />
           </div>
           <div className="mt-6 grid gap-4 md:grid-cols-2">
             <DetailCard label="Global commitments" value={`${header?.globalCommitments?.length ?? 0} entries`} mono={false} />
@@ -165,17 +261,29 @@ function DetailCard({
   label,
   value,
   mono = true,
+  copyValue,
 }: {
   label: string;
   value: string;
   mono?: boolean;
+  copyValue?: string;
 }) {
+  const displayValue = (
+    <div className={`mt-2 text-base font-semibold ${mono ? "font-mono" : ""}`}>
+      {copyValue ? (
+        <HoverableCopyText text={copyValue}>
+          {value}
+        </HoverableCopyText>
+      ) : (
+        value
+      )}
+    </div>
+  );
+
   return (
     <div className="rounded-2xl border border-burgundy/10 bg-light-grey px-4 py-4 text-burgundy shadow-[0_20px_55px_-45px_rgba(64,0,27,0.5)] dark:border-white/10 dark:bg-[#211430]/70 dark:text-white">
       <div className="text-[0.7rem] font-semibold uppercase tracking-[0.3em] text-burgundy/60 dark:text-white/60">{label}</div>
-      <div className={`mt-2 text-base font-semibold ${mono ? "font-mono" : ""}`}>
-        {value}
-      </div>
+      {displayValue}
     </div>
   );
 }
@@ -213,7 +321,98 @@ function formatTypeName(typeKey?: string) {
     .trim();
 }
 
-function ValueTree({ value }: { value: unknown }) {
+function CollapsibleValue({
+  label,
+  value
+}: {
+  label: string;
+  value: unknown;
+}) {
+  const [isExpanded, setIsExpanded] = useState(false);
+  const toggleExpanded = () => setIsExpanded(!isExpanded);
+
+  return (
+    <div>
+      <button
+        onClick={toggleExpanded}
+        className="flex w-full items-center gap-2 text-left text-[0.7rem] uppercase tracking-[0.2em] text-white/50 hover:text-white/70 transition-colors"
+      >
+        <ChevronDown
+          className={`size-3 transition-transform flex-shrink-0 ${isExpanded ? 'rotate-180' : ''}`}
+        />
+        <span>{label}</span>
+      </button>
+      <div className="mt-1 border-l border-white/20 pl-3 relative">
+        <div className={isExpanded ? '' : 'max-h-[4.5rem] overflow-hidden'}>
+          <ValueTree value={value} />
+        </div>
+        {!isExpanded && (
+          <div className="absolute bottom-0 left-0 right-0 h-14 bg-gradient-to-t from-[#120918] via-[#120918]/70 to-transparent">
+            <button
+              onClick={toggleExpanded}
+              className="absolute bottom-2 left-1/2 -translate-x-1/2 flex items-center gap-1.5 px-3 py-1 text-xs font-medium text-white/80 hover:text-white bg-white/10 hover:bg-white/20 rounded-full backdrop-blur-sm transition-all border border-white/20 hover:border-white/30"
+            >
+              <ChevronDown className="size-3 transition-transform" />
+              <span>Expand</span>
+            </button>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function CollapsibleList({
+  label,
+  items
+}: {
+  label: string;
+  items: unknown[];
+}) {
+  const [isExpanded, setIsExpanded] = useState(false);
+  const toggleExpanded = () => setIsExpanded(!isExpanded);
+  const displayItems = isExpanded ? items : items.slice(0, 3);
+
+  return (
+    <div>
+      <button
+        onClick={toggleExpanded}
+        className="flex w-full items-center gap-2 text-left text-[0.7rem] uppercase tracking-[0.2em] text-white/50 hover:text-white/70 transition-colors"
+      >
+        <ChevronDown
+          className={`size-3 transition-transform flex-shrink-0 ${isExpanded ? 'rotate-180' : ''}`}
+        />
+        <span>{label}</span>
+      </button>
+      <div className="mt-1 border-l border-white/20 pl-3 relative">
+        <ol className="space-y-2">
+          {displayItems.map((item, idx) => (
+            <li key={idx}>
+              <div className="text-[0.7rem] uppercase tracking-[0.2em] text-white/50">Item {idx + 1}</div>
+              <div className="mt-1 border-l border-white/20 pl-3">
+                <ValueTree value={item} parentKey={label} />
+              </div>
+            </li>
+          ))}
+        </ol>
+        {!isExpanded && items.length > 3 && (
+          <>
+            <div className="absolute bottom-0 left-0 right-0 h-14 bg-gradient-to-t from-[#120918] via-[#120918]/70 to-transparent pointer-events-none" />
+            <button
+              onClick={toggleExpanded}
+              className="absolute bottom-2 left-1/2 -translate-x-1/2 flex items-center gap-1.5 px-3 py-1 text-xs font-medium text-white/80 hover:text-white bg-white/10 hover:bg-white/20 rounded-full backdrop-blur-sm transition-all border border-white/20 hover:border-white/30 z-10"
+            >
+              <ChevronDown className="size-3 transition-transform" />
+              <span>Expand</span>
+            </button>
+          </>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function ValueTree({ value, parentKey }: { value: unknown; parentKey?: string }) {
   if (value == null) {
     return <div className="break-all font-mono text-white/60">–</div>;
   }
@@ -227,13 +426,22 @@ function ValueTree({ value }: { value: unknown }) {
     if (value.length === 0) {
       return <div className="break-all font-mono text-white/60">Empty array</div>;
     }
+    const isFiltersArray = parentKey && (
+      parentKey.toLowerCase() === "filters" ||
+      parentKey.toLowerCase() === "filter"
+    );
+
+    if (isFiltersArray && value.length > 3) {
+      return <CollapsibleList label={`${parentKey} (${value.length})`} items={value} />;
+    }
+
     return (
       <ol className="space-y-2">
         {value.map((item, idx) => (
           <li key={idx}>
             <div className="text-[0.7rem] uppercase tracking-[0.2em] text-white/50">Item {idx + 1}</div>
             <div className="mt-1 border-l border-white/20 pl-3">
-              <ValueTree value={item} />
+              <ValueTree value={item} parentKey={parentKey} />
             </div>
           </li>
         ))}
@@ -247,14 +455,35 @@ function ValueTree({ value }: { value: unknown }) {
     }
     return (
       <dl className="space-y-2">
-        {entries.map(([key, entryValue]) => (
-          <div key={key}>
-            <dt className="text-[0.7rem] uppercase tracking-[0.2em] text-white/50">{formatTypeName(key)}</dt>
-            <dd className="mt-1 border-l border-white/20 pl-3">
-              <ValueTree value={entryValue} />
-            </dd>
-          </div>
-        ))}
+        {entries.map(([key, entryValue]) => {
+          const formattedKey = formatTypeName(key);
+          const isCollapsibleField = formattedKey === "Key Value" ||
+                                     formattedKey === "Proof" ||
+                                     key.toLowerCase() === "keyvalue" ||
+                                     key.toLowerCase() === "key_value" ||
+                                     key.toLowerCase() === "proof";
+
+          const isFiltersField = formattedKey === "Filters" ||
+                                 key.toLowerCase() === "filters" ||
+                                 key.toLowerCase() === "filter";
+
+          return (
+            <div key={key}>
+              {isCollapsibleField ? (
+                <CollapsibleValue label={formattedKey} value={entryValue} />
+              ) : isFiltersField && Array.isArray(entryValue) && entryValue.length > 0 ? (
+                <CollapsibleList label={`${formattedKey} (${entryValue.length})`} items={entryValue} />
+              ) : (
+                <>
+                  <dt className="text-[0.7rem] uppercase tracking-[0.2em] text-white/50">{formattedKey}</dt>
+                  <dd className="mt-1 border-l border-white/20 pl-3">
+                    <ValueTree value={entryValue} parentKey={key} />
+                  </dd>
+                </>
+              )}
+            </div>
+          );
+        })}
       </dl>
     );
   }
