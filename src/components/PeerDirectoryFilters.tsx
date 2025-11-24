@@ -4,8 +4,8 @@ import ChevronDown from "@/components/ui/ChevronDown";
 export interface PeerFilterState {
   searchQuery: string;
   selectedVersions: Set<string>;
-  selectedPubsubProtocols: Set<"tcp" | "udp">;
-  selectedStreamProtocols: Set<"tcp" | "udp">;
+  selectedPubsubProtocols: Set<"tcp" | "udp" | "other">;
+  selectedStreamProtocols: Set<"tcp" | "udp" | "other">;
   selectedCapabilityCounts: Set<number>;
 }
 
@@ -16,8 +16,8 @@ interface PeerDirectoryFiltersProps {
   versionCounts: Map<string, number>;
   uniqueCapabilityCounts: number[];
   capabilityCountCounts: Map<number, number>;
-  pubsubProtocolCounts: Map<"tcp" | "udp", number>;
-  streamProtocolCounts: Map<"tcp" | "udp", number>;
+  pubsubProtocolCounts: Map<"tcp" | "udp" | "other", number>;
+  streamProtocolCounts: Map<"tcp" | "udp" | "other", number>;
 }
 
 export function PeerDirectoryFilters({
@@ -77,13 +77,24 @@ export function PeerDirectoryFilters({
             <label className="block text-xs font-semibold uppercase tracking-[0.3em] text-burgundy/60 dark:text-white/60 mb-2">
               Search by Peer ID or IP Address
             </label>
-            <input
-              type="text"
-              value={filters.searchQuery}
-              onChange={(e) => updateFilter("searchQuery", e.target.value)}
-              placeholder="Enter peer ID, IPv4, or IPv6 address..."
-              className="w-full border border-burgundy/20 dark:border-white/20 bg-white dark:bg-[#1a0f27] px-4 py-2 text-sm text-burgundy dark:text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-burgundy/30 dark:focus:ring-white/30 transition-colors"
-            />
+            <div className="relative">
+              <input
+                type="text"
+                value={filters.searchQuery}
+                onChange={(e) => updateFilter("searchQuery", e.target.value)}
+                placeholder="Enter peer ID, IPv4, or IPv6 address..."
+                className="w-full border border-burgundy/20 dark:border-white/20 bg-white dark:bg-[#1a0f27] px-4 py-2 pr-10 text-sm text-burgundy dark:text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-burgundy/30 dark:focus:ring-white/30 transition-colors"
+              />
+              {filters.searchQuery && (
+                <button
+                  onClick={() => updateFilter("searchQuery", "")}
+                  className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center justify-center w-6 h-6 text-burgundy/60 hover:text-burgundy dark:text-white/60 dark:hover:text-white transition-colors rounded hover:bg-burgundy/10 dark:hover:bg-white/10"
+                  aria-label="Clear search"
+                >
+                  <span className="text-lg leading-none">×</span>
+                </button>
+              )}
+            </div>
           </div>
 
           {/* Version Filter */}
@@ -151,7 +162,7 @@ export function PeerDirectoryFilters({
                 Pubsub Protocol
               </label>
               <div className="flex gap-3">
-                {(["tcp", "udp"] as const).map((protocol) => (
+                {(["tcp", "udp", "other"] as const).map((protocol) => (
                   <label
                     key={protocol}
                     className="flex items-center gap-2 px-3 py-2 rounded border border-burgundy/20 dark:border-white/20 bg-white dark:bg-[#1a0f27] hover:bg-light-grey/30 dark:hover:bg-white/5 cursor-pointer transition-colors"
@@ -170,8 +181,8 @@ export function PeerDirectoryFilters({
                       }}
                       className="w-4 h-4 text-burgundy border-burgundy/30 rounded focus:ring-burgundy/30 dark:border-white/30 dark:focus:ring-white/30"
                     />
-                    <span className="text-sm text-burgundy dark:text-white uppercase">
-                      {protocol} ({pubsubProtocolCounts.get(protocol) || 0})
+                    <span className={`text-sm text-burgundy dark:text-white ${protocol === "other" ? "" : "uppercase"}`}>
+                      {protocol === "other" ? "No Address" : protocol.toUpperCase()} ({pubsubProtocolCounts.get(protocol) || 0})
                     </span>
                   </label>
                 ))}
@@ -184,7 +195,7 @@ export function PeerDirectoryFilters({
                 Stream Protocol
               </label>
               <div className="flex gap-3">
-                {(["tcp", "udp"] as const).map((protocol) => (
+                {(["tcp", "udp", "other"] as const).map((protocol) => (
                   <label
                     key={protocol}
                     className="flex items-center gap-2 px-3 py-2 rounded border border-burgundy/20 dark:border-white/20 bg-white dark:bg-[#1a0f27] hover:bg-light-grey/30 dark:hover:bg-white/5 cursor-pointer transition-colors"
@@ -203,8 +214,8 @@ export function PeerDirectoryFilters({
                       }}
                       className="w-4 h-4 text-burgundy border-burgundy/30 rounded focus:ring-burgundy/30 dark:border-white/30 dark:focus:ring-white/30"
                     />
-                    <span className="text-sm text-burgundy dark:text-white uppercase">
-                      {protocol} ({streamProtocolCounts.get(protocol) || 0})
+                    <span className={`text-sm text-burgundy dark:text-white ${protocol === "other" ? "" : "uppercase"}`}>
+                      {protocol === "other" ? "No Address" : protocol.toUpperCase()} ({streamProtocolCounts.get(protocol) || 0})
                     </span>
                   </label>
                 ))}

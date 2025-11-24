@@ -329,9 +329,9 @@ export default function PeerDetail() {
                         </div>
                         <div>
                           <div className="text-[0.7rem] font-semibold uppercase tracking-[0.3em] text-burgundy/60 dark:text-white/60 mb-2">
-                            Pubsub Multiaddrs ({reach.pubsub_multiaddrs.length})
+                            Pubsub Multiaddrs ({reach.pubsub_multiaddrs?.length ?? 0})
                           </div>
-                          {reach.pubsub_multiaddrs.length > 0 ? (
+                          {reach.pubsub_multiaddrs && reach.pubsub_multiaddrs.length > 0 ? (
                             <div className="space-y-2">
                               {reach.pubsub_multiaddrs.map((addr, addrIndex) => (
                                 <div key={addrIndex} className="font-mono text-sm break-all">
@@ -347,9 +347,9 @@ export default function PeerDetail() {
                         </div>
                         <div>
                           <div className="text-[0.7rem] font-semibold uppercase tracking-[0.3em] text-burgundy/60 dark:text-white/60 mb-2">
-                            Stream Multiaddrs ({reach.stream_multiaddrs.length})
+                            Stream Multiaddrs ({reach.stream_multiaddrs?.length ?? 0})
                           </div>
-                          {reach.stream_multiaddrs.length > 0 ? (
+                          {reach.stream_multiaddrs && reach.stream_multiaddrs.length > 0 ? (
                             <div className="space-y-2">
                               {reach.stream_multiaddrs.map((addr, addrIndex) => (
                                 <div key={addrIndex} className="font-mono text-sm break-all">

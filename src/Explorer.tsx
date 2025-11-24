@@ -447,8 +447,8 @@ export default function Explorer() {
   const [filters, setFilters] = useState<PeerFilterState>({
     searchQuery: "",
     selectedVersions: new Set(),
-    selectedPubsubProtocols: new Set(["tcp", "udp"]),
-    selectedStreamProtocols: new Set(["tcp", "udp"]),
+    selectedPubsubProtocols: new Set<"tcp" | "udp" | "other">(),
+    selectedStreamProtocols: new Set<"tcp" | "udp" | "other">(),
     selectedCapabilityCounts: new Set(),
   });
 
@@ -502,7 +502,7 @@ export default function Explorer() {
 
   // Count peers per pubsub protocol (based on filtered peers, excluding protocol filters)
   const pubsubProtocolCounts = useMemo(() => {
-    const counts = new Map<"tcp" | "udp", number>();
+    const counts = new Map<"tcp" | "udp" | "other", number>();
     peersForVersionCounts.forEach((peer) => {
       const protocols = getProtocolsFromAddresses(peer.pubsub);
       protocols.forEach((protocol) => {
@@ -514,7 +514,7 @@ export default function Explorer() {
 
   // Count peers per stream protocol (based on filtered peers, excluding protocol filters)
   const streamProtocolCounts = useMemo(() => {
-    const counts = new Map<"tcp" | "udp", number>();
+    const counts = new Map<"tcp" | "udp" | "other", number>();
     peersForVersionCounts.forEach((peer) => {
       const protocols = getProtocolsFromAddresses(peer.stream);
       protocols.forEach((protocol) => {

@@ -53,16 +53,29 @@ export function compareVersions(a: string, b: string): number {
   return 0;
 }
 
-export function getProtocolsFromAddresses(addresses: string[]): Set<"tcp" | "udp"> {
-  const protocols = new Set<"tcp" | "udp">();
+export function getProtocolsFromAddresses(addresses: string[]): Set<"tcp" | "udp" | "other"> {
+  const protocols = new Set<"tcp" | "udp" | "other">();
+
+  // If peer has no addresses, mark as "other" (No Address)
+  if (addresses.length === 0) {
+    protocols.add("other");
+    return protocols;
+  }
+
+  let hasTcp = false;
+  let hasUdp = false;
+
   addresses.forEach((addr) => {
     if (addr.includes("/tcp/")) {
-      protocols.add("tcp");
-    }
-    if (addr.includes("/udp/")) {
-      protocols.add("udp");
+      hasTcp = true;
+    } else if (addr.includes("/udp/")) {
+      hasUdp = true;
     }
   });
+
+  if (hasTcp) protocols.add("tcp");
+  if (hasUdp) protocols.add("udp");
+
   return protocols;
 }
 
