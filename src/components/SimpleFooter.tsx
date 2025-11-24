@@ -4,7 +4,7 @@ export function SimpleFooter() {
       <div className="container mx-auto px-4">
         <div className="grid gap-8 md:grid-cols-3">
           <div>
-            <h3 className="text-lg font-bold">Quilibrium Status</h3>
+            <h3 className="text-lg font-bold">Quilibrium Explorer</h3>
             <p className="mt-3 text-white/70 dark:text-white/60">
               Live health monitoring for the Quilibrium network, applications, and
               ecosystem services.

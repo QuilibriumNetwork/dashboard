@@ -45,6 +45,26 @@ export interface FrameRequest {
   [key: string]: unknown;
 }
 
+export interface PeerReachability {
+  filter: string;
+  pubsub_multiaddrs: string[];
+  stream_multiaddrs: string[];
+}
+
+export interface PeerRecord {
+  peer_id: string;
+  version: string;
+  patch_number: string;
+  cores: number;
+  bandwidth: number;
+  last_seen: number;
+  capabilities: Array<{
+    protocol_identifier: number;
+    additional_metadata: string;
+  }>;
+  reachability: PeerReachability[];
+}
+
 export interface CertifiedProposal {
   state: GlobalFrame;
   parentQuorumCertificate: {
@@ -89,4 +109,5 @@ export const explorerApi = {
   getMessages: (limit = 20) => request<GossipMessage[]>(`/messages?limit=${limit}`),
   getVertex: (id: string) => request<HypergraphRecord>(`/hypergraph/vertex/${id}`),
   getHyperedge: (id: string) => request<HypergraphRecord>(`/hypergraph/hyperedge/${id}`),
+  getPeers: () => request<PeerRecord[]>("/peers"),
 };

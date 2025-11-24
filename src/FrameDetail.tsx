@@ -193,7 +193,7 @@ export default function FrameDetail() {
               <div className="text-xs font-semibold uppercase tracking-[0.3em] text-burgundy/60 dark:text-white/60">Prover</div>
               {header?.prover && (
                 <div className="mt-2 font-mono text-lg">
-                  <HoverableCopyText text={header.prover}>
+                  <HoverableCopyText text={base64ToHex(header.prover)}>
                     {formatBase64Bytes(header.prover)}
                   </HoverableCopyText>
                 </div>
@@ -201,10 +201,10 @@ export default function FrameDetail() {
             </div>
           </div>
           <div className="mt-6 grid gap-4 md:grid-cols-2">
-            <DetailCard label="Output" value={formatBase64Bytes(header?.output)} copyValue={header?.output} />
-            <DetailCard label="Parent selector" value={formatBase64Bytes(header?.parentSelector)} copyValue={header?.parentSelector} />
-            <DetailCard label="Requests root" value={formatBase64Bytes(header?.requestsRoot)} copyValue={header?.requestsRoot} />
-            <DetailCard label="Prover tree commitment" value={formatBase64Bytes(header?.proverTreeCommitment)} copyValue={header?.proverTreeCommitment} />
+            <DetailCard label="Output" value={formatBase64Bytes(header?.output)} copyValue={base64ToHex(header?.output)} />
+            <DetailCard label="Parent selector" value={formatBase64Bytes(header?.parentSelector)} copyValue={base64ToHex(header?.parentSelector)} />
+            <DetailCard label="Requests root" value={formatBase64Bytes(header?.requestsRoot)} copyValue={base64ToHex(header?.requestsRoot)} />
+            <DetailCard label="Prover tree commitment" value={formatBase64Bytes(header?.proverTreeCommitment)} copyValue={base64ToHex(header?.proverTreeCommitment)} />
           </div>
           <div className="mt-6 grid gap-4 md:grid-cols-2">
             <DetailCard label="Global commitments" value={`${header?.globalCommitments?.length ?? 0} entries`} mono={false} />

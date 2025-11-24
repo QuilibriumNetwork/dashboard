@@ -7,9 +7,11 @@ import {
   GlobalFrame,
   GossipMessage,
   HypergraphRecord,
+  PeerRecord,
   explorerApi,
 } from "@/lib/api";
 import {
+  base64ToHex,
   formatBase64Bytes,
   formatTimestamp,
   formatRelative,
@@ -84,14 +86,15 @@ function HoverableCopyText({ text, children }: { text: string; children: React.R
       <span className={`group-hover:underline transition-colors ${copied ? 'text-green dark:text-light-green' : ''}`}>
         {children}
       </span>
+      <Icon
+        name="emptyclipboard"
+        className={`w-3 h-3 text-burgundy/60 dark:text-white/60 flex-shrink-0 transition-opacity ${isHovered ? 'opacity-100' : 'opacity-0'}`}
+      />
       {isHovered && (
-        <>
-          <span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 px-2 py-1 text-xs text-white bg-gray-900 dark:bg-gray-700 rounded whitespace-nowrap pointer-events-none z-10 shadow-lg">
-            {copied ? 'Copied!' : 'Click to copy'}
-            <span className="absolute top-full left-1/2 -translate-x-1/2 -mt-1 border-4 border-transparent border-t-gray-900 dark:border-t-gray-700" />
-          </span>
-          <Icon name="emptyclipboard" className="w-3 h-3 text-burgundy/60 dark:text-white/60 flex-shrink-0" />
-        </>
+        <span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 px-2 py-1 text-xs text-white bg-gray-900 dark:bg-gray-700 rounded whitespace-nowrap pointer-events-none z-10 shadow-lg">
+          {copied ? 'Copied!' : 'Click to copy'}
+          <span className="absolute top-full left-1/2 -translate-x-1/2 -mt-1 border-4 border-transparent border-t-gray-900 dark:border-t-gray-700" />
+        </span>
       )}
     </span>
   );
@@ -119,7 +122,7 @@ function FrameDataCard({ frameNumber, requests, prover, selector, timestamp, onN
         <div>
           <span className="text-burgundy/60 dark:text-white/60">Prover: </span>
           <span className="font-mono break-all">
-            <HoverableCopyText text={prover}>
+            <HoverableCopyText text={base64ToHex(prover)}>
               {formatBase64Bytes(prover)}
             </HoverableCopyText>
           </span>
@@ -127,7 +130,7 @@ function FrameDataCard({ frameNumber, requests, prover, selector, timestamp, onN
         <div>
           <span className="text-burgundy/60 dark:text-white/60">Selector: </span>
           <span className="font-mono break-all">
-            <HoverableCopyText text={selector}>
+            <HoverableCopyText text={base64ToHex(selector)}>
               {formatBase64Bytes(selector)}
             </HoverableCopyText>
           </span>
@@ -158,6 +161,34 @@ function FrameDataCard({ frameNumber, requests, prover, selector, timestamp, onN
   );
 }
 
+function PeerCard({ peer }: { peer: ReturnType<typeof formatPeerRows>[number] }) {
+  return (
+    <div className="rounded-2xl border border-burgundy/10 bg-white/95 p-4 text-sm text-burgundy shadow-[0_20px_55px_-45px_rgba(64,0,27,0.5)] dark:border-white/10 dark:bg-[#211430]/95 dark:text-white">
+      <div className="text-xs font-semibold uppercase tracking-[0.3em] text-burgundy/60 dark:text-white/60">Peer</div>
+      <div className="mt-1 font-mono text-xs">
+        <HoverableCopyText text={peer.peerId}>{peer.peerId}</HoverableCopyText>
+      </div>
+      <div className="mt-2 text-xs text-burgundy/70 dark:text-white/70">Version {peer.version}</div>
+      <div className="mt-4 text-xs">
+        <div className="text-[0.65rem] uppercase tracking-[0.3em] text-burgundy/50 dark:text-white/50">Pubsub</div>
+        {peer.pubsub.length ? peer.pubsub.map((addr) => (
+          <div key={addr} className="break-all">
+            <HoverableCopyText text={addr}>{addr}</HoverableCopyText>
+          </div>
+        )) : "–"}
+      </div>
+      <div className="mt-3 text-xs">
+        <div className="text-[0.65rem] uppercase tracking-[0.3em] text-burgundy/50 dark:text-white/50">Stream</div>
+        {peer.stream.length ? peer.stream.map((addr) => (
+          <div key={addr} className="break-all">
+            <HoverableCopyText text={addr}>{addr}</HoverableCopyText>
+          </div>
+        )) : "–"}
+      </div>
+    </div>
+  );
+}
+
 function FrameDataRow({ frameNumber, requests, prover, selector, timestamp, onNavigate }: FrameDataProps) {
   return (
     <tr
@@ -169,12 +200,12 @@ function FrameDataRow({ frameNumber, requests, prover, selector, timestamp, onNa
       </td>
       <td className="py-4 pr-6">{requests}</td>
       <td className="py-4 pr-6 font-mono">
-        <HoverableCopyText text={prover}>
+        <HoverableCopyText text={base64ToHex(prover)}>
           {formatBase64Bytes(prover)}
         </HoverableCopyText>
       </td>
       <td className="py-4 pr-6 font-mono">
-        <HoverableCopyText text={selector}>
+        <HoverableCopyText text={base64ToHex(selector)}>
           {formatBase64Bytes(selector)}
         </HoverableCopyText>
       </td>
@@ -311,6 +342,7 @@ export default function Explorer() {
   const [frameFeed, setFrameFeed] = useState<GlobalFrame[]>([]);
   const [certified, setCertified] = useState<CertifiedProposal | null>(null);
   const [messages, setMessages] = useState<GossipMessage[]>([]);
+  const [peers, setPeers] = useState<PeerRecord[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [expandedMessages, setExpandedMessages] = useState<Set<number>>(new Set());
@@ -330,10 +362,11 @@ export default function Explorer() {
       setLoading(true);
       setError(null);
       try {
-        const [frame, proposal, gossip] = await Promise.all([
+        const [frame, proposal, gossip, peerList] = await Promise.all([
           explorerApi.getLatestFrame(),
           explorerApi.getLatestCertified().catch(() => null),
           explorerApi.getMessages(20).catch(() => []),
+          explorerApi.getPeers().catch(() => []),
         ]);
         if (!mounted) {
           return;
@@ -341,6 +374,7 @@ export default function Explorer() {
         setLatestFrame(frame);
         setCertified(proposal);
         setMessages(gossip);
+        setPeers(peerList);
         await hydrateFrameFeed(frame);
       } catch (err) {
         if (mounted) {
@@ -393,6 +427,10 @@ export default function Explorer() {
       timestamp: header.timestamp,
     };
   }), [frameFeed]);
+
+  const peerRows = useMemo(() => formatPeerRows(peers), [peers]);
+
+  const formattedPeerCount = peers.length.toLocaleString();
 
   async function handleFrameLookup(event: React.FormEvent) {
     event.preventDefault();
@@ -483,7 +521,7 @@ export default function Explorer() {
                   {error}
                 </div>
               )}
-              <div className="grid gap-6 md:grid-cols-2">
+              <div className="grid gap-6 md:grid-cols-3">
                 <div className="rounded-2xl border border-burgundy/10 bg-white/95 p-6 shadow-[0_26px_70px_-55px_rgba(64,0,27,0.5)] dark:border-white/10 dark:bg-[#211430]/95 dark:text-white">
                   <div className="text-xs font-semibold uppercase tracking-[0.3em] text-burgundy/60 dark:text-white/60">Frame Number</div>
                   <div className="mt-2 text-3xl font-semibold text-burgundy dark:text-white">
@@ -497,11 +535,20 @@ export default function Explorer() {
                   <div className="text-xs font-semibold uppercase tracking-[0.3em] text-burgundy/60 dark:text-white/60">Prover</div>
                   {latestHeader?.prover && (
                     <div className="mt-2 text-2xl font-semibold text-burgundy dark:text-white font-mono">
-                      <HoverableCopyText text={latestHeader.prover}>
+                      <HoverableCopyText text={base64ToHex(latestHeader.prover)}>
                         {formatBase64Bytes(latestHeader.prover)}
                       </HoverableCopyText>
                     </div>
                   )}
+                </div>
+                <div className="rounded-2xl border border-burgundy/10 bg-white/95 p-6 shadow-[0_26px_70px_-55px_rgba(64,0,27,0.5)] dark:border-white/10 dark:bg-[#211430]/95 dark:text-white">
+                  <div className="text-xs font-semibold uppercase tracking-[0.3em] text-burgundy/60 dark:text-white/60">Peers</div>
+                  <div className="mt-2 text-3xl font-semibold text-burgundy dark:text-white">
+                    {formattedPeerCount}
+                  </div>
+                  <div className="text-sm text-burgundy/70 dark:text-white/70">
+                    Active nodes reporting reachability
+                  </div>
                 </div>
               </div>
               <div className="grid gap-4 text-sm md:grid-cols-2">
@@ -509,7 +556,7 @@ export default function Explorer() {
                   <div className="text-[0.7rem] font-semibold uppercase tracking-[0.35em] text-burgundy/60 dark:text-white/60">Requests root</div>
                   {latestHeader?.requestsRoot && (
                     <div className="text-lg font-semibold font-mono">
-                      <HoverableCopyText text={latestHeader.requestsRoot}>
+                      <HoverableCopyText text={base64ToHex(latestHeader.requestsRoot)}>
                         {formatBase64Bytes(latestHeader.requestsRoot)}
                       </HoverableCopyText>
                     </div>
@@ -519,7 +566,7 @@ export default function Explorer() {
                   <div className="text-[0.7rem] font-semibold uppercase tracking-[0.35em] text-burgundy/60 dark:text-white/60">Parent selector</div>
                   {latestHeader?.parentSelector && (
                     <div className="text-lg font-semibold font-mono">
-                      <HoverableCopyText text={latestHeader.parentSelector}>
+                      <HoverableCopyText text={base64ToHex(latestHeader.parentSelector)}>
                         {formatBase64Bytes(latestHeader.parentSelector)}
                       </HoverableCopyText>
                     </div>
@@ -547,7 +594,7 @@ export default function Explorer() {
                   ))}
                 </div>
                 {/* Desktop Table Layout */}
-                <div className="hidden md:block overflow-x-auto">
+                <div className="hidden md:block max-h-[520px] overflow-y-auto overflow-x-auto">
                   <table className="min-w-full divide-y divide-burgundy/10 text-left text-sm text-burgundy dark:divide-white/10 dark:text-white">
                     <thead className="text-xs font-semibold uppercase tracking-[0.3em] text-burgundy/60 dark:text-white/60">
                       <tr>
@@ -614,6 +661,62 @@ export default function Explorer() {
             </div>
           </section> */}
 
+          <section className="mt-14 space-y-4">
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <h2 className="text-3xl font-semibold text-burgundy dark:text-white">Peer directory</h2>
+              <div className="text-sm uppercase tracking-[0.3em] text-burgundy/60 dark:text-white/60">{formattedPeerCount} peers</div>
+            </div>
+            <div className="rounded-3xl border border-burgundy/10 bg-white/95 p-6 shadow-[0_32px_80px_-55px_rgba(57,31,91,0.45)] dark:border-white/10 dark:bg-[#1a0f27]/95 dark:shadow-[0_36px_90px_-55px_rgba(0,0,0,0.65)]">
+              <div className="max-h-[520px] overflow-y-auto pr-1">
+                <div className="space-y-4 md:hidden">
+                  {peerRows.map((peer) => (
+                    <PeerCard key={peer.peerId} peer={peer} />
+                  ))}
+                </div>
+                <div className="hidden md:block max-h-[520px] overflow-y-auto overflow-x-auto relative">
+                  <table className="relative min-w-full divide-y divide-burgundy/10 text-left text-sm text-burgundy dark:divide-white/10 dark:text-white">
+                    <thead className="sticky top-0 bg-white/95 dark:bg-[#1a0f27]/95 text-xs font-semibold uppercase tracking-[0.25em] text-burgundy/60 dark:text-white/60 z-20">
+                      <tr>
+                        <th className="py-3 pr-6">Peer</th>
+                        <th className="py-3 pr-6">Version</th>
+                        <th className="py-3 pr-10 text-right">Pubsub addresses</th>
+                        <th className="py-3 pr-10 text-right">Stream addresses</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-burgundy/10 dark:divide-white/10">
+                      {peerRows.map((peer) => (
+                        <tr key={peer.peerId}>
+                          <td className="py-3 pr-6 font-mono text-xs whitespace-nowrap">
+                            <HoverableCopyText text={peer.peerId}>{peer.peerId}</HoverableCopyText>
+                          </td>
+                          <td className="py-3 pr-6 text-xs">{peer.version}</td>
+                          <td className="py-3 pr-6 text-xs text-right">
+                            {peer.pubsub.length
+                              ? peer.pubsub.map((addr) => (
+                                  <div key={addr} className="break-all">
+                                    <HoverableCopyText text={addr}>{addr}</HoverableCopyText>
+                                  </div>
+                                ))
+                              : "–"}
+                          </td>
+                          <td className="py-3 pr-6 text-xs text-right">
+                            {peer.stream.length
+                              ? peer.stream.map((addr) => (
+                                  <div key={addr} className="break-all">
+                                    <HoverableCopyText text={addr}>{addr}</HoverableCopyText>
+                                  </div>
+                                ))
+                              : "–"}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </section>
+
           <section className="mt-14">
             <div className="rounded-3xl border border-burgundy/10 bg-white/95 p-6 shadow-[0_32px_80px_-55px_rgba(57,31,91,0.45)] dark:border-white/10 dark:bg-[#1a0f27]/95 dark:shadow-[0_36px_90px_-55px_rgba(0,0,0,0.65)]">
               <h2 className="text-2xl font-semibold text-burgundy dark:text-white">Consensus gossip</h2>
@@ -646,4 +749,25 @@ export default function Explorer() {
       </div>
     </>
   );
+}
+
+function formatPeerVersion(peer: PeerRecord) {
+  const versionBytes = Array.from(peer.version ?? "").map((ch) => ch.charCodeAt(0));
+  const versionCore = versionBytes.length ? versionBytes.join(".") : "0";
+  const patchNumber = Number.isNaN(Number.parseInt(peer.patch_number, 16))
+    ? 0
+    : Number.parseInt(peer.patch_number, 16);
+  return `${versionCore}.${patchNumber}`;
+}
+
+function formatPeerRows(peers: PeerRecord[]) {
+  return peers.map((peer) => {
+    const reach = peer.reachability?.[0];
+    return {
+      peerId: peer.peer_id,
+      version: formatPeerVersion(peer),
+      pubsub: reach?.pubsub_multiaddrs ?? [],
+      stream: reach?.stream_multiaddrs ?? [],
+    };
+  });
 }
