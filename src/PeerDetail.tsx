@@ -257,7 +257,6 @@ export default function PeerDetail() {
                   <div className="text-xs font-semibold uppercase tracking-[0.3em] text-burgundy/60 dark:text-white/60">Version</div>
                   <div className="mt-2 text-2xl font-semibold">{formattedVersion}</div>
                 </div>
-                <DetailCard label="Cores" value={peer.cores} />
                 <LastSeenCard
                   label="Last Seen"
                   relativeTime={lastSeenTimestamp ? formatRelativeTime(lastSeenTimestamp) : "–"}

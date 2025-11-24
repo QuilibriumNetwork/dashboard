@@ -1,5 +1,5 @@
 import { useState, useMemo, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { HoverableCopyText } from "./HoverableCopyText";
 import { type PeerRow } from "@/lib/peers";
 import Arrow from "@/components/ui/Arrow";
@@ -15,10 +15,13 @@ interface PeerCardProps {
   peer: PeerRow;
 }
 
-function PeerCard({ peer }: PeerCardProps) {
+function PeerCard({ peer, onNavigate }: PeerCardProps & { onNavigate: () => void }) {
   const shortenedId = shortenPeerId(peer.peerId);
   return (
-    <div className="rounded-2xl border border-burgundy/10 bg-white/95 p-4 text-sm text-burgundy shadow-[0_20px_55px_-45px_rgba(64,0,27,0.5)] dark:border-white/10 dark:bg-[#211430]/95 dark:text-white">
+    <div
+      onClick={onNavigate}
+      className="rounded-2xl border border-burgundy/10 bg-white/95 p-4 text-sm text-burgundy shadow-[0_20px_55px_-45px_rgba(64,0,27,0.5)] dark:border-white/10 dark:bg-[#211430]/95 dark:text-white cursor-pointer transition hover:bg-light-grey/60 dark:hover:bg-white/5"
+    >
       <div className="text-xs font-semibold uppercase tracking-[0.3em] text-burgundy/60 dark:text-white/60">Peer</div>
       <div className="mt-1 font-mono text-xs">
         <HoverableCopyText text={peer.peerId}>
@@ -43,13 +46,16 @@ function PeerCard({ peer }: PeerCardProps) {
         )) : "–"}
       </div>
       <div className="mt-4 pt-3 border-t border-burgundy/10 dark:border-white/10">
-        <Link
-          to={`/peers/${peer.peerId}`}
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            onNavigate();
+          }}
           className="flex items-center gap-2 text-xs font-semibold text-burgundy/70 hover:text-burgundy dark:text-white/70 dark:hover:text-white transition-colors"
         >
           <span>View Peer Details</span>
           <Arrow className="w-4 h-4" />
-        </Link>
+        </button>
       </div>
     </div>
   );
@@ -60,6 +66,7 @@ interface PeerDirectoryProps {
 }
 
 export function PeerDirectory({ peers }: PeerDirectoryProps) {
+  const navigate = useNavigate();
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
 
@@ -152,7 +159,11 @@ export function PeerDirectory({ peers }: PeerDirectoryProps) {
       {/* Mobile/Tablet Card Layout */}
       <div className="space-y-4 md:hidden">
         {paginatedPeers.map((peer) => (
-          <PeerCard key={peer.peerId} peer={peer} />
+          <PeerCard
+            key={peer.peerId}
+            peer={peer}
+            onNavigate={() => navigate(`/peers/${peer.peerId}`)}
+          />
         ))}
       </div>
 
@@ -170,7 +181,11 @@ export function PeerDirectory({ peers }: PeerDirectoryProps) {
           </thead>
           <tbody className="divide-y divide-burgundy/10 dark:divide-white/10">
             {paginatedPeers.map((peer) => (
-              <tr key={peer.peerId}>
+              <tr
+                key={peer.peerId}
+                onClick={() => navigate(`/peers/${peer.peerId}`)}
+                className="cursor-pointer transition hover:bg-light-grey/60 dark:hover:bg-white/5"
+              >
                 <td className="py-3 pr-6 font-mono text-xs whitespace-nowrap">
                   <HoverableCopyText text={peer.peerId}>{shortenPeerId(peer.peerId)}</HoverableCopyText>
                 </td>
@@ -194,13 +209,16 @@ export function PeerDirectory({ peers }: PeerDirectoryProps) {
                     : "–"}
                 </td>
                 <td className="py-3 pr-6">
-                  <Link
-                    to={`/peers/${peer.peerId}`}
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      navigate(`/peers/${peer.peerId}`);
+                    }}
                     className="flex items-center gap-2 text-xs font-semibold text-burgundy/70 hover:text-burgundy dark:text-white/70 dark:hover:text-white transition-colors"
                   >
                     <span>View Peer Details</span>
                     <Arrow className="w-4 h-4" />
-                  </Link>
+                  </button>
                 </td>
               </tr>
             ))}

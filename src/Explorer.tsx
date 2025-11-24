@@ -539,10 +539,6 @@ export default function Explorer() {
 
       // Pubsub protocol filter
       if (filters.selectedPubsubProtocols.size > 0) {
-        if (peer.pubsub.length === 0) {
-          // If filtering for pubsub protocol but peer has no pubsub addresses, exclude it
-          return false;
-        }
         const pubsubProtocols = getProtocolsFromAddresses(peer.pubsub);
         const hasSelectedProtocol = Array.from(filters.selectedPubsubProtocols).some((protocol) =>
           pubsubProtocols.has(protocol)
@@ -554,10 +550,6 @@ export default function Explorer() {
 
       // Stream protocol filter
       if (filters.selectedStreamProtocols.size > 0) {
-        if (peer.stream.length === 0) {
-          // If filtering for stream protocol but peer has no stream addresses, exclude it
-          return false;
-        }
         const streamProtocols = getProtocolsFromAddresses(peer.stream);
         const hasSelectedProtocol = Array.from(filters.selectedStreamProtocols).some((protocol) =>
           streamProtocols.has(protocol)
