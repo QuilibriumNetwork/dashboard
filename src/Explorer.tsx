@@ -16,6 +16,7 @@ import {
 } from "@/lib/format";
 import ChevronDown from "@/components/ui/ChevronDown";
 import Icon from "@/components/ui/Icons";
+import Arrow from "@/components/ui/Arrow";
 
 function Tag({ label }: { label: string }) {
   return (
@@ -140,6 +141,18 @@ function FrameDataCard({ frameNumber, requests, prover, selector, timestamp, onN
             {formatTimestamp(timestamp)}
           </div>
         </div>
+        <div className="pt-3 border-t border-burgundy/10 dark:border-white/10">
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              onNavigate();
+            }}
+            className="flex items-center gap-2 text-xs font-semibold text-burgundy/70 hover:text-burgundy dark:text-white/70 dark:hover:text-white transition-colors"
+          >
+            <span>View frame details</span>
+            <Arrow className="w-4 h-4" />
+          </button>
+        </div>
       </div>
     </div>
   );
@@ -166,6 +179,18 @@ function FrameDataRow({ frameNumber, requests, prover, selector, timestamp, onNa
         </HoverableCopyText>
       </td>
       <td className="py-4 pr-6">{formatTimestamp(timestamp)}</td>
+      <td className="py-4 pr-6">
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            onNavigate();
+          }}
+          className="flex items-center gap-2 text-xs font-semibold text-burgundy/70 hover:text-burgundy dark:text-white/70 dark:hover:text-white transition-colors"
+        >
+          <span>View frame details</span>
+          <Arrow className="w-4 h-4" />
+        </button>
+      </td>
     </tr>
   );
 }
@@ -531,6 +556,7 @@ export default function Explorer() {
                         <th className="py-3 pr-6">Prover</th>
                         <th className="py-3 pr-6">Selector</th>
                         <th className="py-3 pr-6">Timestamp</th>
+                        <th className="py-3 pr-6"></th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-burgundy/10 dark:divide-white/10">
