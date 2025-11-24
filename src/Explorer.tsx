@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState, useRef } from "react";
 import { Helmet } from "react-helmet-async";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams, useLocation } from "react-router-dom";
 
 import {
   CertifiedProposal,
@@ -69,6 +69,58 @@ function CopyButton({ text, className = "", showText = false }: { text: string; 
         <>
           {showText && <span className="text-xs text-burgundy/70 dark:text-white/70">Copy to Clipboard</span>}
           <Icon name="emptyclipboard" className="w-4 h-4 text-burgundy/60 dark:text-white/60" />
+        </>
+      )}
+    </button>
+  );
+}
+
+function CopyFilterLinkButton({ filters }: { filters: PeerFilterState }) {
+  const [copied, setCopied] = useState(false);
+
+  const handleCopy = async () => {
+    try {
+      const params = serializePeerFilters(filters);
+      const url = new URL(window.location.href);
+      url.hash = "peer-directory";
+      url.search = params.toString();
+      const link = url.toString();
+
+      await navigator.clipboard.writeText(link);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch (err) {
+      console.error("Copy failed", err);
+    }
+  };
+
+  const hasActiveFilters =
+    filters.searchQuery ||
+    filters.selectedVersions.size > 0 ||
+    filters.selectedPubsubProtocols.size > 0 ||
+    filters.selectedStreamProtocols.size > 0 ||
+    filters.selectedCapabilityCounts.size > 0;
+
+  if (!hasActiveFilters) {
+    return null;
+  }
+
+  return (
+    <button
+      onClick={handleCopy}
+      className="text-xs font-semibold text-burgundy/70 hover:text-burgundy dark:text-white/70 dark:hover:text-white transition-colors flex items-center gap-1.5"
+      title={copied ? "Link copied!" : "Copy filter link"}
+      aria-label="Copy filter link"
+    >
+      {copied ? (
+        <>
+          <span className="text-green dark:text-light-green">Link copied!</span>
+          <Icon name="check" className="w-3 h-3 text-green dark:text-light-green" />
+        </>
+      ) : (
+        <>
+          <span>Copy filter link</span>
+          <Icon name="emptyclipboard" className="w-3 h-3" />
         </>
       )}
     </button>
@@ -285,8 +337,119 @@ function CollapsibleMessage({
   );
 }
 
+// Helper functions to serialize/deserialize filters to/from URL params
+function serializePeerFilters(filters: PeerFilterState): URLSearchParams {
+  const params = new URLSearchParams();
+
+  if (filters.searchQuery) {
+    params.set("filter_peer_id", filters.searchQuery);
+  }
+  if (filters.selectedVersions.size > 0) {
+    params.set("filter_version", Array.from(filters.selectedVersions).join(","));
+  }
+  if (filters.selectedPubsubProtocols.size > 0) {
+    params.set("filter_pubsub", Array.from(filters.selectedPubsubProtocols).join(","));
+  }
+  if (filters.selectedStreamProtocols.size > 0) {
+    params.set("filter_stream", Array.from(filters.selectedStreamProtocols).join(","));
+  }
+  if (filters.selectedCapabilityCounts.size > 0) {
+    params.set("filter_capability_count", Array.from(filters.selectedCapabilityCounts).sort((a, b) => a - b).join(","));
+  }
+
+  return params;
+}
+
+function deserializePeerFilters(params: URLSearchParams, defaultFilters: PeerFilterState): PeerFilterState {
+  const filters = { ...defaultFilters };
+
+  const peerId = params.get("filter_peer_id");
+  if (peerId) {
+    filters.searchQuery = peerId;
+  }
+
+  const versions = params.get("filter_version");
+  if (versions) {
+    filters.selectedVersions = new Set(versions.split(",").filter(Boolean));
+  }
+
+  const pubsub = params.get("filter_pubsub");
+  if (pubsub) {
+    filters.selectedPubsubProtocols = new Set(pubsub.split(",").filter(Boolean) as Array<"tcp" | "udp" | "other">);
+  }
+
+  const stream = params.get("filter_stream");
+  if (stream) {
+    filters.selectedStreamProtocols = new Set(stream.split(",").filter(Boolean) as Array<"tcp" | "udp" | "other">);
+  }
+
+  const capabilityCounts = params.get("filter_capability_count");
+  if (capabilityCounts) {
+    filters.selectedCapabilityCounts = new Set(
+      capabilityCounts.split(",").map(c => parseInt(c, 10)).filter(n => !isNaN(n))
+    );
+  }
+
+  return filters;
+}
+
+function serializeFrameFilters(filters: FrameFilterState): URLSearchParams {
+  const params = new URLSearchParams();
+
+  if (filters.searchQuery) {
+    params.set("filter_prover_selector", filters.searchQuery);
+  }
+  if (filters.minFrameNumber) {
+    params.set("filter_frame_min", filters.minFrameNumber);
+  }
+  if (filters.maxFrameNumber) {
+    params.set("filter_frame_max", filters.maxFrameNumber);
+  }
+  if (filters.minRequests) {
+    params.set("filter_requests_min", filters.minRequests);
+  }
+  if (filters.maxRequests) {
+    params.set("filter_requests_max", filters.maxRequests);
+  }
+
+  return params;
+}
+
+function deserializeFrameFilters(params: URLSearchParams, defaultFilters: FrameFilterState): FrameFilterState {
+  const filters = { ...defaultFilters };
+
+  const proverSelector = params.get("filter_prover_selector");
+  if (proverSelector) {
+    filters.searchQuery = proverSelector;
+  }
+
+  const frameMin = params.get("filter_frame_min");
+  if (frameMin) {
+    filters.minFrameNumber = frameMin;
+  }
+
+  const frameMax = params.get("filter_frame_max");
+  if (frameMax) {
+    filters.maxFrameNumber = frameMax;
+  }
+
+  const requestsMin = params.get("filter_requests_min");
+  if (requestsMin) {
+    filters.minRequests = requestsMin;
+  }
+
+  const requestsMax = params.get("filter_requests_max");
+  if (requestsMax) {
+    filters.maxRequests = requestsMax;
+  }
+
+  return filters;
+}
+
 export default function Explorer() {
   const navigate = useNavigate();
+  const location = useLocation();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [latestFrame, setLatestFrame] = useState<GlobalFrame | null>(null);
   const [frameFeed, setFrameFeed] = useState<GlobalFrame[]>([]);
   const [certified, setCertified] = useState<CertifiedProposal | null>(null);
@@ -364,6 +527,20 @@ export default function Explorer() {
     };
   }, [frameCount]); // Add frameCount to dependencies
 
+  // Handle anchor scrolling when hash is present
+  useEffect(() => {
+    if (location.hash) {
+      const hash = location.hash.substring(1); // Remove the #
+      const element = document.getElementById(hash);
+      if (element) {
+        // Small delay to ensure content is rendered
+        setTimeout(() => {
+          element.scrollIntoView({ behavior: "smooth", block: "start" });
+        }, 100);
+      }
+    }
+  }, [location.hash, loading]); // Re-run when hash changes or loading completes
+
   const latestHeader = latestFrame?.header;
 
   const frameFeedRows = useMemo(() => frameFeed.map((frame) => {
@@ -380,14 +557,51 @@ export default function Explorer() {
     };
   }), [frameFeed]);
 
-  // Frame filter state
-  const [frameFilters, setFrameFilters] = useState<FrameFilterState>({
+  // Frame filter state - initialize from URL params
+  const defaultFrameFilters: FrameFilterState = {
     searchQuery: "",
     minFrameNumber: "",
     maxFrameNumber: "",
     minRequests: "",
     maxRequests: "",
-  });
+  };
+
+  const frameFiltersInitialized = useRef(false);
+  const [frameFilters, setFrameFilters] = useState<FrameFilterState>(() =>
+    deserializeFrameFilters(searchParams, defaultFrameFilters)
+  );
+
+  // Mark as initialized after first render
+  useEffect(() => {
+    frameFiltersInitialized.current = true;
+  }, []);
+
+  // Update URL when frame filters change (but not on initial mount)
+  useEffect(() => {
+    if (!frameFiltersInitialized.current) return;
+
+    const newParams = serializeFrameFilters(frameFilters);
+    const currentParams = new URLSearchParams(searchParams);
+
+    // Remove old frame filter params
+    currentParams.delete("filter_prover_selector");
+    currentParams.delete("filter_frame_min");
+    currentParams.delete("filter_frame_max");
+    currentParams.delete("filter_requests_min");
+    currentParams.delete("filter_requests_max");
+
+    // Add new frame filter params
+    newParams.forEach((value, key) => {
+      currentParams.set(key, value);
+    });
+
+    // Only update if params actually changed
+    const newParamsStr = currentParams.toString();
+    const oldParamsStr = searchParams.toString();
+    if (newParamsStr !== oldParamsStr) {
+      setSearchParams(currentParams, { replace: true });
+    }
+  }, [frameFilters, searchParams, setSearchParams]);
 
   // Filter frames based on filters
   const filteredFrameRows = useMemo(() => {
@@ -443,14 +657,51 @@ export default function Explorer() {
 
   const peerRows = useMemo(() => formatPeerRows(peers), [peers]);
 
-  // Filter state
-  const [filters, setFilters] = useState<PeerFilterState>({
+  // Filter state - initialize from URL params
+  const defaultPeerFilters: PeerFilterState = {
     searchQuery: "",
     selectedVersions: new Set(),
     selectedPubsubProtocols: new Set<"tcp" | "udp" | "other">(),
     selectedStreamProtocols: new Set<"tcp" | "udp" | "other">(),
     selectedCapabilityCounts: new Set(),
-  });
+  };
+
+  const peerFiltersInitialized = useRef(false);
+  const [filters, setFilters] = useState<PeerFilterState>(() =>
+    deserializePeerFilters(searchParams, defaultPeerFilters)
+  );
+
+  // Mark as initialized after first render
+  useEffect(() => {
+    peerFiltersInitialized.current = true;
+  }, []);
+
+  // Update URL when peer filters change (but not on initial mount)
+  useEffect(() => {
+    if (!peerFiltersInitialized.current) return;
+
+    const newParams = serializePeerFilters(filters);
+    const currentParams = new URLSearchParams(searchParams);
+
+    // Remove old peer filter params
+    currentParams.delete("filter_peer_id");
+    currentParams.delete("filter_version");
+    currentParams.delete("filter_pubsub");
+    currentParams.delete("filter_stream");
+    currentParams.delete("filter_capability_count");
+
+    // Add new peer filter params
+    newParams.forEach((value, key) => {
+      currentParams.set(key, value);
+    });
+
+    // Only update if params actually changed
+    const newParamsStr = currentParams.toString();
+    const oldParamsStr = searchParams.toString();
+    if (newParamsStr !== oldParamsStr) {
+      setSearchParams(currentParams, { replace: true });
+    }
+  }, [filters, searchParams, setSearchParams]);
 
   // Filter peers excluding version, capability count, and protocol filters (for count calculations)
   const peersForVersionCounts = useMemo(() => {
@@ -727,7 +978,7 @@ export default function Explorer() {
             </div>
           </section>
 
-          <section className="mt-14 relative overflow-hidden rounded-3xl border border-burgundy/10 bg-white/95 p-10 text-burgundy shadow-[0_35px_80px_-50px_rgba(57,31,91,0.45)] backdrop-blur-lg dark:border-white/10 dark:bg-[#1a0f27]/95 dark:text-white dark:shadow-[0_40px_90px_-55px_rgba(8,4,20,0.7)]">
+          <section id="frame-feed" className="mt-14 relative overflow-hidden rounded-3xl border border-burgundy/10 bg-white/95 p-10 text-burgundy shadow-[0_35px_80px_-50px_rgba(57,31,91,0.45)] backdrop-blur-lg dark:border-white/10 dark:bg-[#1a0f27]/95 dark:text-white dark:shadow-[0_40px_90px_-55px_rgba(8,4,20,0.7)]">
             <div className="pointer-events-none absolute -right-10 -top-10 h-44 w-44 rounded-full bg-pink/40 blur-3xl dark:bg-pink/30" />
             <div className="pointer-events-none absolute left-6 top-8 h-24 w-24 rounded-full bg-light-purple/80 blur-2xl dark:bg-purple/40" />
 
@@ -848,7 +1099,7 @@ export default function Explorer() {
             </div>
           </section> */}
 
-          <section className="mt-14 relative overflow-hidden rounded-3xl border border-burgundy/10 bg-white/95 p-10 text-burgundy shadow-[0_35px_80px_-50px_rgba(57,31,91,0.45)] backdrop-blur-lg dark:border-white/10 dark:bg-[#1a0f27]/95 dark:text-white dark:shadow-[0_40px_90px_-55px_rgba(8,4,20,0.7)]">
+          <section id="peer-directory" className="mt-14 relative overflow-hidden rounded-3xl border border-burgundy/10 bg-white/95 p-10 text-burgundy shadow-[0_35px_80px_-50px_rgba(57,31,91,0.45)] backdrop-blur-lg dark:border-white/10 dark:bg-[#1a0f27]/95 dark:text-white dark:shadow-[0_40px_90px_-55px_rgba(8,4,20,0.7)]">
             <div className="pointer-events-none absolute -right-10 -top-10 h-44 w-44 rounded-full bg-pink/40 blur-3xl dark:bg-pink/30" />
             <div className="pointer-events-none absolute left-6 top-8 h-24 w-24 rounded-full bg-light-purple/80 blur-2xl dark:bg-purple/40" />
 
@@ -857,8 +1108,11 @@ export default function Explorer() {
                 <h2 className="text-lg md:text-3xl font-semibold uppercase tracking-[0.35em] text-burgundy dark:text-white">
                   Peer directory
                 </h2>
-                <div className="text-xs font-semibold uppercase tracking-[0.35em] text-burgundy/70 dark:text-white/70">
-                  {formattedPeerCount} peers
+                <div className="flex flex-col items-end gap-2">
+                  <div className="text-xs font-semibold uppercase tracking-[0.35em] text-burgundy/70 dark:text-white/70">
+                    {formattedPeerCount} peers
+                  </div>
+                  <CopyFilterLinkButton filters={filters} />
                 </div>
               </div>
 
@@ -883,7 +1137,7 @@ export default function Explorer() {
             </div>
           </section>
 
-          <section className="mt-14 relative overflow-hidden rounded-3xl border border-burgundy/10 bg-white/95 p-10 text-burgundy shadow-[0_35px_80px_-50px_rgba(57,31,91,0.45)] backdrop-blur-lg dark:border-white/10 dark:bg-[#1a0f27]/95 dark:text-white dark:shadow-[0_40px_90px_-55px_rgba(8,4,20,0.7)]">
+          <section id="consensus-gossip" className="mt-14 relative overflow-hidden rounded-3xl border border-burgundy/10 bg-white/95 p-10 text-burgundy shadow-[0_35px_80px_-50px_rgba(57,31,91,0.45)] backdrop-blur-lg dark:border-white/10 dark:bg-[#1a0f27]/95 dark:text-white dark:shadow-[0_40px_90px_-55px_rgba(8,4,20,0.7)]">
             <div className="pointer-events-none absolute -right-10 -top-10 h-44 w-44 rounded-full bg-pink/40 blur-3xl dark:bg-pink/30" />
             <div className="pointer-events-none absolute left-6 top-8 h-24 w-24 rounded-full bg-light-purple/80 blur-2xl dark:bg-purple/40" />
 
