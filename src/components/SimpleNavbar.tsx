@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import Logo from "@/components/ui/Logo";
+import { ThemeToggle } from "@/components/ThemeToggle";
 
 export function SimpleNavbar() {
   return (
@@ -28,6 +29,7 @@ export function SimpleNavbar() {
             >
               Status
             </a>
+            <ThemeToggle />
           </div>
         </div>
       </div>

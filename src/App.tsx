@@ -5,6 +5,7 @@ import { SimpleNavbar } from "@/components/SimpleNavbar";
 import { SimpleFooter } from "@/components/SimpleFooter";
 import { Routes, Route } from "react-router-dom";
 import Spinner from "@/components/ui/Spinner";
+import { ThemeProvider } from "@/components/helpers/ThemeContext";
 
 // Pages
 const NotFound = lazy(() => import("@/404"));
@@ -28,7 +29,7 @@ const withSuspense = (
 
 export default function App() {
   return (
-    <>
+    <ThemeProvider>
       <ScrollToTop />
       <div className="min-h-screen flex flex-col">
         <SimpleNavbar />
@@ -42,6 +43,6 @@ export default function App() {
         </main>
         <SimpleFooter />
       </div>
-    </>
+    </ThemeProvider>
   );
 }
