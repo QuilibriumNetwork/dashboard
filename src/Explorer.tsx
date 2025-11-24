@@ -373,29 +373,39 @@ function CollapsibleMessage({
           <div className="text-[0.7rem] font-semibold uppercase tracking-[0.35em] text-burgundy/60 dark:text-white/60">Data</div>
           <CopyButton text={message.data} showText={true} className="mb-1" />
         </div>
-        <div
-          ref={contentRef}
-          className={`font-mono text-xs text-burgundy dark:text-white break-all whitespace-pre-wrap transition-all ${
-            !isExpanded ? 'overflow-hidden' : ''
-          }`}
-          style={{
-            maxHeight: !isExpanded && lineHeight > 0 ? `${lineHeight * 5}px` : 'none',
-          }}
-        >
-          {message.data}
+        <div className="relative">
+          <div
+            ref={contentRef}
+            className={`font-mono text-xs text-burgundy dark:text-white break-all whitespace-pre-wrap transition-all ${
+              !isExpanded ? 'overflow-hidden' : ''
+            }`}
+            style={{
+              maxHeight: !isExpanded && lineHeight > 0 ? `${lineHeight * 5}px` : 'none',
+            }}
+          >
+            {message.data}
+          </div>
+          {!isExpanded && hasOverflow && (
+            <div className="absolute bottom-0 left-0 right-0 h-14 bg-gradient-to-t from-white via-white/70 to-transparent dark:from-[#211430] dark:via-[#211430]/70 dark:to-transparent">
+              <button
+                onClick={onToggle}
+                className="absolute bottom-2 left-1/2 -translate-x-1/2 flex items-center gap-1.5 px-3 py-1 text-xs font-medium text-burgundy/80 hover:text-burgundy dark:text-white/80 dark:hover:text-white bg-burgundy/10 hover:bg-burgundy/20 dark:bg-white/10 dark:hover:bg-white/20 rounded-full backdrop-blur-sm transition-all border border-burgundy/20 hover:border-burgundy/30 dark:border-white/20 dark:hover:border-white/30"
+              >
+                <ChevronDown className="size-3 transition-transform" />
+                <span>Expand</span>
+              </button>
+            </div>
+          )}
         </div>
-        {!isExpanded && hasOverflow && (
-          <div className="absolute bottom-0 left-0 right-0 h-12 pointer-events-none bg-gradient-to-b from-transparent via-transparent to-white dark:to-[#211430]" />
-        )}
       </div>
-      {hasOverflow && (
+      {isExpanded && hasOverflow && (
         <button
           onClick={onToggle}
           className="mt-3 flex items-center gap-1 text-xs font-semibold text-burgundy/70 hover:text-burgundy dark:text-white/70 dark:hover:text-white transition-colors"
         >
-          {isExpanded ? 'Collapse' : 'Expand'}
+          Collapse
           <ChevronDown
-            className={`size-3 transition-transform ${isExpanded ? 'rotate-180' : ''}`}
+            className="size-3 transition-transform rotate-180"
           />
         </button>
       )}
