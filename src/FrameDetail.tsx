@@ -8,44 +8,11 @@ import {
   formatBase64Bytes,
   formatTimestamp,
   formatRelative,
+  convertBase64ToHex,
 } from "@/lib/format";
 import Spinner from "@/components/ui/Spinner";
 import Icon from "@/components/ui/Icons";
 import ChevronDown from "@/components/ui/ChevronDown";
-
-/**
- * Recursively converts base64 strings in an object to hex format (with 0x prefix)
- */
-function convertBase64ToHex(obj: unknown): unknown {
-  if (obj == null) {
-    return obj;
-  }
-
-  if (typeof obj === "string") {
-    // Check if it looks like base64 (matches the pattern from formatMaybeBytes)
-    if (/^[A-Za-z0-9+/=_-]+$/.test(obj) && obj.length > 16) {
-      const hex = base64ToHex(obj);
-      if (hex) {
-        return `0x${hex}`;
-      }
-    }
-    return obj;
-  }
-
-  if (Array.isArray(obj)) {
-    return obj.map(convertBase64ToHex);
-  }
-
-  if (typeof obj === "object") {
-    const result: Record<string, unknown> = {};
-    for (const [key, value] of Object.entries(obj)) {
-      result[key] = convertBase64ToHex(value);
-    }
-    return result;
-  }
-
-  return obj;
-}
 
 function CopyFrameDataButton() {
   const [copied, setCopied] = useState(false);

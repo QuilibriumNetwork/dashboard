@@ -16,6 +16,7 @@ import {
   formatTimestamp,
   formatRelative,
   coerceTimestamp,
+  convertBase64ToHex,
 } from "@/lib/format";
 import {
   formatPeerRows,
@@ -71,6 +72,35 @@ function CopyButton({ text, className = "", showText = false }: { text: string; 
           <Icon name="emptyclipboard" className="w-4 h-4 text-burgundy/60 dark:text-white/60" />
         </>
       )}
+    </button>
+  );
+}
+
+function CopyFrameDataButton({ frame }: { frame: GlobalFrame | null }) {
+  const [copied, setCopied] = useState(false);
+
+  const handleCopy = async () => {
+    try {
+      if (!frame) return;
+      const convertedFrame = convertBase64ToHex(frame) as GlobalFrame;
+      const frameDataJson = JSON.stringify(convertedFrame, null, 2);
+      await navigator.clipboard.writeText(frameDataJson);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch (err) {
+      console.error("Copy failed", err);
+    }
+  };
+
+  if (!frame) return null;
+
+  return (
+    <button
+      onClick={handleCopy}
+      className="flex items-center gap-2 px-2 py-1 text-sm font-semibold uppercase tracking-[0.2em] text-burgundy/70 hover:text-burgundy dark:text-white/70 transition-colors bg-transparent hover:bg-transparent"
+    >
+      <Icon name="emptyclipboard" className="w-4 h-4 flex-shrink-0" />
+      <span>{copied ? 'Copied!' : 'Copy data'}</span>
     </button>
   );
 }
@@ -150,17 +180,35 @@ function FrameDataCard({ frameNumber, requests, prover, selector, timestamp, onN
         <div>
           <span className="text-burgundy/60 dark:text-white/60">Prover: </span>
           <span className="font-mono break-all">
-            <HoverableCopyText text={base64ToHex(prover) ?? prover}>
-              {formatBase64Bytes(prover)}
-            </HoverableCopyText>
+            {(() => {
+              const displayValue = formatBase64Bytes(prover);
+              const copyValue = base64ToHex(prover);
+              const finalCopyValue = displayValue.startsWith("0x") && copyValue && !copyValue.startsWith("0x")
+                ? `0x${copyValue}`
+                : copyValue ?? prover;
+              return (
+                <HoverableCopyText text={finalCopyValue}>
+                  {displayValue}
+                </HoverableCopyText>
+              );
+            })()}
           </span>
         </div>
         <div>
           <span className="text-burgundy/60 dark:text-white/60">Selector: </span>
           <span className="font-mono break-all">
-            <HoverableCopyText text={base64ToHex(selector) ?? selector}>
-              {formatBase64Bytes(selector)}
-            </HoverableCopyText>
+            {(() => {
+              const displayValue = formatBase64Bytes(selector);
+              const copyValue = base64ToHex(selector);
+              const finalCopyValue = displayValue.startsWith("0x") && copyValue && !copyValue.startsWith("0x")
+                ? `0x${copyValue}`
+                : copyValue ?? selector;
+              return (
+                <HoverableCopyText text={finalCopyValue}>
+                  {displayValue}
+                </HoverableCopyText>
+              );
+            })()}
           </span>
         </div>
         <div className="flex items-center justify-between pt-2">
@@ -201,14 +249,32 @@ function FrameDataRow({ frameNumber, requests, prover, selector, timestamp, onNa
       </td>
       <td className="py-4 pr-6">{requests}</td>
       <td className="py-4 pr-6 font-mono">
-        <HoverableCopyText text={base64ToHex(prover) ?? prover}>
-          {formatBase64Bytes(prover)}
-        </HoverableCopyText>
+        {(() => {
+          const displayValue = formatBase64Bytes(prover);
+          const copyValue = base64ToHex(prover);
+          const finalCopyValue = displayValue.startsWith("0x") && copyValue && !copyValue.startsWith("0x")
+            ? `0x${copyValue}`
+            : copyValue ?? prover;
+          return (
+            <HoverableCopyText text={finalCopyValue}>
+              {displayValue}
+            </HoverableCopyText>
+          );
+        })()}
       </td>
       <td className="py-4 pr-6 font-mono">
-        <HoverableCopyText text={base64ToHex(selector) ?? selector}>
-          {formatBase64Bytes(selector)}
-        </HoverableCopyText>
+        {(() => {
+          const displayValue = formatBase64Bytes(selector);
+          const copyValue = base64ToHex(selector);
+          const finalCopyValue = displayValue.startsWith("0x") && copyValue && !copyValue.startsWith("0x")
+            ? `0x${copyValue}`
+            : copyValue ?? selector;
+          return (
+            <HoverableCopyText text={finalCopyValue}>
+              {displayValue}
+            </HoverableCopyText>
+          );
+        })()}
       </td>
       <td className="py-4 pr-6">{formatTimestamp(timestamp)}</td>
       <td className="py-4 pr-6">
@@ -911,14 +977,19 @@ export default function Explorer() {
                     Rank #{latestHeader?.rank.toLocaleString() ?? "–"}
                   </span>
                 </div>
-                <div className="text-sm text-burgundy/70 dark:text-white/70">
-                  {loading ? (
-                    "Refreshing explorer data…"
-                  ) : latestHeader?.timestamp ? (
-                    <span className="text-[0.7rem] tracking-[0.2em] text-burgundy/60 dark:text-white/60">
-                      {formatTimestamp(latestHeader.timestamp)} ({formatRelative(latestHeader.timestamp)})
-                    </span>
-                  ) : null}
+                <div className="flex items-center gap-4">
+                  <div className="text-sm text-burgundy/70 dark:text-white/70">
+                    {loading ? (
+                      "Refreshing explorer data…"
+                    ) : latestHeader?.timestamp ? (
+                      <span className="text-[0.7rem] tracking-[0.2em] text-burgundy/60 dark:text-white/60">
+                        {formatTimestamp(latestHeader.timestamp)} ({formatRelative(latestHeader.timestamp)})
+                      </span>
+                    ) : null}
+                  </div>
+                  {latestFrame && (
+                    <CopyFrameDataButton frame={latestFrame} />
+                  )}
                 </div>
               </div>
 
@@ -935,13 +1006,20 @@ export default function Explorer() {
                 </div>
                 <div className="rounded-2xl border border-burgundy/10 bg-white/95 p-6 shadow-[0_26px_70px_-55px_rgba(64,0,27,0.5)] dark:border-white/10 dark:bg-[#211430]/95 dark:text-white">
                   <div className="text-xs font-semibold uppercase tracking-[0.3em] text-burgundy/60 dark:text-white/60">Prover</div>
-                  {latestHeader?.prover && (
-                    <div className="mt-2 text-2xl font-semibold text-burgundy dark:text-white font-mono">
-                      <HoverableCopyText text={base64ToHex(latestHeader.prover) ?? latestHeader.prover}>
-                        {formatBase64Bytes(latestHeader.prover)}
-                      </HoverableCopyText>
-                    </div>
-                  )}
+                  {latestHeader?.prover && (() => {
+                    const displayValue = formatBase64Bytes(latestHeader.prover);
+                    const copyValue = base64ToHex(latestHeader.prover);
+                    const finalCopyValue = displayValue.startsWith("0x") && copyValue && !copyValue.startsWith("0x")
+                      ? `0x${copyValue}`
+                      : copyValue ?? latestHeader.prover;
+                    return (
+                      <div className="mt-2 text-2xl font-semibold text-burgundy dark:text-white font-mono">
+                        <HoverableCopyText text={finalCopyValue}>
+                          {displayValue}
+                        </HoverableCopyText>
+                      </div>
+                    );
+                  })()}
                 </div>
                 <div className="rounded-2xl border border-burgundy/10 bg-white/95 p-6 shadow-[0_26px_70px_-55px_rgba(64,0,27,0.5)] dark:border-white/10 dark:bg-[#211430]/95 dark:text-white">
                   <div className="text-xs font-semibold uppercase tracking-[0.3em] text-burgundy/60 dark:text-white/60">Peers</div>
@@ -956,23 +1034,37 @@ export default function Explorer() {
               <div className="grid gap-4 text-sm md:grid-cols-2">
                 <div className="rounded-2xl border border-burgundy/10 bg-white px-4 py-4 text-burgundy shadow-[0_20px_55px_-45px_rgba(64,0,27,0.5)] dark:border-white/10 dark:bg-[#211430] dark:text-white">
                   <div className="text-[0.7rem] font-semibold uppercase tracking-[0.35em] text-burgundy/60 dark:text-white/60">Requests root</div>
-                  {latestHeader?.requestsRoot && (
-                    <div className="text-lg font-semibold font-mono">
-                      <HoverableCopyText text={base64ToHex(latestHeader.requestsRoot) ?? latestHeader.requestsRoot}>
-                        {formatBase64Bytes(latestHeader.requestsRoot)}
-                      </HoverableCopyText>
-                    </div>
-                  )}
+                  {latestHeader?.requestsRoot && (() => {
+                    const displayValue = formatBase64Bytes(latestHeader.requestsRoot);
+                    const copyValue = base64ToHex(latestHeader.requestsRoot);
+                    const finalCopyValue = displayValue.startsWith("0x") && copyValue && !copyValue.startsWith("0x")
+                      ? `0x${copyValue}`
+                      : copyValue ?? latestHeader.requestsRoot;
+                    return (
+                      <div className="text-lg font-semibold font-mono">
+                        <HoverableCopyText text={finalCopyValue}>
+                          {displayValue}
+                        </HoverableCopyText>
+                      </div>
+                    );
+                  })()}
                 </div>
                 <div className="rounded-2xl border border-burgundy/10 bg-white px-4 py-4 text-burgundy shadow-[0_20px_55px_-45px_rgba(64,0,27,0.5)] dark:border-white/10 dark:bg-[#211430] dark:text-white">
                   <div className="text-[0.7rem] font-semibold uppercase tracking-[0.35em] text-burgundy/60 dark:text-white/60">Parent selector</div>
-                  {latestHeader?.parentSelector && (
-                    <div className="text-lg font-semibold font-mono">
-                      <HoverableCopyText text={base64ToHex(latestHeader.parentSelector) ?? latestHeader.parentSelector}>
-                        {formatBase64Bytes(latestHeader.parentSelector)}
-                      </HoverableCopyText>
-                    </div>
-                  )}
+                  {latestHeader?.parentSelector && (() => {
+                    const displayValue = formatBase64Bytes(latestHeader.parentSelector);
+                    const copyValue = base64ToHex(latestHeader.parentSelector);
+                    const finalCopyValue = displayValue.startsWith("0x") && copyValue && !copyValue.startsWith("0x")
+                      ? `0x${copyValue}`
+                      : copyValue ?? latestHeader.parentSelector;
+                    return (
+                      <div className="text-lg font-semibold font-mono">
+                        <HoverableCopyText text={finalCopyValue}>
+                          {displayValue}
+                        </HoverableCopyText>
+                      </div>
+                    );
+                  })()}
                 </div>
               </div>
             </div>
