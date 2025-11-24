@@ -436,16 +436,22 @@ export default function Explorer() {
             <div className="pointer-events-none absolute left-6 top-8 h-24 w-24 rounded-full bg-light-purple/80 blur-2xl dark:bg-purple/40" />
 
             <div className="relative space-y-6">
-              <div className="flex flex-wrap items-center gap-3 text-xs font-semibold uppercase tracking-[0.35em] text-burgundy/70 dark:text-white/70">
-                <Tag label="Global frame" />
-                <span>
-                  Rank #{latestHeader?.rank.toLocaleString() ?? "–"}
-                </span>
-                {latestHeader?.timestamp && (
-                  <span className="text-[0.7rem] tracking-[0.2em] text-burgundy/60 dark:text-white/60">
-                    {formatTimestamp(latestHeader.timestamp)} ({formatRelative(latestHeader.timestamp)})
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <div className="flex flex-wrap items-center gap-3 text-xs font-semibold uppercase tracking-[0.35em] text-burgundy/70 dark:text-white/70">
+                  <Tag label="Global frame" />
+                  <span>
+                    Rank #{latestHeader?.rank.toLocaleString() ?? "–"}
                   </span>
-                )}
+                </div>
+                <div className="text-sm text-burgundy/70 dark:text-white/70">
+                  {loading ? (
+                    "Refreshing explorer data…"
+                  ) : latestHeader?.timestamp ? (
+                    <span className="text-[0.7rem] tracking-[0.2em] text-burgundy/60 dark:text-white/60">
+                      {formatTimestamp(latestHeader.timestamp)} ({formatRelative(latestHeader.timestamp)})
+                    </span>
+                  ) : null}
+                </div>
               </div>
               {error && (
                 <div className="rounded-2xl border border-pink/30 bg-light-pink/40 p-4 text-sm text-pink">
@@ -495,7 +501,6 @@ export default function Explorer() {
                   )}
                 </div>
               </div>
-              {loading && <div className="text-sm text-burgundy/70 dark:text-white/70">Refreshing explorer data…</div>}
 
               {/* Frame feed section */}
               <div className="mt-10 space-y-4 border-t border-burgundy/10 dark:border-white/10 pt-10">
