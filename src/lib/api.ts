@@ -56,7 +56,6 @@ export interface PeerRecord {
   version: string;
   patch_number: string;
   cores: number;
-  bandwidth: number;
   last_seen: number;
   capabilities: Array<{
     protocol_identifier: number;

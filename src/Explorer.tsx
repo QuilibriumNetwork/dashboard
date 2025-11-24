@@ -15,14 +15,28 @@ import {
   formatBase64Bytes,
   formatTimestamp,
   formatRelative,
+  coerceTimestamp,
 } from "@/lib/format";
+import {
+  formatPeerRows,
+  compareVersions,
+  getProtocolsFromAddresses,
+  matchesSearch,
+  type PeerRow,
+} from "@/lib/peers";
 import ChevronDown from "@/components/ui/ChevronDown";
 import Icon from "@/components/ui/Icons";
 import Arrow from "@/components/ui/Arrow";
+import { HoverableCopyText } from "@/components/HoverableCopyText";
+import { PeerDirectoryFilters, type PeerFilterState } from "@/components/PeerDirectoryFilters";
+import { PeerDirectory } from "@/components/PeerDirectory";
+import { PeerDirectoryExport } from "@/components/PeerDirectoryExport";
+import { FrameFeedFilters, type FrameFilterState } from "@/components/FrameFeedFilters";
+import { FrameFeedExport } from "@/components/FrameFeedExport";
 
 function Tag({ label }: { label: string }) {
   return (
-    <span className="inline-flex rounded-full border border-burgundy/20 bg-light-grey px-3 py-1 text-xs font-semibold uppercase tracking-[0.3em] text-burgundy/70 dark:border-white/15 dark:bg-[#261732] dark:text-white/70">
+    <span className="inline-flex rounded-full border border-burgundy/20 bg-light-grey px-4 py-1.5 text-sm md:px-3 md:py-1 md:text-xs font-semibold uppercase tracking-[0.3em] text-burgundy/70 dark:border-white/15 dark:bg-[#261732] dark:text-white/70">
       {label}
     </span>
   );
@@ -61,51 +75,13 @@ function CopyButton({ text, className = "", showText = false }: { text: string; 
   );
 }
 
-function HoverableCopyText({ text, children }: { text: string; children: React.ReactNode }) {
-  const [isHovered, setIsHovered] = useState(false);
-  const [copied, setCopied] = useState(false);
-
-  const handleCopy = async (e: React.MouseEvent) => {
-    e.stopPropagation();
-    try {
-      await navigator.clipboard.writeText(text);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
-    } catch (err) {
-      console.error("Copy failed", err);
-    }
-  };
-
-  return (
-    <span
-      className="relative inline-flex items-center gap-1.5 group cursor-pointer"
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
-      onClick={handleCopy}
-    >
-      <span className={`group-hover:underline transition-colors ${copied ? 'text-green dark:text-light-green' : ''}`}>
-        {children}
-      </span>
-      <Icon
-        name="emptyclipboard"
-        className={`w-3 h-3 text-burgundy/60 dark:text-white/60 flex-shrink-0 transition-opacity ${isHovered ? 'opacity-100' : 'opacity-0'}`}
-      />
-      {isHovered && (
-        <span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 px-2 py-1 text-xs text-white bg-gray-900 dark:bg-gray-700 rounded whitespace-nowrap pointer-events-none z-10 shadow-lg">
-          {copied ? 'Copied!' : 'Click to copy'}
-          <span className="absolute top-full left-1/2 -translate-x-1/2 -mt-1 border-4 border-transparent border-t-gray-900 dark:border-t-gray-700" />
-        </span>
-      )}
-    </span>
-  );
-}
 
 interface FrameDataProps {
   frameNumber: number;
   requests: number;
   prover: string;
   selector: string;
-  timestamp: number;
+  timestamp: string;
   onNavigate: () => void;
 }
 
@@ -122,7 +98,7 @@ function FrameDataCard({ frameNumber, requests, prover, selector, timestamp, onN
         <div>
           <span className="text-burgundy/60 dark:text-white/60">Prover: </span>
           <span className="font-mono break-all">
-            <HoverableCopyText text={base64ToHex(prover)}>
+            <HoverableCopyText text={base64ToHex(prover) ?? prover}>
               {formatBase64Bytes(prover)}
             </HoverableCopyText>
           </span>
@@ -130,7 +106,7 @@ function FrameDataCard({ frameNumber, requests, prover, selector, timestamp, onN
         <div>
           <span className="text-burgundy/60 dark:text-white/60">Selector: </span>
           <span className="font-mono break-all">
-            <HoverableCopyText text={base64ToHex(selector)}>
+            <HoverableCopyText text={base64ToHex(selector) ?? selector}>
               {formatBase64Bytes(selector)}
             </HoverableCopyText>
           </span>
@@ -161,33 +137,6 @@ function FrameDataCard({ frameNumber, requests, prover, selector, timestamp, onN
   );
 }
 
-function PeerCard({ peer }: { peer: ReturnType<typeof formatPeerRows>[number] }) {
-  return (
-    <div className="rounded-2xl border border-burgundy/10 bg-white/95 p-4 text-sm text-burgundy shadow-[0_20px_55px_-45px_rgba(64,0,27,0.5)] dark:border-white/10 dark:bg-[#211430]/95 dark:text-white">
-      <div className="text-xs font-semibold uppercase tracking-[0.3em] text-burgundy/60 dark:text-white/60">Peer</div>
-      <div className="mt-1 font-mono text-xs">
-        <HoverableCopyText text={peer.peerId}>{peer.peerId}</HoverableCopyText>
-      </div>
-      <div className="mt-2 text-xs text-burgundy/70 dark:text-white/70">Version {peer.version}</div>
-      <div className="mt-4 text-xs">
-        <div className="text-[0.65rem] uppercase tracking-[0.3em] text-burgundy/50 dark:text-white/50">Pubsub</div>
-        {peer.pubsub.length ? peer.pubsub.map((addr) => (
-          <div key={addr} className="break-all">
-            <HoverableCopyText text={addr}>{addr}</HoverableCopyText>
-          </div>
-        )) : "–"}
-      </div>
-      <div className="mt-3 text-xs">
-        <div className="text-[0.65rem] uppercase tracking-[0.3em] text-burgundy/50 dark:text-white/50">Stream</div>
-        {peer.stream.length ? peer.stream.map((addr) => (
-          <div key={addr} className="break-all">
-            <HoverableCopyText text={addr}>{addr}</HoverableCopyText>
-          </div>
-        )) : "–"}
-      </div>
-    </div>
-  );
-}
 
 function FrameDataRow({ frameNumber, requests, prover, selector, timestamp, onNavigate }: FrameDataProps) {
   return (
@@ -200,12 +149,12 @@ function FrameDataRow({ frameNumber, requests, prover, selector, timestamp, onNa
       </td>
       <td className="py-4 pr-6">{requests}</td>
       <td className="py-4 pr-6 font-mono">
-        <HoverableCopyText text={base64ToHex(prover)}>
+        <HoverableCopyText text={base64ToHex(prover) ?? prover}>
           {formatBase64Bytes(prover)}
         </HoverableCopyText>
       </td>
       <td className="py-4 pr-6 font-mono">
-        <HoverableCopyText text={base64ToHex(selector)}>
+        <HoverableCopyText text={base64ToHex(selector) ?? selector}>
           {formatBase64Bytes(selector)}
         </HoverableCopyText>
       </td>
@@ -345,7 +294,8 @@ export default function Explorer() {
   const [peers, setPeers] = useState<PeerRecord[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [expandedMessages, setExpandedMessages] = useState<Set<number>>(new Set());
+  const [expandedMessages, setExpandedMessages] = useState<Set<string>>(new Set());
+  const [frameCount, setFrameCount] = useState<number>(10); // Add this line
 
   const [frameQuery, setFrameQuery] = useState("");
   const [frameLookup, setFrameLookup] = useState<FrameSearchState>({});
@@ -375,7 +325,7 @@ export default function Explorer() {
         setCertified(proposal);
         setMessages(gossip);
         setPeers(peerList);
-        await hydrateFrameFeed(frame);
+        await hydrateFrameFeed(frame, frameCount); // Update this line
       } catch (err) {
         if (mounted) {
           setError(err instanceof Error ? err.message : "Failed to load explorer data");
@@ -387,9 +337,9 @@ export default function Explorer() {
       }
     }
 
-    async function hydrateFrameFeed(baseFrame: GlobalFrame) {
+    async function hydrateFrameFeed(baseFrame: GlobalFrame, count: number) { // Update this line
       const latestNumber = baseFrame.header.frameNumber;
-      const counts = Array.from({ length: 10 }, (_, idx) => latestNumber - idx).filter((n) => n > 0);
+      const counts = Array.from({ length: count }, (_, idx) => latestNumber - idx).filter((n) => n > 0); // Update this line
       const frames: GlobalFrame[] = [];
       for (const num of counts) {
         try {
@@ -412,25 +362,235 @@ export default function Explorer() {
       mounted = false;
       window.clearInterval(interval);
     };
-  }, []);
+  }, [frameCount]); // Add frameCount to dependencies
 
   const latestHeader = latestFrame?.header;
 
   const frameFeedRows = useMemo(() => frameFeed.map((frame) => {
     const { header } = frame;
+    const timestampNum = coerceTimestamp(header.timestamp) ?? 0;
     return {
       frameNumber: header.frameNumber,
       requests: frame.requests?.length ?? 0,
       shardsTouched: header.globalCommitments?.length ?? 0,
       prover: header.prover,
       selector: header.parentSelector,
-      timestamp: header.timestamp,
+      timestamp: header.timestamp, // Keep as string for formatTimestamp
+      timestampNum, // Keep as number for export
     };
   }), [frameFeed]);
 
+  // Frame filter state
+  const [frameFilters, setFrameFilters] = useState<FrameFilterState>({
+    searchQuery: "",
+    minFrameNumber: "",
+    maxFrameNumber: "",
+    minRequests: "",
+    maxRequests: "",
+  });
+
+  // Filter frames based on filters
+  const filteredFrameRows = useMemo(() => {
+    return frameFeedRows.filter((frame) => {
+      // Search filter (prover or selector)
+      if (frameFilters.searchQuery.trim()) {
+        const query = frameFilters.searchQuery.trim().toLowerCase();
+        const proverHex = base64ToHex(frame.prover)?.toLowerCase() ?? "";
+        const selectorHex = base64ToHex(frame.selector)?.toLowerCase() ?? "";
+        const proverBase64 = frame.prover.toLowerCase();
+        const selectorBase64 = frame.selector.toLowerCase();
+        if (
+          !proverHex.includes(query) &&
+          !selectorHex.includes(query) &&
+          !proverBase64.includes(query) &&
+          !selectorBase64.includes(query)
+        ) {
+          return false;
+        }
+      }
+
+      // Frame number range
+      if (frameFilters.minFrameNumber) {
+        const min = Number(frameFilters.minFrameNumber);
+        if (Number.isFinite(min) && frame.frameNumber < min) {
+          return false;
+        }
+      }
+      if (frameFilters.maxFrameNumber) {
+        const max = Number(frameFilters.maxFrameNumber);
+        if (Number.isFinite(max) && frame.frameNumber > max) {
+          return false;
+        }
+      }
+
+      // Requests range
+      if (frameFilters.minRequests) {
+        const min = Number(frameFilters.minRequests);
+        if (Number.isFinite(min) && frame.requests < min) {
+          return false;
+        }
+      }
+      if (frameFilters.maxRequests) {
+        const max = Number(frameFilters.maxRequests);
+        if (Number.isFinite(max) && frame.requests > max) {
+          return false;
+        }
+      }
+
+      return true;
+    });
+  }, [frameFeedRows, frameFilters]);
+
   const peerRows = useMemo(() => formatPeerRows(peers), [peers]);
 
-  const formattedPeerCount = peers.length.toLocaleString();
+  // Filter state
+  const [filters, setFilters] = useState<PeerFilterState>({
+    searchQuery: "",
+    selectedVersions: new Set(),
+    selectedPubsubProtocols: new Set(["tcp", "udp"]),
+    selectedStreamProtocols: new Set(["tcp", "udp"]),
+    selectedCapabilityCounts: new Set(),
+  });
+
+  // Filter peers excluding version, capability count, and protocol filters (for count calculations)
+  const peersForVersionCounts = useMemo(() => {
+    return peerRows.filter((peer) => {
+      // Search filter
+      if (!matchesSearch(peer, filters.searchQuery)) {
+        return false;
+      }
+
+      return true;
+    });
+  }, [peerRows, filters.searchQuery]);
+
+  // Extract unique versions from filtered peers (excluding version filter)
+  const uniqueVersions = useMemo(() => {
+    const versions = new Set<string>();
+    peersForVersionCounts.forEach((peer) => {
+      versions.add(peer.version);
+    });
+    return Array.from(versions).sort(compareVersions);
+  }, [peersForVersionCounts]);
+
+  // Count peers per version (based on filtered peers, excluding version filter)
+  const versionCounts = useMemo(() => {
+    const counts = new Map<string, number>();
+    peersForVersionCounts.forEach((peer) => {
+      counts.set(peer.version, (counts.get(peer.version) || 0) + 1);
+    });
+    return counts;
+  }, [peersForVersionCounts]);
+
+  // Extract unique capability counts from filtered peers (excluding capability count filter)
+  const uniqueCapabilityCounts = useMemo(() => {
+    const counts = new Set<number>();
+    peersForVersionCounts.forEach((peer) => {
+      counts.add(peer.capabilityCount);
+    });
+    return Array.from(counts).sort((a, b) => a - b);
+  }, [peersForVersionCounts]);
+
+  // Count peers per capability count (based on filtered peers, excluding capability count filter)
+  const capabilityCountCounts = useMemo(() => {
+    const counts = new Map<number, number>();
+    peersForVersionCounts.forEach((peer) => {
+      counts.set(peer.capabilityCount, (counts.get(peer.capabilityCount) || 0) + 1);
+    });
+    return counts;
+  }, [peersForVersionCounts]);
+
+  // Count peers per pubsub protocol (based on filtered peers, excluding protocol filters)
+  const pubsubProtocolCounts = useMemo(() => {
+    const counts = new Map<"tcp" | "udp", number>();
+    peersForVersionCounts.forEach((peer) => {
+      const protocols = getProtocolsFromAddresses(peer.pubsub);
+      protocols.forEach((protocol) => {
+        counts.set(protocol, (counts.get(protocol) || 0) + 1);
+      });
+    });
+    return counts;
+  }, [peersForVersionCounts]);
+
+  // Count peers per stream protocol (based on filtered peers, excluding protocol filters)
+  const streamProtocolCounts = useMemo(() => {
+    const counts = new Map<"tcp" | "udp", number>();
+    peersForVersionCounts.forEach((peer) => {
+      const protocols = getProtocolsFromAddresses(peer.stream);
+      protocols.forEach((protocol) => {
+        counts.set(protocol, (counts.get(protocol) || 0) + 1);
+      });
+    });
+    return counts;
+  }, [peersForVersionCounts]);
+
+  // Filter peers based on search, version, and protocol
+  const filteredPeerRows = useMemo(() => {
+    return peerRows.filter((peer) => {
+      // Search filter
+      if (!matchesSearch(peer, filters.searchQuery)) {
+        return false;
+      }
+
+      // Version filter
+      if (filters.selectedVersions.size > 0 && !filters.selectedVersions.has(peer.version)) {
+        return false;
+      }
+
+      // Pubsub protocol filter
+      if (filters.selectedPubsubProtocols.size > 0) {
+        if (peer.pubsub.length === 0) {
+          // If filtering for pubsub protocol but peer has no pubsub addresses, exclude it
+          return false;
+        }
+        const pubsubProtocols = getProtocolsFromAddresses(peer.pubsub);
+        const hasSelectedProtocol = Array.from(filters.selectedPubsubProtocols).some((protocol) =>
+          pubsubProtocols.has(protocol)
+        );
+        if (!hasSelectedProtocol) {
+          return false;
+        }
+      }
+
+      // Stream protocol filter
+      if (filters.selectedStreamProtocols.size > 0) {
+        if (peer.stream.length === 0) {
+          // If filtering for stream protocol but peer has no stream addresses, exclude it
+          return false;
+        }
+        const streamProtocols = getProtocolsFromAddresses(peer.stream);
+        const hasSelectedProtocol = Array.from(filters.selectedStreamProtocols).some((protocol) =>
+          streamProtocols.has(protocol)
+        );
+        if (!hasSelectedProtocol) {
+          return false;
+        }
+      }
+
+      // Capability count filter
+      if (filters.selectedCapabilityCounts.size > 0 && !filters.selectedCapabilityCounts.has(peer.capabilityCount)) {
+        return false;
+      }
+
+      return true;
+    });
+  }, [peerRows, filters]);
+
+  const totalPeerCount = peerRows.length;
+  const filteredPeerCount = filteredPeerRows.length;
+  const hasActiveFilters = useMemo(() => {
+    return (
+      filters.searchQuery.trim() !== "" ||
+      filters.selectedVersions.size > 0 ||
+      filters.selectedPubsubProtocols.size > 0 ||
+      filters.selectedStreamProtocols.size > 0 ||
+      filters.selectedCapabilityCounts.size > 0
+    );
+  }, [filters]);
+
+  const formattedPeerCount = hasActiveFilters
+    ? `${filteredPeerCount.toLocaleString()} / ${totalPeerCount.toLocaleString()}`
+    : totalPeerCount.toLocaleString();
 
   async function handleFrameLookup(event: React.FormEvent) {
     event.preventDefault();
@@ -490,7 +650,7 @@ export default function Explorer() {
 
       <div className="relative min-h-screen bg-beige pb-24 pt-16 dark:bg-[#100418]">
         <div className="pointer-events-none absolute -left-16 top-10 h-72 w-72 rounded-full bg-light-purple/60 blur-3xl dark:bg-purple/40" />
-        <div className="pointer-events-none absolute -right-24 top-32 h-80 w-80 rounded-full bg-light-blue/70 blur-3xl dark:bg-blue/40" />
+        <div className="pointer-events-none absolute -right-24 top-32 h-80 w-80 rounded-full bg-light-blue/70 blur-3xl dark:bg-blue/40 overflow-hidden" />
         <div className="pointer-events-none absolute left-1/2 top-[420px] h-80 w-80 -translate-x-1/2 rounded-full bg-light-green/60 blur-3xl dark:bg-green/30" />
 
         <div className="relative mx-auto max-w-6xl px-6">
@@ -499,10 +659,12 @@ export default function Explorer() {
             <div className="pointer-events-none absolute left-6 top-8 h-24 w-24 rounded-full bg-light-purple/80 blur-2xl dark:bg-purple/40" />
 
             <div className="relative space-y-6">
-              <div className="flex flex-wrap items-center justify-between gap-3">
-                <div className="flex flex-wrap items-center gap-3 text-xs font-semibold uppercase tracking-[0.35em] text-burgundy/70 dark:text-white/70">
-                  <Tag label="Global frame" />
-                  <span>
+              <div className="flex flex-wrap items-start justify-between gap-3">
+                <div className="flex flex-col gap-2">
+                  <h2 className="text-lg md:text-3xl font-semibold uppercase tracking-[0.35em] text-burgundy dark:text-white">
+                    Global frame
+                  </h2>
+                  <span className="text-xs font-semibold uppercase tracking-[0.35em] text-burgundy/70 dark:text-white/70">
                     Rank #{latestHeader?.rank.toLocaleString() ?? "–"}
                   </span>
                 </div>
@@ -516,11 +678,8 @@ export default function Explorer() {
                   ) : null}
                 </div>
               </div>
-              {error && (
-                <div className="rounded-2xl border border-pink/30 bg-light-pink/40 p-4 text-sm text-pink">
-                  {error}
-                </div>
-              )}
+
+              {/* Add this new section */}
               <div className="grid gap-6 md:grid-cols-3">
                 <div className="rounded-2xl border border-burgundy/10 bg-white/95 p-6 shadow-[0_26px_70px_-55px_rgba(64,0,27,0.5)] dark:border-white/10 dark:bg-[#211430]/95 dark:text-white">
                   <div className="text-xs font-semibold uppercase tracking-[0.3em] text-burgundy/60 dark:text-white/60">Frame Number</div>
@@ -535,7 +694,7 @@ export default function Explorer() {
                   <div className="text-xs font-semibold uppercase tracking-[0.3em] text-burgundy/60 dark:text-white/60">Prover</div>
                   {latestHeader?.prover && (
                     <div className="mt-2 text-2xl font-semibold text-burgundy dark:text-white font-mono">
-                      <HoverableCopyText text={base64ToHex(latestHeader.prover)}>
+                      <HoverableCopyText text={base64ToHex(latestHeader.prover) ?? latestHeader.prover}>
                         {formatBase64Bytes(latestHeader.prover)}
                       </HoverableCopyText>
                     </div>
@@ -556,7 +715,7 @@ export default function Explorer() {
                   <div className="text-[0.7rem] font-semibold uppercase tracking-[0.35em] text-burgundy/60 dark:text-white/60">Requests root</div>
                   {latestHeader?.requestsRoot && (
                     <div className="text-lg font-semibold font-mono">
-                      <HoverableCopyText text={base64ToHex(latestHeader.requestsRoot)}>
+                      <HoverableCopyText text={base64ToHex(latestHeader.requestsRoot) ?? latestHeader.requestsRoot}>
                         {formatBase64Bytes(latestHeader.requestsRoot)}
                       </HoverableCopyText>
                     </div>
@@ -566,37 +725,73 @@ export default function Explorer() {
                   <div className="text-[0.7rem] font-semibold uppercase tracking-[0.35em] text-burgundy/60 dark:text-white/60">Parent selector</div>
                   {latestHeader?.parentSelector && (
                     <div className="text-lg font-semibold font-mono">
-                      <HoverableCopyText text={base64ToHex(latestHeader.parentSelector)}>
+                      <HoverableCopyText text={base64ToHex(latestHeader.parentSelector) ?? latestHeader.parentSelector}>
                         {formatBase64Bytes(latestHeader.parentSelector)}
                       </HoverableCopyText>
                     </div>
                   )}
                 </div>
               </div>
+            </div>
+          </section>
 
-              {/* Frame feed section */}
-              <div className="mt-10 space-y-4 border-t border-burgundy/10 dark:border-white/10 pt-10">
-                <div className="flex flex-wrap items-center gap-3 text-xs font-semibold uppercase tracking-[0.35em] text-burgundy/70 dark:text-white/70">
-                  <Tag label="Frame feed" />
-                </div>
-                {/* Mobile/Tablet Card Layout */}
-                <div className="space-y-4 md:hidden">
-                  {frameFeedRows.map((row) => (
-                    <FrameDataCard
-                      key={row.frameNumber}
-                      frameNumber={row.frameNumber}
-                      requests={row.requests}
-                      prover={row.prover}
-                      selector={row.selector}
-                      timestamp={row.timestamp}
-                      onNavigate={() => navigate(`/frames/${row.frameNumber}`)}
-                    />
-                  ))}
-                </div>
-                {/* Desktop Table Layout */}
-                <div className="hidden md:block max-h-[520px] overflow-y-auto overflow-x-auto">
+          <section className="mt-14 relative overflow-hidden rounded-3xl border border-burgundy/10 bg-white/95 p-10 text-burgundy shadow-[0_35px_80px_-50px_rgba(57,31,91,0.45)] backdrop-blur-lg dark:border-white/10 dark:bg-[#1a0f27]/95 dark:text-white dark:shadow-[0_40px_90px_-55px_rgba(8,4,20,0.7)]">
+            <div className="pointer-events-none absolute -right-10 -top-10 h-44 w-44 rounded-full bg-pink/40 blur-3xl dark:bg-pink/30" />
+            <div className="pointer-events-none absolute left-6 top-8 h-24 w-24 rounded-full bg-light-purple/80 blur-2xl dark:bg-purple/40" />
+
+            <div className="relative space-y-6">
+              <h2 className="text-lg md:text-3xl font-semibold uppercase tracking-[0.35em] text-burgundy dark:text-white">
+                Frame feed
+              </h2>
+
+              {/* Add this new section */}
+              <div className="flex flex-wrap items-center gap-3">
+                <span className="text-xs font-semibold uppercase tracking-[0.3em] text-burgundy/60 dark:text-white/60">
+                  Showing statistics from the last
+                </span>
+                <select
+                  value={frameCount}
+                  onChange={(e) => setFrameCount(Number(e.target.value))}
+                  className="border border-burgundy/20 dark:border-white/20 bg-white dark:bg-[#1a0f27] px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.3em] text-burgundy dark:text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-burgundy/30 dark:focus:ring-white/30 transition-colors"
+                >
+                  <option value={10}>10</option>
+                  <option value={25}>25</option>
+                  <option value={100}>100</option>
+                </select>
+                <span className="text-xs font-semibold uppercase tracking-[0.3em] text-burgundy/60 dark:text-white/60">
+                  frames
+                </span>
+              </div>
+
+              <FrameFeedFilters
+                filters={frameFilters}
+                onFiltersChange={setFrameFilters}
+              />
+
+              <FrameFeedExport
+                filteredFrames={filteredFrameRows}
+                filters={frameFilters}
+              />
+
+              {/* Mobile/Tablet Card Layout */}
+              <div className="space-y-4 md:hidden">
+                {filteredFrameRows.map((row) => (
+                  <FrameDataCard
+                    key={row.frameNumber}
+                    frameNumber={row.frameNumber}
+                    requests={row.requests}
+                    prover={row.prover}
+                    selector={row.selector}
+                    timestamp={row.timestamp}
+                    onNavigate={() => navigate(`/frames/${row.frameNumber}`)}
+                  />
+                ))}
+              </div>
+              {/* Desktop Table Layout */}
+              <div className="hidden md:block overflow-x-auto">
+                <div className="max-h-[520px] overflow-y-auto">
                   <table className="min-w-full divide-y divide-burgundy/10 text-left text-sm text-burgundy dark:divide-white/10 dark:text-white">
-                    <thead className="text-xs font-semibold uppercase tracking-[0.3em] text-burgundy/60 dark:text-white/60">
+                    <thead className="sticky top-0 z-10 bg-white/95 dark:bg-[#1a0f27]/95 text-xs font-semibold uppercase tracking-[0.3em] text-burgundy/60 dark:text-white/60">
                       <tr>
                         <th className="py-3 pr-6">Frame</th>
                         <th className="py-3 pr-6">Requests</th>
@@ -607,7 +802,7 @@ export default function Explorer() {
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-burgundy/10 dark:divide-white/10">
-                      {frameFeedRows.map((row) => (
+                      {filteredFrameRows.map((row) => (
                         <FrameDataRow
                           key={row.frameNumber}
                           frameNumber={row.frameNumber}
@@ -661,66 +856,50 @@ export default function Explorer() {
             </div>
           </section> */}
 
-          <section className="mt-14 space-y-4">
-            <div className="flex flex-wrap items-center justify-between gap-3">
-              <h2 className="text-3xl font-semibold text-burgundy dark:text-white">Peer directory</h2>
-              <div className="text-sm uppercase tracking-[0.3em] text-burgundy/60 dark:text-white/60">{formattedPeerCount} peers</div>
-            </div>
-            <div className="rounded-3xl border border-burgundy/10 bg-white/95 p-6 shadow-[0_32px_80px_-55px_rgba(57,31,91,0.45)] dark:border-white/10 dark:bg-[#1a0f27]/95 dark:shadow-[0_36px_90px_-55px_rgba(0,0,0,0.65)]">
-              <div className="max-h-[520px] overflow-y-auto pr-1">
-                <div className="space-y-4 md:hidden">
-                  {peerRows.map((peer) => (
-                    <PeerCard key={peer.peerId} peer={peer} />
-                  ))}
-                </div>
-                <div className="hidden md:block max-h-[520px] overflow-y-auto overflow-x-auto relative">
-                  <table className="relative min-w-full divide-y divide-burgundy/10 text-left text-sm text-burgundy dark:divide-white/10 dark:text-white">
-                    <thead className="sticky top-0 bg-white/95 dark:bg-[#1a0f27]/95 text-xs font-semibold uppercase tracking-[0.25em] text-burgundy/60 dark:text-white/60 z-20">
-                      <tr>
-                        <th className="py-3 pr-6">Peer</th>
-                        <th className="py-3 pr-6">Version</th>
-                        <th className="py-3 pr-10 text-right">Pubsub addresses</th>
-                        <th className="py-3 pr-10 text-right">Stream addresses</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-burgundy/10 dark:divide-white/10">
-                      {peerRows.map((peer) => (
-                        <tr key={peer.peerId}>
-                          <td className="py-3 pr-6 font-mono text-xs whitespace-nowrap">
-                            <HoverableCopyText text={peer.peerId}>{peer.peerId}</HoverableCopyText>
-                          </td>
-                          <td className="py-3 pr-6 text-xs">{peer.version}</td>
-                          <td className="py-3 pr-6 text-xs text-right">
-                            {peer.pubsub.length
-                              ? peer.pubsub.map((addr) => (
-                                  <div key={addr} className="break-all">
-                                    <HoverableCopyText text={addr}>{addr}</HoverableCopyText>
-                                  </div>
-                                ))
-                              : "–"}
-                          </td>
-                          <td className="py-3 pr-6 text-xs text-right">
-                            {peer.stream.length
-                              ? peer.stream.map((addr) => (
-                                  <div key={addr} className="break-all">
-                                    <HoverableCopyText text={addr}>{addr}</HoverableCopyText>
-                                  </div>
-                                ))
-                              : "–"}
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
+          <section className="mt-14 relative overflow-hidden rounded-3xl border border-burgundy/10 bg-white/95 p-10 text-burgundy shadow-[0_35px_80px_-50px_rgba(57,31,91,0.45)] backdrop-blur-lg dark:border-white/10 dark:bg-[#1a0f27]/95 dark:text-white dark:shadow-[0_40px_90px_-55px_rgba(8,4,20,0.7)]">
+            <div className="pointer-events-none absolute -right-10 -top-10 h-44 w-44 rounded-full bg-pink/40 blur-3xl dark:bg-pink/30" />
+            <div className="pointer-events-none absolute left-6 top-8 h-24 w-24 rounded-full bg-light-purple/80 blur-2xl dark:bg-purple/40" />
+
+            <div className="relative space-y-6">
+              <div className="flex flex-wrap items-start justify-between gap-3">
+                <h2 className="text-lg md:text-3xl font-semibold uppercase tracking-[0.35em] text-burgundy dark:text-white">
+                  Peer directory
+                </h2>
+                <div className="text-xs font-semibold uppercase tracking-[0.35em] text-burgundy/70 dark:text-white/70">
+                  {formattedPeerCount} peers
                 </div>
               </div>
+
+              <PeerDirectoryFilters
+                filters={filters}
+                onFiltersChange={setFilters}
+                uniqueVersions={uniqueVersions}
+                versionCounts={versionCounts}
+                uniqueCapabilityCounts={uniqueCapabilityCounts}
+                capabilityCountCounts={capabilityCountCounts}
+                pubsubProtocolCounts={pubsubProtocolCounts}
+                streamProtocolCounts={streamProtocolCounts}
+              />
+
+              <PeerDirectoryExport
+                filteredPeers={filteredPeerRows}
+                allPeerRecords={peers}
+                filters={filters}
+              />
+
+              <PeerDirectory peers={filteredPeerRows} />
             </div>
           </section>
 
-          <section className="mt-14">
-            <div className="rounded-3xl border border-burgundy/10 bg-white/95 p-6 shadow-[0_32px_80px_-55px_rgba(57,31,91,0.45)] dark:border-white/10 dark:bg-[#1a0f27]/95 dark:shadow-[0_36px_90px_-55px_rgba(0,0,0,0.65)]">
-              <h2 className="text-2xl font-semibold text-burgundy dark:text-white">Consensus gossip</h2>
-              <div className="mt-4 space-y-4">
+          <section className="mt-14 relative overflow-hidden rounded-3xl border border-burgundy/10 bg-white/95 p-10 text-burgundy shadow-[0_35px_80px_-50px_rgba(57,31,91,0.45)] backdrop-blur-lg dark:border-white/10 dark:bg-[#1a0f27]/95 dark:text-white dark:shadow-[0_40px_90px_-55px_rgba(8,4,20,0.7)]">
+            <div className="pointer-events-none absolute -right-10 -top-10 h-44 w-44 rounded-full bg-pink/40 blur-3xl dark:bg-pink/30" />
+            <div className="pointer-events-none absolute left-6 top-8 h-24 w-24 rounded-full bg-light-purple/80 blur-2xl dark:bg-purple/40" />
+
+            <div className="relative space-y-6">
+              <h2 className="text-lg md:text-3xl font-semibold uppercase tracking-[0.35em] text-burgundy dark:text-white">
+                Consensus gossip
+              </h2>
+              <div className="space-y-4">
                 {messages.map((message) => {
                   const isExpanded = expandedMessages.has(message.seqno);
                   return (
@@ -751,23 +930,3 @@ export default function Explorer() {
   );
 }
 
-function formatPeerVersion(peer: PeerRecord) {
-  const versionBytes = Array.from(peer.version ?? "").map((ch) => ch.charCodeAt(0));
-  const versionCore = versionBytes.length ? versionBytes.join(".") : "0";
-  const patchNumber = Number.isNaN(Number.parseInt(peer.patch_number, 16))
-    ? 0
-    : Number.parseInt(peer.patch_number, 16);
-  return `${versionCore}.${patchNumber}`;
-}
-
-function formatPeerRows(peers: PeerRecord[]) {
-  return peers.map((peer) => {
-    const reach = peer.reachability?.[0];
-    return {
-      peerId: peer.peer_id,
-      version: formatPeerVersion(peer),
-      pubsub: reach?.pubsub_multiaddrs ?? [],
-      stream: reach?.stream_multiaddrs ?? [],
-    };
-  });
-}

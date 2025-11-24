@@ -171,6 +171,59 @@ h6, nav {
 }
 
 /* -------------------------------------------------- */
+/* Scrollbar Styling */
+/* -------------------------------------------------- */
+
+/* Global scrollbar styling for all browsers */
+* {
+  /* Firefox */
+  scrollbar-width: thin;
+  scrollbar-color: rgba(64, 0, 27, 0.3) transparent;
+}
+
+/* Webkit browsers (Chrome, Safari, Edge) */
+*::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+*::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+*::-webkit-scrollbar-thumb {
+  background-color: rgba(64, 0, 27, 0.3);
+  border-radius: 10px;
+  border: 2px solid transparent;
+  background-clip: padding-box;
+  transition: background-color 0.2s ease;
+}
+
+*::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(64, 0, 27, 0.5);
+}
+
+*::-webkit-scrollbar-corner {
+  background: transparent;
+}
+
+/* Dark mode scrollbar */
+@media (prefers-color-scheme: dark) {
+  * {
+    /* Firefox dark mode */
+    scrollbar-color: rgba(255, 5, 109, 0.4) transparent;
+  }
+
+  *::-webkit-scrollbar-thumb {
+    background-color: rgba(255, 5, 109, 0.4);
+  }
+
+  *::-webkit-scrollbar-thumb:hover {
+    background-color: rgba(255, 5, 109, 0.6);
+  }
+}
+
+/* -------------------------------------------------- */
 /* Utilities (spacing, layout, gradients, etc.) */
 /* -------------------------------------------------- */
 
@@ -370,6 +423,52 @@ h6, nav {
   /*mainly used in Bridge.tsx*/
   .input-base {
     @apply w-full border border-slate-600/30 px-4 py-2 text-sm mb-4 rounded-xl focus:outline-none focus:ring-4 focus:ring-pink/20 focus:ring-offset-0 transition-colors;
+  }
+
+  /* Number input spinner styling */
+  input[type="number"] {
+    -moz-appearance: textfield;
+  }
+
+  input[type="number"]::-webkit-inner-spin-button,
+  input[type="number"]::-webkit-outer-spin-button {
+    opacity: 1;
+    height: 100%;
+    width: 20px;
+    cursor: pointer;
+    padding: 0 4px;
+  }
+
+  input[type="number"]::-webkit-inner-spin-button {
+    background: transparent;
+    border-left: 1px solid rgba(64, 0, 27, 0.2);
+    margin-left: 4px;
+  }
+
+  input[type="number"]::-webkit-outer-spin-button {
+    background: transparent;
+  }
+
+  input[type="number"]:hover::-webkit-inner-spin-button {
+    border-left-color: rgba(64, 0, 27, 0.4);
+  }
+
+  input[type="number"]:focus::-webkit-inner-spin-button {
+    border-left-color: rgba(64, 0, 27, 0.6);
+  }
+
+  @media (prefers-color-scheme: dark) {
+    input[type="number"]::-webkit-inner-spin-button {
+      border-left-color: rgba(255, 255, 255, 0.2);
+    }
+
+    input[type="number"]:hover::-webkit-inner-spin-button {
+      border-left-color: rgba(255, 255, 255, 0.4);
+    }
+
+    input[type="number"]:focus::-webkit-inner-spin-button {
+      border-left-color: rgba(255, 255, 255, 0.6);
+    }
   }
 }
 
