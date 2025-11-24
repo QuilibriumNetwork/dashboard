@@ -13,6 +13,40 @@ import Spinner from "@/components/ui/Spinner";
 import Icon from "@/components/ui/Icons";
 import ChevronDown from "@/components/ui/ChevronDown";
 
+/**
+ * Recursively converts base64 strings in an object to hex format (with 0x prefix)
+ */
+function convertBase64ToHex(obj: unknown): unknown {
+  if (obj == null) {
+    return obj;
+  }
+
+  if (typeof obj === "string") {
+    // Check if it looks like base64 (matches the pattern from formatMaybeBytes)
+    if (/^[A-Za-z0-9+/=_-]+$/.test(obj) && obj.length > 16) {
+      const hex = base64ToHex(obj);
+      if (hex) {
+        return `0x${hex}`;
+      }
+    }
+    return obj;
+  }
+
+  if (Array.isArray(obj)) {
+    return obj.map(convertBase64ToHex);
+  }
+
+  if (typeof obj === "object") {
+    const result: Record<string, unknown> = {};
+    for (const [key, value] of Object.entries(obj)) {
+      result[key] = convertBase64ToHex(value);
+    }
+    return result;
+  }
+
+  return obj;
+}
+
 function CopyFrameDataButton() {
   const [copied, setCopied] = useState(false);
 
@@ -126,7 +160,8 @@ export default function FrameDetail() {
 
   const frameDataJson = useMemo(() => {
     if (!frame) return '';
-    return JSON.stringify(frame, null, 2);
+    const convertedFrame = convertBase64ToHex(frame) as GlobalFrame;
+    return JSON.stringify(convertedFrame, null, 2);
   }, [frame]);
 
   if (loading) {
@@ -191,20 +226,27 @@ export default function FrameDetail() {
             </div>
             <div className="rounded-2xl border border-burgundy/10 bg-white/90 p-5 dark:border-white/10 dark:bg-[#211430]">
               <div className="text-xs font-semibold uppercase tracking-[0.3em] text-burgundy/60 dark:text-white/60">Prover</div>
-              {header?.prover && (
-                <div className="mt-2 font-mono text-lg">
-                  <HoverableCopyText text={base64ToHex(header.prover)}>
-                    {formatBase64Bytes(header.prover)}
-                  </HoverableCopyText>
-                </div>
-              )}
+              {header?.prover && (() => {
+                const displayValue = formatBase64Bytes(header.prover);
+                const copyValue = base64ToHex(header.prover);
+                const finalCopyValue = displayValue.startsWith("0x") && copyValue && !copyValue.startsWith("0x")
+                  ? `0x${copyValue}`
+                  : copyValue;
+                return (
+                  <div className="mt-2 font-mono text-lg">
+                    <HoverableCopyText text={finalCopyValue ?? ""}>
+                      {displayValue}
+                    </HoverableCopyText>
+                  </div>
+                );
+              })()}
             </div>
           </div>
           <div className="mt-6 grid gap-4 md:grid-cols-2">
-            <DetailCard label="Output" value={formatBase64Bytes(header?.output)} copyValue={base64ToHex(header?.output)} />
-            <DetailCard label="Parent selector" value={formatBase64Bytes(header?.parentSelector)} copyValue={base64ToHex(header?.parentSelector)} />
-            <DetailCard label="Requests root" value={formatBase64Bytes(header?.requestsRoot)} copyValue={base64ToHex(header?.requestsRoot)} />
-            <DetailCard label="Prover tree commitment" value={formatBase64Bytes(header?.proverTreeCommitment)} copyValue={base64ToHex(header?.proverTreeCommitment)} />
+            <DetailCard label="Output" value={formatBase64Bytes(header?.output)} copyValue={base64ToHex(header?.output ?? "") ?? undefined} />
+            <DetailCard label="Parent selector" value={formatBase64Bytes(header?.parentSelector)} copyValue={base64ToHex(header?.parentSelector ?? "") ?? undefined} />
+            <DetailCard label="Requests root" value={formatBase64Bytes(header?.requestsRoot)} copyValue={base64ToHex(header?.requestsRoot ?? "") ?? undefined} />
+            <DetailCard label="Prover tree commitment" value={formatBase64Bytes(header?.proverTreeCommitment)} copyValue={base64ToHex(header?.proverTreeCommitment ?? "") ?? undefined} />
           </div>
           <div className="mt-6 grid gap-4 md:grid-cols-2">
             <DetailCard label="Global commitments" value={`${header?.globalCommitments?.length ?? 0} entries`} mono={false} />
@@ -268,10 +310,17 @@ function DetailCard({
   mono?: boolean;
   copyValue?: string;
 }) {
+  // Format copyValue: if displayed value has 0x prefix, ensure copyValue also has it
+  const finalCopyValue = copyValue
+    ? (value.startsWith("0x") && !copyValue.startsWith("0x")
+        ? `0x${copyValue}`
+        : copyValue)
+    : undefined;
+
   const displayValue = (
     <div className={`mt-2 text-base font-semibold ${mono ? "font-mono" : ""}`}>
-      {copyValue ? (
-        <HoverableCopyText text={copyValue}>
+      {finalCopyValue ? (
+        <HoverableCopyText text={finalCopyValue}>
           {value}
         </HoverableCopyText>
       ) : (
