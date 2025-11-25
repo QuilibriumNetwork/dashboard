@@ -9,15 +9,19 @@
       // Redirect to index.html with the current path preserved
       // This works with the URL rewriting script in index.html
       // Handles all routes: /peers/:peerId, /frames/:frameNumber, /frames-analytics, etc.
-      var pathSegmentsToKeep = 0;
-      var l = window.location;
-      l.replace(
-        l.protocol + '//' + l.hostname + (l.port ? ':' + l.port : '') +
-        l.pathname.split('/').slice(0, 1 + pathSegmentsToKeep).join('/') + '/?/' +
-        l.pathname.slice(1).split('/').slice(pathSegmentsToKeep).join('/').replace(/&/g, '~and~') +
-        (l.search ? '&' + l.search.slice(1).replace(/&/g, '~and~') : '') +
-        l.hash
-      );
+      (function() {
+        var pathSegmentsToKeep = 0;
+        var l = window.location;
+        var path = l.pathname.slice(1).split('/').slice(pathSegmentsToKeep).join('/').replace(/&/g, '~and~');
+        var search = l.search ? '&' + l.search.slice(1).replace(/&/g, '~and~') : '';
+        var hash = l.hash;
+
+        // Redirect to root with path in query string
+        l.replace(
+          l.protocol + '//' + l.hostname + (l.port ? ':' + l.port : '') +
+          '/?/' + path + search + hash
+        );
+      })();
     </script>
   </head>
   <body>

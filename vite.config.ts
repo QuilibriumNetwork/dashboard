@@ -5,7 +5,7 @@ import { visualizer } from 'rollup-plugin-visualizer';
 
 export default defineConfig({
   root: '.', // your actual root folder
-  base: './', // relative paths to assets
+  base: '/', // absolute paths from root for GitHub Pages
   plugins: [react(), visualizer({ filename: 'dist/report.html', open: true })],
   resolve: {
     alias: {
