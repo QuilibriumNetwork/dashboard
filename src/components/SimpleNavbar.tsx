@@ -1,8 +1,11 @@
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import Logo from "@/components/ui/Logo";
 import { ThemeToggle } from "@/components/ThemeToggle";
 
 export function SimpleNavbar() {
+  const location = useLocation();
+  const isAnalyticsActive = location.pathname === "/frames-analytics";
+
   return (
     <nav className="sticky top-0 z-50 border-b border-burgundy/10 bg-white/95 backdrop-blur dark:border-white/10 dark:bg-[#160c21]/90">
       <div className="container mx-auto px-4">
@@ -23,6 +26,16 @@ export function SimpleNavbar() {
               </span>
               Operational
             </span>
+            <Link
+              to="/frames-analytics"
+              className={`text-sm font-semibold transition-colors ${
+                isAnalyticsActive
+                  ? "text-purple dark:text-light-blue"
+                  : "text-burgundy hover:text-purple dark:text-white dark:hover:text-light-blue"
+              }`}
+            >
+              Analytics
+            </Link>
             <a
               href="https://status.quilibrium.com"
               className="text-sm font-semibold text-burgundy transition-colors hover:text-purple dark:text-white dark:hover:text-light-blue"

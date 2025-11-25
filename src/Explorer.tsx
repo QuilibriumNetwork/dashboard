@@ -1,6 +1,6 @@
-import { useEffect, useMemo, useState, useRef } from "react";
+import React, { useEffect, useMemo, useState, useRef, useCallback } from "react";
 import { Helmet } from "react-helmet-async";
-import { useNavigate, useSearchParams, useLocation } from "react-router-dom";
+import { useNavigate, useSearchParams, useLocation, Link } from "react-router-dom";
 
 import {
   CertifiedProposal,
@@ -534,7 +534,8 @@ export default function Explorer() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [expandedMessages, setExpandedMessages] = useState<Set<string>>(new Set());
-  const [frameCount, setFrameCount] = useState<number>(10); // Add this line
+  const [frameCount, setFrameCount] = useState<number>(10);
+  const frameCountRef = useRef<number>(10);
 
   const [frameQuery, setFrameQuery] = useState("");
   const [frameLookup, setFrameLookup] = useState<FrameSearchState>({});
@@ -545,6 +546,34 @@ export default function Explorer() {
   const [hypergraphQuery, setHypergraphQuery] = useState("");
   const [hypergraphLookup, setHypergraphLookup] = useState<HypergraphSearchState>({});
 
+  // Function to hydrate frame feed
+  const hydrateFrameFeed = useCallback(async (baseFrame: GlobalFrame, count: number) => {
+    const latestNumber = baseFrame.header.frameNumber;
+    const counts = Array.from({ length: count }, (_, idx) => latestNumber - idx).filter((n) => n > 0);
+    const frames: GlobalFrame[] = [];
+    console.log(`Starting to load ${count} frames, starting from ${latestNumber}`);
+    for (const num of counts) {
+      try {
+        if (num === latestNumber) {
+          frames.push(baseFrame);
+        } else {
+          const f = await explorerApi.getFrame(num);
+          frames.push(f);
+        }
+      } catch (err) {
+        console.warn("Failed to load frame", num, err);
+      }
+    }
+    console.log(`Loaded ${frames.length} frames (expected ${count}), setting frameFeed state`);
+    // Use a function form to ensure we're setting the latest state
+    setFrameFeed(() => {
+      const newFrames = [...frames];
+      console.log(`Setting frameFeed with ${newFrames.length} frames`);
+      return newFrames;
+    });
+  }, []);
+
+  // Initial load and periodic refresh
   useEffect(() => {
     let mounted = true;
     async function load() {
@@ -564,7 +593,7 @@ export default function Explorer() {
         setCertified(proposal);
         setMessages(gossip);
         setPeers(peerList);
-        await hydrateFrameFeed(frame, frameCount); // Update this line
+        // Don't call hydrateFrameFeed here - let the frameCount effect handle it
       } catch (err) {
         if (mounted) {
           setError(err instanceof Error ? err.message : "Failed to load explorer data");
@@ -576,32 +605,58 @@ export default function Explorer() {
       }
     }
 
-    async function hydrateFrameFeed(baseFrame: GlobalFrame, count: number) { // Update this line
-      const latestNumber = baseFrame.header.frameNumber;
-      const counts = Array.from({ length: count }, (_, idx) => latestNumber - idx).filter((n) => n > 0); // Update this line
-      const frames: GlobalFrame[] = [];
-      for (const num of counts) {
-        try {
-          if (num === latestNumber) {
-            frames.push(baseFrame);
-          } else {
-            const f = await explorerApi.getFrame(num);
-            frames.push(f);
-          }
-        } catch (err) {
-          console.warn("Failed to load frame", num, err);
-        }
-      }
-      setFrameFeed(frames);
-    }
-
     load();
     const interval = window.setInterval(load, 30_000);
     return () => {
       mounted = false;
       window.clearInterval(interval);
     };
-  }, [frameCount]); // Add frameCount to dependencies
+  }, []); // Only run on mount
+
+  // Update frame feed when frameCount changes (using existing latestFrame)
+  useEffect(() => {
+    if (latestFrame) {
+      console.log(`useEffect triggered: frameCount=${frameCount}, latestFrame=${latestFrame.header.frameNumber}`);
+      // Clear old data immediately to show loading state
+      setFrameFeed([]);
+      setLoading(true);
+      hydrateFrameFeed(latestFrame, frameCount).then(() => {
+        console.log(`hydrateFrameFeed completed for frameCount=${frameCount}`);
+        setLoading(false);
+      }).catch((err) => {
+        console.error('Error loading frames:', err);
+        setLoading(false);
+      });
+    }
+  }, [frameCount, latestFrame, hydrateFrameFeed]);
+
+  // Update ref when frameCount changes
+  useEffect(() => {
+    frameCountRef.current = frameCount;
+  }, [frameCount]);
+
+  // Add native event listeners for frame count buttons (using capture phase to intercept before other handlers)
+  useEffect(() => {
+    const handleClick = (e: Event) => {
+      const target = e.target as HTMLElement;
+      const button = target.closest('button[data-count]');
+      if (button) {
+        const count = parseInt(button.getAttribute('data-count') || '10', 10);
+        e.preventDefault();
+        e.stopPropagation();
+        console.log(`Button clicked: setting frameCount from ${frameCountRef.current} to ${count}`);
+        setFrameCount(count);
+      }
+    };
+
+    const container = document.getElementById('frame-count-selector');
+    if (container) {
+      container.addEventListener('click', handleClick, true); // Use capture phase
+      return () => {
+        container.removeEventListener('click', handleClick, true);
+      };
+    }
+  }, []);
 
   // Handle anchor scrolling when hash is present
   useEffect(() => {
@@ -1085,24 +1140,45 @@ export default function Explorer() {
             <div className="pointer-events-none absolute left-6 top-8 h-24 w-24 rounded-full bg-light-purple/80 blur-2xl dark:bg-purple/40" />
 
             <div className="relative space-y-6">
-              <h2 className="text-lg md:text-3xl font-semibold uppercase tracking-[0.35em] text-burgundy dark:text-white">
-                Frame feed
-              </h2>
+              <div className="flex flex-wrap items-center justify-between gap-4">
+                <h2 className="text-lg md:text-3xl font-semibold uppercase tracking-[0.35em] text-burgundy dark:text-white">
+                  Frame feed
+                </h2>
+                <Link
+                  to="/frames-analytics"
+                  className="text-xs font-semibold uppercase tracking-[0.3em] text-burgundy/70 hover:text-burgundy dark:text-white/70 dark:hover:text-white transition-colors flex items-center gap-2"
+                >
+                  <span>View Analytics</span>
+                  <Arrow className="w-4 h-4" />
+                </Link>
+              </div>
 
               {/* Add this new section */}
               <div className="flex flex-wrap items-center gap-3">
                 <span className="text-xs font-semibold uppercase tracking-[0.3em] text-burgundy/60 dark:text-white/60">
                   Showing statistics from the last
                 </span>
-                <select
-                  value={frameCount}
-                  onChange={(e) => setFrameCount(Number(e.target.value))}
-                  className="border border-burgundy/20 dark:border-white/20 bg-white dark:bg-[#1a0f27] px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.3em] text-burgundy dark:text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-burgundy/30 dark:focus:ring-white/30 transition-colors"
-                >
-                  <option value={10}>10</option>
-                  <option value={25}>25</option>
-                  <option value={100}>100</option>
-                </select>
+                <div className="flex items-center gap-2" id="frame-count-selector">
+                  {[10, 25, 50, 100, 250, 500, 1000].map((count, index) => (
+                    <React.Fragment key={count}>
+                      <button
+                        type="button"
+                        data-count={count}
+                        className={`text-xs font-semibold uppercase tracking-[0.3em] transition-colors cursor-pointer ${
+                          frameCount === count
+                            ? "text-burgundy dark:text-white font-bold"
+                            : "text-burgundy/60 dark:text-white/60 hover:text-burgundy dark:hover:text-white"
+                        }`}
+                        style={{ pointerEvents: 'auto', zIndex: 10 }}
+                      >
+                        {count.toLocaleString()}
+                      </button>
+                      {index < 6 && (
+                        <span className="mx-1 text-burgundy/40 dark:text-white/40">|</span>
+                      )}
+                    </React.Fragment>
+                  ))}
+                </div>
                 <span className="text-xs font-semibold uppercase tracking-[0.3em] text-burgundy/60 dark:text-white/60">
                   frames
                 </span>

@@ -12,6 +12,7 @@ const NotFound = lazy(() => import("@/404"));
 const Explorer = lazy(() => import("@/Explorer"));
 const FrameDetail = lazy(() => import("@/FrameDetail"));
 const PeerDetail = lazy(() => import("@/PeerDetail"));
+const FramesAnalytics = lazy(() => import("@/FramesAnalytics"));
 
 const withSuspense = (
   Component: React.LazyExoticComponent<() => JSX.Element>
@@ -37,6 +38,7 @@ export default function App() {
           <Routes>
             <Route path="/" element={withSuspense(Explorer)} />
             <Route path="/frames/:frameNumber" element={withSuspense(FrameDetail)} />
+            <Route path="/frames-analytics" element={withSuspense(FramesAnalytics)} />
             <Route path="/peers/:peerId" element={withSuspense(PeerDetail)} />
             <Route path="*" element={withSuspense(NotFound)} />
           </Routes>
