@@ -564,7 +564,7 @@ export default function Explorer() {
     // Step 1: Check cache for frames
     const cachedFramesMap = await getFramesByNumbers(neededFrameNumbers);
     const cachedFrames = Array.from(cachedFramesMap.values()).sort(
-      (a, b) => a.header.frameNumber - b.header.frameNumber
+      (a, b) => b.header.frameNumber - a.header.frameNumber
     );
     const cachedFrameNumbers = new Set(cachedFrames.map((f) => f.header.frameNumber));
 
@@ -590,7 +590,7 @@ export default function Explorer() {
     let lastBatchSavePromise: Promise<void> | null = null;
 
     // Sort to fetch in order
-    missingFrameNumbers.sort((a, b) => a - b);
+    missingFrameNumbers.sort((a, b) => b - a);
 
     // Fetch frames in parallel batches
     for (let i = 0; i < missingFrameNumbers.length; i += BATCH_FETCH_SIZE) {
@@ -642,7 +642,7 @@ export default function Explorer() {
       }
 
       // Update frame feed after each batch
-      const sortedFrames = [...framesToLoad].sort((a, b) => a.header.frameNumber - b.header.frameNumber);
+      const sortedFrames = [...framesToLoad].sort((a, b) => b.header.frameNumber - a.header.frameNumber);
       setFrameFeed(sortedFrames);
     }
 
@@ -658,7 +658,7 @@ export default function Explorer() {
     // Ensure all frames are saved to cache
     const finalFrames = framesToLoad
       .filter((f) => f.header.frameNumber >= startNumber && f.header.frameNumber <= latestNumber)
-      .sort((a, b) => a.header.frameNumber - b.header.frameNumber);
+      .sort((a, b) => b.header.frameNumber - a.header.frameNumber);
 
     if (finalFrames.length > cachedFrames.length) {
       try {
