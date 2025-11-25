@@ -8,6 +8,7 @@
       // GitHub Pages 404.html workaround for SPA routing
       // Redirect to index.html with the current path preserved
       // This works with the URL rewriting script in index.html
+      // Handles all routes: /peers/:peerId, /frames/:frameNumber, /frames-analytics, etc.
       var pathSegmentsToKeep = 0;
       var l = window.location;
       l.replace(
