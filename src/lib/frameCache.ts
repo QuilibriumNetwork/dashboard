@@ -433,3 +433,99 @@ export async function clearFrameCache(): Promise<void> {
     console.warn("Failed to clear frame cache:", err);
   }
 }
+
+/**
+ * Estimate storage usage of frame cache
+ */
+export async function estimateStorageUsage(): Promise<{ sizeBytes: number; frameCount: number }> {
+  try {
+    const db = await openDatabase();
+    const transaction = db.transaction([FRAMES_STORE], "readonly");
+    const store = transaction.objectStore(FRAMES_STORE);
+    const request = store.getAll();
+
+    return new Promise((resolve, reject) => {
+      request.onsuccess = () => {
+        const frames = request.result as Array<{ frameNumber: number; frame: GlobalFrame }>;
+        let totalSize = 0;
+
+        // Estimate size by serializing each frame
+        frames.forEach((item) => {
+          try {
+            const serialized = JSON.stringify(item);
+            // Each character in UTF-16 is 2 bytes, but JSON uses UTF-8 which is 1 byte per ASCII char
+            // This is an approximation
+            totalSize += new Blob([serialized]).size;
+          } catch (err) {
+            // If serialization fails, estimate based on frame number
+            totalSize += 10000; // Rough estimate per frame
+          }
+        });
+
+        resolve({
+          sizeBytes: totalSize,
+          frameCount: frames.length,
+        });
+      };
+
+      request.onerror = () => {
+        reject(request.error);
+      };
+    });
+  } catch (err) {
+    console.warn("Failed to estimate storage usage:", err);
+    return { sizeBytes: 0, frameCount: 0 };
+  }
+}
+
+/**
+ * Delete frames, keeping only the last N frames
+ */
+export async function deleteFramesKeepingLast(keepCount: number): Promise<void> {
+  try {
+    const cache = await getCachedFrames();
+    if (!cache || cache.frames.size === 0) {
+      return;
+    }
+
+    const frameNumbers = Array.from(cache.frames.keys()).sort((a, b) => b - a); // Descending
+    const framesToKeep = frameNumbers.slice(0, keepCount);
+    const framesToDelete = frameNumbers.slice(keepCount);
+
+    if (framesToDelete.length === 0) {
+      return;
+    }
+
+    const db = await openDatabase();
+    const transaction = db.transaction([FRAMES_STORE], "readwrite");
+    const store = transaction.objectStore(FRAMES_STORE);
+
+    // Delete frames
+    await Promise.all(
+      framesToDelete.map(
+        (frameNumber) =>
+          new Promise<void>((resolve, reject) => {
+            const request = store.delete(frameNumber);
+            request.onsuccess = () => resolve();
+            request.onerror = () => reject(request.error);
+          })
+      )
+    );
+
+    // Update metadata
+    const remainingFrames = framesToKeep.sort((a, b) => a - b);
+    const latestFrameNumber = remainingFrames.length > 0 ? Math.max(...remainingFrames) : 0;
+
+    const metadata: CacheMetadata = {
+      version: 1,
+      latestFrameNumber,
+      cachedAt: Date.now(),
+      frameNumbers: remainingFrames,
+    };
+
+    await saveCacheMetadata(metadata);
+  } catch (err) {
+    console.warn("Failed to delete frames:", err);
+    throw err;
+  }
+}

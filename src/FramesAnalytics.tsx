@@ -22,6 +22,8 @@ import {
 import { GlobalFrame, explorerApi } from "@/lib/api";
 import { coerceTimestamp } from "@/lib/format";
 import Spinner from "@/components/ui/Spinner";
+import Modal from "@/components/ui/Modal";
+import Callout from "@/components/ui/Callout";
 import { useTheme } from "@/components/helpers/ThemeContext";
 import {
   getCachedFramesInRange,
@@ -31,6 +33,9 @@ import {
   isCacheStale,
   getCachedFrames,
   getFramesByNumbers,
+  estimateStorageUsage,
+  deleteFramesKeepingLast,
+  clearFrameCache,
 } from "@/lib/frameCache";
 import {
   getCachedAnalytics,
@@ -104,6 +109,9 @@ export default function FramesAnalytics() {
     avgSpacing: number;
     frameCount: number;
   }> | null>(null);
+  const [storageUsage, setStorageUsage] = useState<{ sizeBytes: number; frameCount: number } | null>(null);
+  const [showClearModal, setShowClearModal] = useState(false);
+  const [isClearing, setIsClearing] = useState(false);
 
   // Theme-aware colors
   const isDark = theme === "dark";
@@ -320,7 +328,8 @@ export default function FramesAnalytics() {
         }
 
         // Keep progress bar visible if we're still calculating analytics for large datasets
-        if (!shouldShowProgress) {
+        // Don't hide it here - let the analytics calculation control visibility
+        if (!shouldShowProgress && !calculatingAnalytics) {
           setShowProgressBar(false);
         }
       } catch (err) {
@@ -379,6 +388,21 @@ export default function FramesAnalytics() {
         return;
       }
 
+      // If we have fewer frames than requested, check if we're still loading
+      // If loading is complete and we have fewer frames, proceed with what we have
+      // (some frames may be missing/unavailable)
+      if (frames.length < frameCount && loading) {
+        // Still loading - wait for more frames
+        console.log(`Waiting for more frames: have ${frames.length}, need ${frameCount}, still loading`);
+        return;
+      }
+
+      // If we have fewer frames than requested but loading is complete,
+      // proceed with what we have (some frames may be missing)
+      if (frames.length < frameCount && !loading) {
+        console.log(`Proceeding with ${frames.length} frames (requested ${frameCount}). Some frames may be missing.`);
+      }
+
       const latestFrameNumber = frames[frames.length - 1]?.header.frameNumber;
       if (!latestFrameNumber) return;
 
@@ -387,8 +411,8 @@ export default function FramesAnalytics() {
       // Try to load from IndexedDB cache first
       try {
         const cached = await getCachedAnalytics(frameCount, latestFrameNumber);
-        // Only use cache if frameCount matches exactly AND we have the expected number of frames
-        // Also check that cached data length matches the actual frames we have
+        // Only use cache if frameCount matches exactly AND cached data length matches the actual frames we have
+        // This handles cases where we have fewer frames than requested (some frames may be missing)
         if (cached && mounted && cached.frameCount === frameCount && cached.analyticsData.length === frames.length) {
           console.log(`Using cached analytics for frameCount=${frameCount}, cached length=${cached.analyticsData.length}, frames.length=${frames.length}`);
           setCachedAnalyticsData(cached.analyticsData);
@@ -402,8 +426,13 @@ export default function FramesAnalytics() {
           }
           setShowProgressBar(false);
           return;
-        } else {
-          console.log(`Cache miss or mismatch: cached=${!!cached}, cached.frameCount=${cached?.frameCount}, cached.length=${cached?.analyticsData?.length}, frames.length=${frames.length}, expected=${frameCount}`);
+        } else if (cached && mounted) {
+          // Cache exists but doesn't match - log why
+          if (cached.frameCount !== frameCount) {
+            console.log(`Cache mismatch: cached.frameCount=${cached.frameCount}, requested=${frameCount}`);
+          } else if (cached.analyticsData.length !== frames.length) {
+            console.log(`Cache mismatch: cached.length=${cached.analyticsData.length}, frames.length=${frames.length} (requested ${frameCount})`);
+          }
         }
       } catch (err) {
         console.warn("Failed to load analytics cache:", err);
@@ -415,7 +444,11 @@ export default function FramesAnalytics() {
         setCalculatingAnalytics(true);
         if (shouldShowProgress) {
           setShowProgressBar(true);
+          // Reset progress to show we're starting analytics calculation
           setProgress({ current: 0, total: frames.length, phase: "analytics" });
+        } else {
+          // Even if we don't show progress bar, still set phase for UI consistency
+          setProgress(prev => ({ ...prev, phase: "analytics" }));
         }
       }
 
@@ -424,27 +457,29 @@ export default function FramesAnalytics() {
         if (!mounted) return;
 
         // Update progress during calculation for large datasets
-        const updateProgress = (current: number) => {
+        // Track progress through 5 main steps of analytics calculation
+        const totalSteps = 5;
+        const updateProgress = (step: number) => {
           if (mounted && shouldShowProgress) {
-            setProgress({ current, total: frames.length, phase: "analytics" });
+            setProgress({
+              current: Math.floor((step / totalSteps) * frames.length),
+              total: frames.length,
+              phase: "analytics"
+            });
           }
         };
 
-        // Process frames in chunks for progress updates
-        const chunkSize = Math.max(1, Math.floor(frames.length / 10));
-        let processedCount = 0;
-
+        // Step 1: Process frames for analytics
+        updateProgress(1);
         const processedData = processFramesForAnalytics(frames);
-        processedCount += frames.length;
-        updateProgress(processedCount);
 
+        // Step 2: Calculate stats
+        updateProgress(2);
         const calculatedStats = calculateStats(processedData);
-        processedCount += frames.length;
-        updateProgress(processedCount);
 
+        // Step 3: Calculate prover distribution
+        updateProgress(3);
         const calculatedDistribution = calculateProverDistribution(processedData);
-        processedCount += frames.length;
-        updateProgress(processedCount);
 
         // Calculate frames per prover per hour (with adaptive bucket size)
         // Determine time range
@@ -515,24 +550,34 @@ export default function FramesAnalytics() {
           chartData.push(dataPoint);
         });
 
+        // Step 4: Calculate frames per prover per hour
+        updateProgress(4);
         const calculatedFramesPerProverPerHour = { chartData, topProvers };
-        processedCount += frames.length;
-        updateProgress(processedCount);
 
-        // Calculate frame spacing over time
+        // Step 5: Calculate frame spacing over time
+        updateProgress(5);
         const frameSpacingOverTime = calculateFrameSpacingOverTime(processedData);
-        processedCount += frames.length;
-        updateProgress(processedCount);
 
         if (mounted) {
+          // Show 100% completion before hiding
+          if (shouldShowProgress) {
+            setProgress({ current: frames.length, total: frames.length, phase: "analytics" });
+          }
+
           console.log(`Setting analytics data: processedData.length=${processedData.length}, frameCount=${frameCount}, calculatedStats.totalFrames=${calculatedStats.totalFrames}`);
           setCachedAnalyticsData(processedData);
           setCachedStats(calculatedStats);
           setCachedProverDistribution(calculatedDistribution);
           setCachedFramesPerProverPerHour(calculatedFramesPerProverPerHour);
           setCachedFrameSpacingOverTime(frameSpacingOverTime);
-          setCalculatingAnalytics(false);
-          setShowProgressBar(false);
+
+          // Small delay before hiding to show completion
+          setTimeout(() => {
+            if (mounted) {
+              setCalculatingAnalytics(false);
+              setShowProgressBar(false);
+            }
+          }, 300);
 
           // Save to IndexedDB cache
           saveAnalyticsCache({
@@ -569,6 +614,105 @@ export default function FramesAnalytics() {
       mounted = false;
     };
   }, [frames, frameCount, loading]);
+
+  // Calculate storage usage
+  useEffect(() => {
+    async function calculateStorage() {
+      try {
+        const usage = await estimateStorageUsage();
+        setStorageUsage(usage);
+      } catch (err) {
+        console.warn("Failed to calculate storage usage:", err);
+      }
+    }
+    calculateStorage();
+    // Recalculate after frames change or when modal closes
+    if (!showClearModal) {
+      calculateStorage();
+    }
+  }, [frames, showClearModal]);
+
+  // Format storage size for display
+  const formatStorageSize = (bytes: number) => {
+    if (bytes < 1024) return `${bytes} B`;
+    if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(2)} KB`;
+    if (bytes < 1024 * 1024 * 1024) return `${(bytes / (1024 * 1024)).toFixed(2)} MB`;
+    return `${(bytes / (1024 * 1024 * 1024)).toFixed(2)} GB`;
+  };
+
+  // Handle frame deletion
+  const handleDeleteFrames = async (keepCount: number | null) => {
+    setIsClearing(true);
+    try {
+      // Check current frame count
+      const currentUsage = await estimateStorageUsage();
+
+      if (keepCount === null) {
+        // Delete all - check if we have frames to delete
+        if (currentUsage.frameCount === 0) {
+          setError("No frames to delete");
+          setIsClearing(false);
+          return;
+        }
+        await clearFrameCache();
+      } else {
+        // Ensure we keep at least 10 frames
+        if (keepCount < 10) {
+          setError("Cannot delete frames. Must keep at least 10 frames.");
+          setIsClearing(false);
+          return;
+        }
+
+        // Check if we have enough frames to keep
+        if (currentUsage.frameCount <= keepCount) {
+          setError(`Cannot delete frames. Only ${currentUsage.frameCount} frames available.`);
+          setIsClearing(false);
+          return;
+        }
+
+        // Keep last N frames
+        await deleteFramesKeepingLast(keepCount);
+      }
+
+      // Clear analytics cache and reload frames
+      setCachedAnalyticsData([]);
+      setCachedStats(null);
+      setCachedProverDistribution([]);
+      setCachedFramesPerProverPerHour(null);
+      setCachedFrameSpacingOverTime(null);
+      setFrames([]);
+
+      // Recalculate storage
+      const usage = await estimateStorageUsage();
+      setStorageUsage(usage);
+
+      // Update frame count to match what was kept
+      if (keepCount !== null) {
+        // Find the closest valid option that matches or is less than keepCount
+        const validOptions = FRAME_COUNT_OPTIONS.filter(opt => opt <= keepCount);
+        const newFrameCount = validOptions.length > 0 ? validOptions[validOptions.length - 1] : 10;
+        setFrameCount(newFrameCount);
+        // Save to localStorage
+        if (typeof window !== "undefined") {
+          localStorage.setItem(FRAME_COUNT_STORAGE_KEY, String(newFrameCount));
+        }
+      } else {
+        // If all deleted, set to minimum (10)
+        const newFrameCount = 10;
+        setFrameCount(newFrameCount);
+        if (typeof window !== "undefined") {
+          localStorage.setItem(FRAME_COUNT_STORAGE_KEY, String(newFrameCount));
+        }
+      }
+
+      setShowClearModal(false);
+    } catch (err) {
+      console.error("Failed to delete frames:", err);
+      setError(err instanceof Error ? err.message : "Failed to delete frames");
+    } finally {
+      setIsClearing(false);
+    }
+  };
 
   // Helper function to process frames for analytics
   const processFramesForAnalytics = (framesToProcess: GlobalFrame[]): FrameAnalytics[] => {
@@ -882,6 +1026,21 @@ export default function FramesAnalytics() {
           >
             ← Back
           </Link>
+          <div className="flex items-center gap-4">
+            {storageUsage && (
+              <div className="text-xs text-burgundy/60 dark:text-white/60">
+                Cache: {formatStorageSize(storageUsage.sizeBytes)} ({storageUsage.frameCount.toLocaleString()} frames)
+              </div>
+            )}
+            {storageUsage && storageUsage.frameCount > 10 && (
+              <button
+                onClick={() => setShowClearModal(true)}
+                className="text-xs font-semibold uppercase tracking-[0.3em] text-burgundy/70 hover:text-burgundy dark:text-white/70 dark:hover:text-white transition-colors"
+              >
+                Clear Frame Data
+              </button>
+            )}
+          </div>
           <div className="flex flex-col gap-2">
             <div className="flex items-center gap-3">
               <span className="text-xs font-semibold uppercase tracking-[0.3em] text-burgundy/60 dark:text-white/60">
@@ -919,10 +1078,12 @@ export default function FramesAnalytics() {
                 frames
               </span>
             </div>
-            {showProgressBar && (
+            {(showProgressBar || calculatingAnalytics) && (
               <div className="flex items-center gap-3 w-full max-w-2xl">
                 <span className="text-xs font-semibold uppercase tracking-[0.3em] text-burgundy/60 dark:text-white/60 whitespace-nowrap">
-                  Downloading and analyzing
+                  {progress.phase === "analytics" || calculatingAnalytics
+                    ? "Calculating analytics"
+                    : "Downloading frames"}
                 </span>
                 <div className="flex-1 bg-burgundy/10 dark:bg-white/10 rounded-full h-1.5 overflow-hidden min-w-[200px]">
                   <div
@@ -937,6 +1098,15 @@ export default function FramesAnalytics() {
                 </div>
               </div>
             )}
+            {(frameCount === 500 || frameCount === 1000) && (loading || calculatingAnalytics) && (
+              <Callout type="warning">
+                <div className="font-semibold mb-1">Large dataset warning</div>
+                <div>
+                  Loading {frameCount.toLocaleString()} frames will use approximately{" "}
+                  <strong>{frameCount === 1000 ? "200-400MB" : "100-200MB"}</strong> of storage space.
+                </div>
+              </Callout>
+            )}
           </div>
         </div>
 
@@ -947,12 +1117,6 @@ export default function FramesAnalytics() {
         )}
 
         {loadingFromCache && (
-          <div className="mb-6 rounded-2xl border border-green/30 bg-light-green/40 p-4 text-sm text-green dark:border-green/30 dark:bg-green/15 dark:text-green">
-            Loading from cache... Fetching missing frames in background.
-          </div>
-        )}
-
-        {loadingFromCache && !showProgressBar && (
           <div className="mb-6 rounded-2xl border border-green/30 bg-light-green/40 p-4 text-sm text-green dark:border-green/30 dark:bg-green/15 dark:text-green">
             Loading from cache... Fetching missing frames in background.
           </div>
@@ -1372,6 +1536,67 @@ export default function FramesAnalytics() {
           </ResponsiveContainer>
         </section>
       </div>
+
+      {/* Clear Frame Data Modal */}
+      <Modal
+        show={showClearModal}
+        onClose={() => !isClearing && setShowClearModal(false)}
+        title="Clear Frame Data"
+        maxWidth="max-w-md"
+      >
+        <div className="space-y-4">
+          {storageUsage && (
+            <div className="text-sm text-burgundy dark:text-white">
+              <p className="mb-2">
+                Current cache: <strong>{formatStorageSize(storageUsage.sizeBytes)}</strong> ({storageUsage.frameCount.toLocaleString()} frames)
+              </p>
+            </div>
+          )}
+          <div className="space-y-2">
+            <p className="text-sm font-semibold uppercase tracking-[0.3em] text-burgundy/60 dark:text-white/60 mb-4">
+              Select how many frames to keep:
+            </p>
+            <div className="space-y-2">
+              <button
+                onClick={() => handleDeleteFrames(null)}
+                disabled={isClearing || (storageUsage && storageUsage.frameCount <= 10)}
+                className="w-full text-left px-4 py-3 rounded-lg border border-burgundy/20 dark:border-white/20 bg-white dark:bg-[#1a0f27] text-burgundy dark:text-white hover:bg-burgundy/10 dark:hover:bg-white/10 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                Delete All Frames
+                {storageUsage && storageUsage.frameCount <= 10 && (
+                  <span className="ml-2 text-xs text-burgundy/60 dark:text-white/60">
+                    (Must keep at least 10 frames)
+                  </span>
+                )}
+              </button>
+              {[10, 25, 50, 100, 250, 500, 1000].map((count) => {
+                const canDelete = storageUsage && storageUsage.frameCount > count;
+                return (
+                  <button
+                    key={count}
+                    onClick={() => handleDeleteFrames(count)}
+                    disabled={isClearing || !canDelete}
+                    className="w-full text-left px-4 py-3 rounded-lg border border-burgundy/20 dark:border-white/20 bg-white dark:bg-[#1a0f27] text-burgundy dark:text-white hover:bg-burgundy/10 dark:hover:bg-white/10 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    Keep Last {count.toLocaleString()} Frames
+                    {!canDelete && storageUsage && (
+                      <span className="ml-2 text-xs text-burgundy/60 dark:text-white/60">
+                        ({storageUsage.frameCount} frames available)
+                      </span>
+                    )}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+          {isClearing && (
+            <div className="flex items-center gap-2 text-sm text-burgundy/60 dark:text-white/60">
+              <Spinner size="16" />
+              <span>Clearing frames...</span>
+            </div>
+          )}
+        </div>
+      </Modal>
     </div>
   );
 }

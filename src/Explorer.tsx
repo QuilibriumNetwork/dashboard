@@ -745,6 +745,13 @@ export default function Explorer() {
     frameCountRef.current = frameCount;
   }, [frameCount]);
 
+  // Reset frameCount to valid value if it's set to an unavailable option
+  useEffect(() => {
+    if (frameCount !== 10 && frameCount !== 25 && frameCount !== 50) {
+      setFrameCount(50);
+    }
+  }, [frameCount]);
+
   // Handle anchor scrolling when hash is present
   useEffect(() => {
     if (location.hash) {
@@ -1241,26 +1248,27 @@ export default function Explorer() {
               </div>
 
               {/* Add this new section */}
-              <div className="flex flex-wrap items-center gap-3">
-                <span className="text-xs font-semibold uppercase tracking-[0.3em] text-burgundy/60 dark:text-white/60">
-                  Showing statistics from the last
-                </span>
-                <select
-                  value={frameCount}
-                  onChange={(e) => {
-                    const newCount = parseInt(e.target.value, 10);
-                    setFrameCount(newCount);
-                  }}
-                  className="text-xs font-semibold uppercase tracking-[0.3em] text-burgundy dark:text-white bg-white dark:bg-[#1a0f27] border border-burgundy/20 dark:border-white/20 rounded-lg px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-burgundy/30 dark:focus:ring-white/30 transition-colors cursor-pointer"
-                >
-                  <option value={10}>10</option>
-                  <option value={25}>25</option>
-                  <option value={50}>50</option>
-                  <option value={100}>100</option>
-                </select>
-                <span className="text-xs font-semibold uppercase tracking-[0.3em] text-burgundy/60 dark:text-white/60">
-                  frames
-                </span>
+              <div className="flex flex-col gap-3">
+                <div className="flex flex-wrap items-center gap-3">
+                  <span className="text-xs font-semibold uppercase tracking-[0.3em] text-burgundy/60 dark:text-white/60">
+                    Showing statistics from the last
+                  </span>
+                  <select
+                    value={frameCount}
+                    onChange={(e) => {
+                      const newCount = parseInt(e.target.value, 10);
+                      setFrameCount(newCount);
+                    }}
+                    className="text-xs font-semibold uppercase tracking-[0.3em] text-burgundy dark:text-white bg-white dark:bg-[#1a0f27] border border-burgundy/20 dark:border-white/20 rounded-lg px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-burgundy/30 dark:focus:ring-white/30 transition-colors cursor-pointer"
+                  >
+                    <option value={10}>10</option>
+                    <option value={25}>25</option>
+                    <option value={50}>50</option>
+                  </select>
+                  <span className="text-xs font-semibold uppercase tracking-[0.3em] text-burgundy/60 dark:text-white/60">
+                    frames
+                  </span>
+                </div>
               </div>
 
               <FrameFeedFilters
