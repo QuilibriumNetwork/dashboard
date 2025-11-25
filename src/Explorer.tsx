@@ -34,6 +34,12 @@ import { PeerDirectory } from "@/components/PeerDirectory";
 import { PeerDirectoryExport } from "@/components/PeerDirectoryExport";
 import { FrameFeedFilters, type FrameFilterState } from "@/components/FrameFeedFilters";
 import { FrameFeedExport } from "@/components/FrameFeedExport";
+import {
+  getCachedFrames,
+  getFramesByNumbers,
+  saveFramesToCache,
+  pruneCache,
+} from "@/lib/frameCache";
 
 function Tag({ label }: { label: string }) {
   return (
@@ -546,31 +552,135 @@ export default function Explorer() {
   const [hypergraphQuery, setHypergraphQuery] = useState("");
   const [hypergraphLookup, setHypergraphLookup] = useState<HypergraphSearchState>({});
 
-  // Function to hydrate frame feed
+  // Function to hydrate frame feed with caching
   const hydrateFrameFeed = useCallback(async (baseFrame: GlobalFrame, count: number) => {
     const latestNumber = baseFrame.header.frameNumber;
-    const counts = Array.from({ length: count }, (_, idx) => latestNumber - idx).filter((n) => n > 0);
-    const frames: GlobalFrame[] = [];
-    console.log(`Starting to load ${count} frames, starting from ${latestNumber}`);
-    for (const num of counts) {
-      try {
-        if (num === latestNumber) {
-          frames.push(baseFrame);
-        } else {
-          const f = await explorerApi.getFrame(num);
-          frames.push(f);
+    const startNumber = Math.max(1, latestNumber - count + 1);
+    const neededFrameNumbers = Array.from(
+      { length: latestNumber - startNumber + 1 },
+      (_, i) => startNumber + i
+    );
+
+    // Step 1: Check cache for frames
+    const cachedFramesMap = await getFramesByNumbers(neededFrameNumbers);
+    const cachedFrames = Array.from(cachedFramesMap.values()).sort(
+      (a, b) => a.header.frameNumber - b.header.frameNumber
+    );
+    const cachedFrameNumbers = new Set(cachedFrames.map((f) => f.header.frameNumber));
+
+    // Show cached frames immediately
+    if (cachedFrames.length > 0) {
+      setFrameFeed(cachedFrames);
+    }
+
+    // Step 2: Find missing frames
+    const missingFrameNumbers = neededFrameNumbers.filter(
+      (num) => !cachedFrameNumbers.has(num)
+    );
+
+    if (missingFrameNumbers.length === 0) {
+      console.log(`All ${count} frames loaded from cache`);
+      return;
+    }
+
+    console.log(`Loading ${missingFrameNumbers.length} missing frames (${cachedFrames.length} from cache)`);
+
+    // Step 3: Fetch missing frames in parallel batches
+    const framesToLoad = [...cachedFrames];
+    const BATCH_FETCH_SIZE = 20; // Fetch 20 frames in parallel at a time
+    const BATCH_SAVE_SIZE = 50; // Save to cache every 50 frames
+    const framesToSave: GlobalFrame[] = [];
+    let lastBatchSavePromise: Promise<void> | null = null;
+
+    // Sort to fetch in order
+    missingFrameNumbers.sort((a, b) => a - b);
+
+    // Fetch frames in parallel batches
+    for (let i = 0; i < missingFrameNumbers.length; i += BATCH_FETCH_SIZE) {
+      const batch = missingFrameNumbers.slice(i, i + BATCH_FETCH_SIZE);
+
+      // Fetch all frames in this batch in parallel
+      const fetchPromises = batch.map(async (frameNum) => {
+        try {
+          // Use baseFrame if it's the latest frame
+          if (frameNum === latestNumber) {
+            return { success: true, frame: baseFrame, frameNum };
+          }
+          const frame = await explorerApi.getFrame(frameNum);
+          return { success: true, frame, frameNum };
+        } catch (err) {
+          console.warn(`Failed to load frame ${frameNum}:`, err);
+          return { success: false, frame: null, frameNum };
         }
+      });
+
+      const results = await Promise.all(fetchPromises);
+
+      // Process successful fetches
+      for (const result of results) {
+        if (result.success && result.frame) {
+          // Insert frame in correct position
+          const insertIndex = framesToLoad.findIndex(
+            (f) => f.header.frameNumber > result.frameNum
+          );
+          if (insertIndex === -1) {
+            framesToLoad.push(result.frame);
+          } else {
+            framesToLoad.splice(insertIndex, 0, result.frame);
+          }
+
+          // Add to batch save queue
+          framesToSave.push(result.frame);
+
+          // Save to cache in batches (non-blocking)
+          if (framesToSave.length >= BATCH_SAVE_SIZE) {
+            const batchToSave = [...framesToSave];
+            framesToSave.length = 0;
+
+            lastBatchSavePromise = saveFramesToCache(batchToSave).catch((err) => {
+              console.warn("Failed to save batch to cache:", err);
+            });
+          }
+        }
+      }
+
+      // Update frame feed after each batch
+      const sortedFrames = [...framesToLoad].sort((a, b) => a.header.frameNumber - b.header.frameNumber);
+      setFrameFeed(sortedFrames);
+    }
+
+    // Save any remaining frames
+    if (framesToSave.length > 0) {
+      const batchToSave = [...framesToSave];
+      framesToSave.length = 0;
+      lastBatchSavePromise = saveFramesToCache(batchToSave).catch((err) => {
+        console.warn("Failed to save final batch to cache:", err);
+      });
+    }
+
+    // Ensure all frames are saved to cache
+    const finalFrames = framesToLoad
+      .filter((f) => f.header.frameNumber >= startNumber && f.header.frameNumber <= latestNumber)
+      .sort((a, b) => a.header.frameNumber - b.header.frameNumber);
+
+    if (finalFrames.length > cachedFrames.length) {
+      try {
+        await saveFramesToCache(finalFrames);
       } catch (err) {
-        console.warn("Failed to load frame", num, err);
+        console.warn("Failed to save final frames to cache:", err);
       }
     }
-    console.log(`Loaded ${frames.length} frames (expected ${count}), setting frameFeed state`);
-    // Use a function form to ensure we're setting the latest state
-    setFrameFeed(() => {
-      const newFrames = [...frames];
-      console.log(`Setting frameFeed with ${newFrames.length} frames`);
-      return newFrames;
-    });
+
+    // Wait for last batch save
+    if (lastBatchSavePromise) {
+      await lastBatchSavePromise;
+    }
+
+    // Prune cache
+    await pruneCache(latestNumber, count + 500);
+
+    console.log(`Loaded ${finalFrames.length} frames (expected ${count}), setting frameFeed state`);
+    setFrameFeed(finalFrames);
   }, []);
 
   // Initial load and periodic refresh
@@ -634,29 +744,6 @@ export default function Explorer() {
   useEffect(() => {
     frameCountRef.current = frameCount;
   }, [frameCount]);
-
-  // Add native event listeners for frame count buttons (using capture phase to intercept before other handlers)
-  useEffect(() => {
-    const handleClick = (e: Event) => {
-      const target = e.target as HTMLElement;
-      const button = target.closest('button[data-count]');
-      if (button) {
-        const count = parseInt(button.getAttribute('data-count') || '10', 10);
-        e.preventDefault();
-        e.stopPropagation();
-        console.log(`Button clicked: setting frameCount from ${frameCountRef.current} to ${count}`);
-        setFrameCount(count);
-      }
-    };
-
-    const container = document.getElementById('frame-count-selector');
-    if (container) {
-      container.addEventListener('click', handleClick, true); // Use capture phase
-      return () => {
-        container.removeEventListener('click', handleClick, true);
-      };
-    }
-  }, []);
 
   // Handle anchor scrolling when hash is present
   useEffect(() => {
@@ -1158,27 +1245,19 @@ export default function Explorer() {
                 <span className="text-xs font-semibold uppercase tracking-[0.3em] text-burgundy/60 dark:text-white/60">
                   Showing statistics from the last
                 </span>
-                <div className="flex items-center gap-2" id="frame-count-selector">
-                  {[10, 25, 50, 100, 250, 500, 1000].map((count, index) => (
-                    <React.Fragment key={count}>
-                      <button
-                        type="button"
-                        data-count={count}
-                        className={`text-xs font-semibold uppercase tracking-[0.3em] transition-colors cursor-pointer ${
-                          frameCount === count
-                            ? "text-burgundy dark:text-white font-bold"
-                            : "text-burgundy/60 dark:text-white/60 hover:text-burgundy dark:hover:text-white"
-                        }`}
-                        style={{ pointerEvents: 'auto', zIndex: 10 }}
-                      >
-                        {count.toLocaleString()}
-                      </button>
-                      {index < 6 && (
-                        <span className="mx-1 text-burgundy/40 dark:text-white/40">|</span>
-                      )}
-                    </React.Fragment>
-                  ))}
-                </div>
+                <select
+                  value={frameCount}
+                  onChange={(e) => {
+                    const newCount = parseInt(e.target.value, 10);
+                    setFrameCount(newCount);
+                  }}
+                  className="text-xs font-semibold uppercase tracking-[0.3em] text-burgundy dark:text-white bg-white dark:bg-[#1a0f27] border border-burgundy/20 dark:border-white/20 rounded-lg px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-burgundy/30 dark:focus:ring-white/30 transition-colors cursor-pointer"
+                >
+                  <option value={10}>10</option>
+                  <option value={25}>25</option>
+                  <option value={50}>50</option>
+                  <option value={100}>100</option>
+                </select>
                 <span className="text-xs font-semibold uppercase tracking-[0.3em] text-burgundy/60 dark:text-white/60">
                   frames
                 </span>
@@ -1353,4 +1432,5 @@ export default function Explorer() {
     </>
   );
 }
+
 
