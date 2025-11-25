@@ -1,1 +1,0 @@
-import{j as s}from"./index-BJZsk1Yp.js";import{j as e}from"./index-C3QaJipQ.js";function c({name:o,className:r="",...t}){if(!o)return null;const n=e[o.toLowerCase()];return n?s.jsx(n,{className:r,...t}):null}export{c as I};
