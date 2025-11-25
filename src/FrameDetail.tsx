@@ -318,7 +318,7 @@ function RequestCard({ index, request }: { index: number; request: FrameRequest 
           <div className="text-xs text-burgundy/60 dark:text-white/60">{timestamp}</div>
         )}
       </div>
-      <div className="mt-3 rounded-xl bg-[#120918] p-4 text-xs text-white/80">
+      <div className="mt-3 rounded-xl bg-gray-100 p-4 text-xs text-burgundy/80 dark:bg-[#120918] dark:text-white/80">
         <ValueTree value={displayPayload} />
       </div>
     </div>
@@ -351,22 +351,22 @@ function CollapsibleValue({
     <div>
       <button
         onClick={toggleExpanded}
-        className="flex w-full items-center gap-2 text-left text-[0.7rem] uppercase tracking-[0.2em] text-white/50 hover:text-white/70 transition-colors"
+        className="flex w-full items-center gap-2 text-left text-[0.7rem] uppercase tracking-[0.2em] text-burgundy/50 hover:text-burgundy/70 dark:text-white/50 dark:hover:text-white/70 transition-colors"
       >
         <ChevronDown
           className={`size-3 transition-transform flex-shrink-0 ${isExpanded ? 'rotate-180' : ''}`}
         />
         <span>{label}</span>
       </button>
-      <div className="mt-1 border-l border-white/20 pl-3 relative">
+      <div className="mt-1 border-l border-burgundy/20 dark:border-white/20 pl-3 relative">
         <div className={isExpanded ? '' : 'max-h-[4.5rem] overflow-hidden'}>
           <ValueTree value={value} />
         </div>
         {!isExpanded && (
-          <div className="absolute bottom-0 left-0 right-0 h-14 bg-gradient-to-t from-[#120918] via-[#120918]/70 to-transparent">
+          <div className="absolute bottom-0 left-0 right-0 h-14 bg-gradient-to-t from-gray-100 via-gray-100/70 to-transparent dark:from-[#120918] dark:via-[#120918]/70">
             <button
               onClick={toggleExpanded}
-              className="absolute bottom-2 left-1/2 -translate-x-1/2 flex items-center gap-1.5 px-3 py-1 text-xs font-medium text-white/80 hover:text-white bg-white/10 hover:bg-white/20 rounded-full backdrop-blur-sm transition-all border border-white/20 hover:border-white/30"
+              className="absolute bottom-2 left-1/2 -translate-x-1/2 flex items-center gap-1.5 px-3 py-1 text-xs font-medium text-burgundy/80 hover:text-burgundy bg-burgundy/10 hover:bg-burgundy/20 dark:text-white/80 dark:hover:text-white dark:bg-white/10 dark:hover:bg-white/20 rounded-full backdrop-blur-sm transition-all border border-burgundy/20 hover:border-burgundy/30 dark:border-white/20 dark:hover:border-white/30"
             >
               <ChevronDown className="size-3 transition-transform" />
               <span>Expand</span>
@@ -393,19 +393,19 @@ function CollapsibleList({
     <div>
       <button
         onClick={toggleExpanded}
-        className="flex w-full items-center gap-2 text-left text-[0.7rem] uppercase tracking-[0.2em] text-white/50 hover:text-white/70 transition-colors"
+        className="flex w-full items-center gap-2 text-left text-[0.7rem] uppercase tracking-[0.2em] text-burgundy/50 hover:text-burgundy/70 dark:text-white/50 dark:hover:text-white/70 transition-colors"
       >
         <ChevronDown
           className={`size-3 transition-transform flex-shrink-0 ${isExpanded ? 'rotate-180' : ''}`}
         />
         <span>{label}</span>
       </button>
-      <div className="mt-1 border-l border-white/20 pl-3 relative">
+      <div className="mt-1 border-l border-burgundy/20 dark:border-white/20 pl-3 relative">
         <ol className="space-y-2">
           {displayItems.map((item, idx) => (
             <li key={idx}>
-              <div className="text-[0.7rem] uppercase tracking-[0.2em] text-white/50">Item {idx + 1}</div>
-              <div className="mt-1 border-l border-white/20 pl-3">
+              <div className="text-[0.7rem] uppercase tracking-[0.2em] text-burgundy/50 dark:text-white/50">Item {idx + 1}</div>
+              <div className="mt-1 border-l border-burgundy/20 dark:border-white/20 pl-3">
                 <ValueTree value={item} parentKey={label} />
               </div>
             </li>
@@ -413,10 +413,10 @@ function CollapsibleList({
         </ol>
         {!isExpanded && items.length > 3 && (
           <>
-            <div className="absolute bottom-0 left-0 right-0 h-14 bg-gradient-to-t from-[#120918] via-[#120918]/70 to-transparent pointer-events-none" />
+            <div className="absolute bottom-0 left-0 right-0 h-14 bg-gradient-to-t from-gray-100 via-gray-100/70 to-transparent dark:from-[#120918] dark:via-[#120918]/70 pointer-events-none" />
             <button
               onClick={toggleExpanded}
-              className="absolute bottom-2 left-1/2 -translate-x-1/2 flex items-center gap-1.5 px-3 py-1 text-xs font-medium text-white/80 hover:text-white bg-white/10 hover:bg-white/20 rounded-full backdrop-blur-sm transition-all border border-white/20 hover:border-white/30 z-10"
+              className="absolute bottom-2 left-1/2 -translate-x-1/2 flex items-center gap-1.5 px-3 py-1 text-xs font-medium text-burgundy/80 hover:text-burgundy bg-burgundy/10 hover:bg-burgundy/20 dark:text-white/80 dark:hover:text-white dark:bg-white/10 dark:hover:bg-white/20 rounded-full backdrop-blur-sm transition-all border border-burgundy/20 hover:border-burgundy/30 dark:border-white/20 dark:hover:border-white/30 z-10"
             >
               <ChevronDown className="size-3 transition-transform" />
               <span>Expand</span>
@@ -430,17 +430,17 @@ function CollapsibleList({
 
 function ValueTree({ value, parentKey }: { value: unknown; parentKey?: string }) {
   if (value == null) {
-    return <div className="break-all font-mono text-white/60">–</div>;
+    return <div className="break-all font-mono text-burgundy/60 dark:text-white/60">–</div>;
   }
   if (typeof value === "string") {
-    return <div className="break-all font-mono">{formatMaybeBytes(value)}</div>;
+    return <div className="break-all font-mono text-burgundy dark:text-white">{formatMaybeBytes(value)}</div>;
   }
   if (typeof value === "number" || typeof value === "boolean") {
-    return <div className="break-all font-mono">{String(value)}</div>;
+    return <div className="break-all font-mono text-burgundy dark:text-white">{String(value)}</div>;
   }
   if (Array.isArray(value)) {
     if (value.length === 0) {
-      return <div className="break-all font-mono text-white/60">Empty array</div>;
+      return <div className="break-all font-mono text-burgundy/60 dark:text-white/60">Empty array</div>;
     }
     const isFiltersArray = parentKey && (
       parentKey.toLowerCase() === "filters" ||
@@ -455,8 +455,8 @@ function ValueTree({ value, parentKey }: { value: unknown; parentKey?: string })
       <ol className="space-y-2">
         {value.map((item, idx) => (
           <li key={idx}>
-            <div className="text-[0.7rem] uppercase tracking-[0.2em] text-white/50">Item {idx + 1}</div>
-            <div className="mt-1 border-l border-white/20 pl-3">
+            <div className="text-[0.7rem] uppercase tracking-[0.2em] text-burgundy/50 dark:text-white/50">Item {idx + 1}</div>
+            <div className="mt-1 border-l border-burgundy/20 dark:border-white/20 pl-3">
               <ValueTree value={item} parentKey={parentKey} />
             </div>
           </li>
@@ -467,7 +467,7 @@ function ValueTree({ value, parentKey }: { value: unknown; parentKey?: string })
   if (typeof value === "object") {
     const entries = Object.entries(value as Record<string, unknown>);
     if (!entries.length) {
-      return <div className="break-all font-mono text-white/60">Empty object</div>;
+      return <div className="break-all font-mono text-burgundy/60 dark:text-white/60">Empty object</div>;
     }
     return (
       <dl className="space-y-2">
@@ -491,8 +491,8 @@ function ValueTree({ value, parentKey }: { value: unknown; parentKey?: string })
                 <CollapsibleList label={`${formattedKey} (${entryValue.length})`} items={entryValue} />
               ) : (
                 <>
-                  <dt className="text-[0.7rem] uppercase tracking-[0.2em] text-white/50">{formattedKey}</dt>
-                  <dd className="mt-1 border-l border-white/20 pl-3">
+                  <dt className="text-[0.7rem] uppercase tracking-[0.2em] text-burgundy/50 dark:text-white/50">{formattedKey}</dt>
+                  <dd className="mt-1 border-l border-burgundy/20 dark:border-white/20 pl-3">
                     <ValueTree value={entryValue} parentKey={key} />
                   </dd>
                 </>
@@ -503,7 +503,7 @@ function ValueTree({ value, parentKey }: { value: unknown; parentKey?: string })
       </dl>
     );
   }
-  return <div className="break-all font-mono">{String(value)}</div>;
+  return <div className="break-all font-mono text-burgundy dark:text-white">{String(value)}</div>;
 }
 
 function formatMaybeBytes(value: string) {
