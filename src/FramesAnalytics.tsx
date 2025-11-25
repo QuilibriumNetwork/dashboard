@@ -1558,25 +1558,28 @@ export default function FramesAnalytics() {
             </p>
             <div className="space-y-2">
               <button
-                onClick={() => handleDeleteFrames(null)}
+                onClick={() => handleDeleteFrames(10)}
                 disabled={isClearing || (storageUsage && storageUsage.frameCount <= 10)}
-                className="w-full text-left px-4 py-3 rounded-lg border border-burgundy/20 dark:border-white/20 bg-white dark:bg-[#1a0f27] text-burgundy dark:text-white hover:bg-burgundy/10 dark:hover:bg-white/10 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full text-left px-4 py-3 rounded-lg border border-burgundy/20 dark:border-white/20 bg-white dark:bg-[#1a0f27] text-burgundy dark:text-white hover:bg-burgundy/10 dark:hover:bg-white/10 hover:border-burgundy/30 dark:hover:border-white/30 focus:outline-none focus:ring-2 focus:ring-burgundy/30 dark:focus:ring-white/30 transition-colors disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-white disabled:dark:hover:bg-[#1a0f27] disabled:hover:border-burgundy/20 disabled:dark:hover:border-white/20"
               >
                 Delete All Frames
+                <span className="ml-2 text-xs text-burgundy/60 dark:text-white/60">
+                  (saves last 10)
+                </span>
                 {storageUsage && storageUsage.frameCount <= 10 && (
                   <span className="ml-2 text-xs text-burgundy/60 dark:text-white/60">
                     (Must keep at least 10 frames)
                   </span>
                 )}
               </button>
-              {[10, 25, 50, 100, 250, 500, 1000].map((count) => {
+              {[25, 50, 100, 250, 500, 1000].map((count) => {
                 const canDelete = storageUsage && storageUsage.frameCount > count;
                 return (
                   <button
                     key={count}
                     onClick={() => handleDeleteFrames(count)}
                     disabled={isClearing || !canDelete}
-                    className="w-full text-left px-4 py-3 rounded-lg border border-burgundy/20 dark:border-white/20 bg-white dark:bg-[#1a0f27] text-burgundy dark:text-white hover:bg-burgundy/10 dark:hover:bg-white/10 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="w-full text-left px-4 py-3 rounded-lg border border-burgundy/20 dark:border-white/20 bg-white dark:bg-[#1a0f27] text-burgundy dark:text-white hover:bg-burgundy/10 dark:hover:bg-white/10 hover:border-burgundy/30 dark:hover:border-white/30 focus:outline-none focus:ring-2 focus:ring-burgundy/30 dark:focus:ring-white/30 transition-colors disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-white disabled:dark:hover:bg-[#1a0f27] disabled:hover:border-burgundy/20 disabled:dark:hover:border-white/20"
                   >
                     Keep Last {count.toLocaleString()} Frames
                     {!canDelete && storageUsage && (

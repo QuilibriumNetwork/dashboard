@@ -49,25 +49,25 @@ const Modal: React.FC<ModalProps> = ({
         onClick={(e) => e.stopPropagation()}
         ref={modalRef}
       >
-        <div className="bg-white rounded-xl shadow-lg flex flex-col h-full overflow-hidden mx-5">
-          <div className="flex justify-between items-center p-6 border-b border-gray-200">
+        <div className="bg-white dark:bg-[#1a0f27] rounded-xl shadow-lg flex flex-col h-full overflow-hidden mx-5 border border-burgundy/10 dark:border-white/10">
+          <div className="flex justify-between items-center p-6 border-b border-burgundy/10 dark:border-white/10">
             <h2
               className={
                 titleClassName ||
-                "text-2xl font-semibold text-burgundy gradient-sweep mb-0"
+                "text-2xl font-semibold text-burgundy dark:text-white gradient-sweep mb-0"
               }
             >
               {title}
             </h2>
             <button
               onClick={onClose}
-              className="text-gray-400 hover:text-pink cursor-pointer transition-colors duration-200"
+              className="text-burgundy/60 dark:text-white/60 hover:text-burgundy dark:hover:text-white cursor-pointer transition-colors duration-200"
               aria-label="Close modal"
             >
               ✕
             </button>
           </div>
-          <div className="p-6 overflow-y-auto">{children}</div>
+          <div className="p-6 overflow-y-auto text-burgundy dark:text-white">{children}</div>
         </div>
       </div>
     </div>
