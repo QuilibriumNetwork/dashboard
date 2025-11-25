@@ -26,6 +26,8 @@ interface AnalyticsCache {
     prover: string;
     count: number;
     percentage: number;
+    lastFrameNumber: number;
+    lastTimestamp: number;
   }>;
   framesPerProverPerHour?: {
     chartData: Array<Record<string, string | number>>;

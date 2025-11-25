@@ -18,7 +18,7 @@ import {
 } from "recharts";
 
 import { GlobalFrame, explorerApi } from "@/lib/api";
-import { coerceTimestamp } from "@/lib/format";
+import { coerceTimestamp, formatTimestamp } from "@/lib/format";
 import Spinner from "@/components/ui/Spinner";
 import Modal from "@/components/ui/Modal";
 import Callout from "@/components/ui/Callout";
@@ -99,6 +99,8 @@ export default function FramesAnalytics() {
     prover: string;
     count: number;
     percentage: number;
+    lastFrameNumber: number;
+    lastTimestamp: number;
   }>>([]);
   const [cachedFramesPerProverPerHour, setCachedFramesPerProverPerHour] = useState<{
     chartData: Array<Record<string, string | number>>;
@@ -856,17 +858,40 @@ export default function FramesAnalytics() {
 
   // Helper function to calculate prover distribution
   const calculateProverDistribution = (analyticsDataToProcess: FrameAnalytics[]) => {
-    const proverMap = new Map<string, number>();
+    const proverMap = new Map<string, { count: number; lastFrameNumber: number; lastTimestamp: number }>();
 
     analyticsDataToProcess.forEach((frame) => {
-      proverMap.set(frame.prover, (proverMap.get(frame.prover) || 0) + 1);
+      const existing = proverMap.get(frame.prover);
+      if (existing) {
+        if (frame.frameNumber > existing.lastFrameNumber) {
+          proverMap.set(frame.prover, {
+            count: existing.count + 1,
+            lastFrameNumber: frame.frameNumber,
+            lastTimestamp: frame.timestamp,
+          });
+        } else {
+          proverMap.set(frame.prover, {
+            count: existing.count + 1,
+            lastFrameNumber: existing.lastFrameNumber,
+            lastTimestamp: existing.lastTimestamp,
+          });
+        }
+      } else {
+        proverMap.set(frame.prover, {
+          count: 1,
+          lastFrameNumber: frame.frameNumber,
+          lastTimestamp: frame.timestamp,
+        });
+      }
     });
 
     return Array.from(proverMap.entries())
-      .map(([prover, count]) => ({
+      .map(([prover, data]) => ({
         prover,
-        count,
-        percentage: (count / analyticsDataToProcess.length) * 100,
+        count: data.count,
+        percentage: (data.count / analyticsDataToProcess.length) * 100,
+        lastFrameNumber: data.lastFrameNumber,
+        lastTimestamp: data.lastTimestamp,
       }))
       .sort((a, b) => b.count - a.count)
       .slice(0, 10); // Top 10 provers
@@ -1363,7 +1388,7 @@ export default function FramesAnalytics() {
                   color: isDark ? "#ffffff" : "#391F5B",
                 }}
                 formatter={(value: number, name: string, props: any) => [
-                  `${value} frames (${props.payload.percentage.toFixed(2)}%)`,
+                  `${value} frames (${props.payload.percentage.toFixed(2)}%) - Last frame: ${props.payload.lastFrameNumber.toLocaleString()} at ${formatTimestamp(String(props.payload.lastTimestamp))}`,
                   "Frames",
                 ]}
               />
@@ -1375,7 +1400,7 @@ export default function FramesAnalytics() {
                   const shortProver = value.length > 20
                     ? `${value.slice(0, 10)}...${value.slice(-6)}`
                     : value;
-                  return `${shortProver} (${entry.count})`;
+                  return `${shortProver} (${entry.count} frames, last: ${entry.lastFrameNumber.toLocaleString()} at ${formatTimestamp(String(entry.lastTimestamp))})`;
                 }}
               />
             </PieChart>
