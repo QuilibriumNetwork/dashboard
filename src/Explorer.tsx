@@ -579,11 +579,8 @@ export default function Explorer() {
     );
 
     if (missingFrameNumbers.length === 0) {
-      console.log(`All ${count} frames loaded from cache`);
       return;
     }
-
-    console.log(`Loading ${missingFrameNumbers.length} missing frames (${cachedFrames.length} from cache)`);
 
     // Step 3: Fetch missing frames in parallel batches
     const framesToLoad = [...cachedFrames];
@@ -679,7 +676,6 @@ export default function Explorer() {
     // Prune cache
     await pruneCache(latestNumber, count + 500);
 
-    console.log(`Loaded ${finalFrames.length} frames (expected ${count}), setting frameFeed state`);
     setFrameFeed(finalFrames);
   }, []);
 
@@ -726,12 +722,10 @@ export default function Explorer() {
   // Update frame feed when frameCount changes (using existing latestFrame)
   useEffect(() => {
     if (latestFrame) {
-      console.log(`useEffect triggered: frameCount=${frameCount}, latestFrame=${latestFrame.header.frameNumber}`);
       // Clear old data immediately to show loading state
       setFrameFeed([]);
       setLoading(true);
       hydrateFrameFeed(latestFrame, frameCount).then(() => {
-        console.log(`hydrateFrameFeed completed for frameCount=${frameCount}`);
         setLoading(false);
       }).catch((err) => {
         console.error('Error loading frames:', err);

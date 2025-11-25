@@ -4,8 +4,6 @@ import { Link } from "react-router-dom";
 import {
   LineChart,
   Line,
-  BarChart,
-  Bar,
   PieChart,
   Pie,
   Cell,
@@ -85,6 +83,9 @@ export default function FramesAnalytics() {
     totalFrames: number;
     totalRequests: number;
     avgRequestsPerFrame: number;
+    minRequestsPerFrame: number;
+    maxRequestsPerFrame: number;
+    medianRequestsPerFrame: number;
     uniqueProvers: number;
     uniqueSelectors: number;
     avgFrameSpacing: number;
@@ -118,13 +119,15 @@ export default function FramesAnalytics() {
   const gridColor = isDark ? "rgba(255,255,255,0.1)" : "rgba(57,31,91,0.1)";
   const axisColor = isDark ? "rgba(255,255,255,0.6)" : "rgba(57,31,91,0.6)";
   const lineColor = isDark ? "#ffffff" : "#8B1538";
-  const barColor = isDark ? "#ffffff" : "#8B1538";
   const tooltipBg = isDark ? "rgba(26,15,39,0.95)" : "rgba(255,255,255,0.95)";
   const tooltipBorder = isDark ? "rgba(255,255,255,0.2)" : "rgba(57,31,91,0.2)";
 
   useEffect(() => {
     let mounted = true;
     let cancelled = false;
+
+    // Set loading to true FIRST to prevent analytics effect from running prematurely
+    setLoading(true);
 
     // Clear cached analytics and frames immediately when frameCount changes
     setCachedAnalyticsData([]);
@@ -136,7 +139,6 @@ export default function FramesAnalytics() {
     setFramesWarning(null); // Clear warning when changing frame count
 
     async function loadFrames() {
-      setLoading(true);
       setError(null);
       setLoadingFromCache(false);
       setCalculatingAnalytics(false);
@@ -265,24 +267,46 @@ export default function FramesAnalytics() {
               total: frameCount,
               phase: "frames",
             });
+
+            // Update frames state so UI reflects newly fetched frames
+            if (mounted && !cancelled) {
+              const currentFrames = framesToLoad
+                .filter((f) => f.header.frameNumber >= startNumber && f.header.frameNumber <= latestNumber)
+                .sort((a, b) => a.header.frameNumber - b.header.frameNumber);
+              setFrames([...currentFrames]);
+            }
           }
 
-          // Save any remaining frames in the batch
+          // After processing all batches, hide the loading message
+          // (we've finished fetching all missing frames we could fetch)
+          setLoadingFromCache(false);
+
+          // Save any remaining frames in the batch (non-blocking)
           if (framesToSave.length > 0) {
             const batchToSave = [...framesToSave];
             framesToSave.length = 0;
-            lastBatchSavePromise = saveFramesToCache(batchToSave).catch((err) => {
+            // Save asynchronously without blocking - don't await
+            saveFramesToCache(batchToSave).catch((err) => {
               console.warn("Failed to save final batch to cache:", err);
             });
           }
 
-          // Wait for the last batch save to complete before continuing
+          // Don't wait for lastBatchSavePromise - it's non-blocking and frames are already saved in batches
+          // This prevents the function from hanging if the promise doesn't resolve
           if (lastBatchSavePromise) {
-            await lastBatchSavePromise;
+            // Let it complete in the background without blocking
+            lastBatchSavePromise.catch((err) => {
+              console.warn("Background batch save failed:", err);
+            });
           }
+        } else {
+          // No missing frames - all frames were cached, hide the loading message immediately
+          setLoadingFromCache(false);
         }
 
-        if (!mounted || cancelled) return;
+        if (!mounted || cancelled) {
+          return;
+        }
 
         // Ensure we have frames in the requested range and sort
         const finalFrames = framesToLoad
@@ -299,25 +323,25 @@ export default function FramesAnalytics() {
         }
 
         // Also ensure all final frames are in cache (in case batch saves missed some)
+        // Make this non-blocking since frames are already saved in batches
         if (apiCallCount > 0) {
-          try {
-            await saveFramesToCache(finalFrames);
-          } catch (err) {
+          // Save asynchronously without blocking - frames are already saved in batches
+          saveFramesToCache(finalFrames).catch((err) => {
             console.warn("Failed to save final frames to cache:", err);
-          }
+          });
         }
 
         // Prune cache to keep it manageable
         await pruneCache(latestNumber, frameCount + 500); // Keep extra for gap filling
 
-        if (!mounted || cancelled) return;
+        if (!mounted || cancelled) {
+          return;
+        }
 
         // Use function form to ensure we're setting the latest state
         setFrames(() => {
-          console.log(`Setting frames state with ${finalFrames.length} frames (expected ${frameCount})`);
           return [...finalFrames]; // Create new array reference
         });
-        setLoadingFromCache(false);
 
         // Set warning if we have fewer frames than requested
         if (finalFrames.length < frameCount) {
@@ -332,9 +356,30 @@ export default function FramesAnalytics() {
         if (!shouldShowProgress && !calculatingAnalytics) {
           setShowProgressBar(false);
         }
+
+        // Final safety check: ensure loading message is hidden
+        setLoadingFromCache(false);
+
+        // Recalculate storage usage asynchronously (non-blocking)
+        // This happens after loading is set to false so buttons aren't blocked
+        if (mounted && !cancelled) {
+          // Use setTimeout to ensure this doesn't block the finally block
+          setTimeout(async () => {
+            if (mounted && !cancelled) {
+              try {
+                const usage = await estimateStorageUsage();
+                setStorageUsage(usage);
+              } catch (err) {
+                console.warn("Failed to recalculate storage usage:", err);
+              }
+            }
+          }, 100);
+        }
       } catch (err) {
         if (mounted && !cancelled) {
           setError(err instanceof Error ? err.message : "Failed to load frames");
+          // Hide loading message on error
+          setLoadingFromCache(false);
 
           // Try to use cached frames as fallback
           try {
@@ -354,9 +399,9 @@ export default function FramesAnalytics() {
           }
         }
       } finally {
-        if (mounted && !cancelled) {
-          setLoading(false);
-        }
+        // Always set loading to false in finally block
+        // The cleanup function handles unmounting, so it's safe to always set it here
+        setLoading(false);
       }
     }
 
@@ -365,6 +410,8 @@ export default function FramesAnalytics() {
     return () => {
       mounted = false;
       cancelled = true;
+      // Note: loading will be set to false in the finally block of loadFrames
+      // No need to set it here to avoid race conditions
     };
   }, [frameCount]);
 
@@ -375,6 +422,7 @@ export default function FramesAnalytics() {
     async function loadOrCalculateAnalytics() {
       // Don't calculate analytics while still loading frames
       if (loading) {
+        setCalculatingAnalytics(false); // Ensure it's false when waiting for frames
         return;
       }
 
@@ -385,6 +433,7 @@ export default function FramesAnalytics() {
         setCachedProverDistribution([]);
         setCachedFramesPerProverPerHour(null);
         setCachedFrameSpacingOverTime(null);
+        setCalculatingAnalytics(false); // Ensure it's false when no frames
         return;
       }
 
@@ -393,20 +442,14 @@ export default function FramesAnalytics() {
       // (some frames may be missing/unavailable)
       if (frames.length < frameCount && loading) {
         // Still loading - wait for more frames
-        console.log(`Waiting for more frames: have ${frames.length}, need ${frameCount}, still loading`);
         return;
       }
 
-      // If we have fewer frames than requested but loading is complete,
-      // proceed with what we have (some frames may be missing)
-      if (frames.length < frameCount && !loading) {
-        console.log(`Proceeding with ${frames.length} frames (requested ${frameCount}). Some frames may be missing.`);
-      }
-
       const latestFrameNumber = frames[frames.length - 1]?.header.frameNumber;
-      if (!latestFrameNumber) return;
-
-      console.log(`loadOrCalculateAnalytics: frames.length=${frames.length}, frameCount=${frameCount}, latestFrameNumber=${latestFrameNumber}`);
+      if (!latestFrameNumber) {
+        setCalculatingAnalytics(false); // Ensure it's false when no latest frame
+        return;
+      }
 
       // Try to load from IndexedDB cache first
       try {
@@ -414,7 +457,6 @@ export default function FramesAnalytics() {
         // Only use cache if frameCount matches exactly AND cached data length matches the actual frames we have
         // This handles cases where we have fewer frames than requested (some frames may be missing)
         if (cached && mounted && cached.frameCount === frameCount && cached.analyticsData.length === frames.length) {
-          console.log(`Using cached analytics for frameCount=${frameCount}, cached length=${cached.analyticsData.length}, frames.length=${frames.length}`);
           setCachedAnalyticsData(cached.analyticsData);
           setCachedStats(cached.stats);
           setCachedProverDistribution(cached.proverDistribution);
@@ -425,14 +467,8 @@ export default function FramesAnalytics() {
             setCachedFrameSpacingOverTime(cached.frameSpacingOverTime);
           }
           setShowProgressBar(false);
+          setCalculatingAnalytics(false); // Ensure this is false when using cached analytics
           return;
-        } else if (cached && mounted) {
-          // Cache exists but doesn't match - log why
-          if (cached.frameCount !== frameCount) {
-            console.log(`Cache mismatch: cached.frameCount=${cached.frameCount}, requested=${frameCount}`);
-          } else if (cached.analyticsData.length !== frames.length) {
-            console.log(`Cache mismatch: cached.length=${cached.analyticsData.length}, frames.length=${frames.length} (requested ${frameCount})`);
-          }
         }
       } catch (err) {
         console.warn("Failed to load analytics cache:", err);
@@ -564,7 +600,6 @@ export default function FramesAnalytics() {
             setProgress({ current: frames.length, total: frames.length, phase: "analytics" });
           }
 
-          console.log(`Setting analytics data: processedData.length=${processedData.length}, frameCount=${frameCount}, calculatedStats.totalFrames=${calculatedStats.totalFrames}`);
           setCachedAnalyticsData(processedData);
           setCachedStats(calculatedStats);
           setCachedProverDistribution(calculatedDistribution);
@@ -612,6 +647,8 @@ export default function FramesAnalytics() {
 
     return () => {
       mounted = false;
+      // Ensure calculatingAnalytics is reset when effect unmounts
+      setCalculatingAnalytics(false);
     };
   }, [frames, frameCount, loading]);
 
@@ -619,6 +656,8 @@ export default function FramesAnalytics() {
   useEffect(() => {
     async function calculateStorage() {
       try {
+        // Add a small delay to ensure IndexedDB operations from frame loading are complete
+        await new Promise(resolve => setTimeout(resolve, 500));
         const usage = await estimateStorageUsage();
         setStorageUsage(usage);
       } catch (err) {
@@ -742,6 +781,9 @@ export default function FramesAnalytics() {
         totalFrames: 0,
         totalRequests: 0,
         avgRequestsPerFrame: 0,
+        minRequestsPerFrame: 0,
+        maxRequestsPerFrame: 0,
+        medianRequestsPerFrame: 0,
         uniqueProvers: 0,
         uniqueSelectors: 0,
         avgFrameSpacing: 0,
@@ -756,6 +798,20 @@ export default function FramesAnalytics() {
     const totalRequests = analyticsDataToProcess.reduce((sum, f) => sum + f.requests, 0);
     const avgRequestsPerFrame = totalRequests / analyticsDataToProcess.length;
 
+    // Calculate requests per frame statistics
+    const requestsPerFrame = analyticsDataToProcess.map((f) => f.requests);
+    const sortedRequests = [...requestsPerFrame].sort((a, b) => a - b);
+    const minRequestsPerFrame = sortedRequests[0];
+    const maxRequestsPerFrame = sortedRequests[sortedRequests.length - 1];
+
+    // Calculate median (50th percentile)
+    const calculatePercentile = (sorted: number[], percentile: number): number => {
+      if (sorted.length === 0) return 0;
+      const index = Math.ceil((percentile / 100) * sorted.length) - 1;
+      return sorted[Math.max(0, index)];
+    };
+    const medianRequestsPerFrame = calculatePercentile(sortedRequests, 50);
+
     const uniqueProvers = new Set(analyticsDataToProcess.map((f) => f.prover)).size;
     const uniqueSelectors = new Set(analyticsDataToProcess.map((f) => f.selector)).size;
 
@@ -769,12 +825,6 @@ export default function FramesAnalytics() {
     }
 
     // Calculate percentiles for frame spacing
-    const calculatePercentile = (sorted: number[], percentile: number): number => {
-      if (sorted.length === 0) return 0;
-      const index = Math.ceil((percentile / 100) * sorted.length) - 1;
-      return sorted[Math.max(0, index)];
-    };
-
     const sortedSpacings = [...spacings].sort((a, b) => a - b);
     const p50 = calculatePercentile(sortedSpacings, 50);
     const p75 = calculatePercentile(sortedSpacings, 75);
@@ -790,6 +840,9 @@ export default function FramesAnalytics() {
       totalFrames: analyticsDataToProcess.length,
       totalRequests,
       avgRequestsPerFrame,
+      minRequestsPerFrame,
+      maxRequestsPerFrame,
+      medianRequestsPerFrame,
       uniqueProvers,
       uniqueSelectors,
       avgFrameSpacing,
@@ -1060,6 +1113,7 @@ export default function FramesAnalytics() {
                         }
                       }}
                       disabled={loading || calculatingAnalytics}
+                      title={loading ? "Loading frames..." : calculatingAnalytics ? "Calculating analytics..." : ""}
                       className={`text-xs font-semibold uppercase tracking-[0.3em] transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${
                         frameCount === count
                           ? "text-burgundy dark:text-white font-bold"
@@ -1126,23 +1180,45 @@ export default function FramesAnalytics() {
         <section className="mb-10 rounded-3xl border border-burgundy/10 bg-white/95 p-8 text-burgundy shadow-[0_35px_80px_-50px_rgba(57,31,91,0.45)] dark:border-white/10 dark:bg-[#1a0f27]/95 dark:text-white">
           <h2 className="mb-6 text-2xl font-semibold">Statistics</h2>
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
-            <div className="rounded-2xl border border-burgundy/10 bg-white/90 p-5 dark:border-white/10 dark:bg-[#211430]">
-              <div className="text-xs font-semibold uppercase tracking-[0.3em] text-burgundy/60 dark:text-white/60">
-                Total Frames
+            <div className="flex flex-col gap-3">
+              <div className="rounded-2xl border border-burgundy/10 bg-white/90 p-4 dark:border-white/10 dark:bg-[#211430] flex-1">
+                <div className="text-xs font-semibold uppercase tracking-[0.3em] text-burgundy/60 dark:text-white/60">
+                  Total Frames
+                </div>
+                <div className="mt-2 text-2xl font-semibold">
+                  {stats.totalFrames.toLocaleString()}
+                </div>
               </div>
-              <div className="mt-2 text-2xl font-semibold">
-                {stats.totalFrames.toLocaleString()}
+              <div className="rounded-2xl border border-burgundy/10 bg-white/90 p-4 dark:border-white/10 dark:bg-[#211430] flex-1">
+                <div className="text-xs font-semibold uppercase tracking-[0.3em] text-burgundy/60 dark:text-white/60">
+                  Total Requests
+                </div>
+                <div className="mt-2 text-2xl font-semibold">
+                  {stats.totalRequests.toLocaleString()}
+                </div>
               </div>
             </div>
             <div className="rounded-2xl border border-burgundy/10 bg-white/90 p-5 dark:border-white/10 dark:bg-[#211430]">
               <div className="text-xs font-semibold uppercase tracking-[0.3em] text-burgundy/60 dark:text-white/60">
-                Total Requests
+                Requests Per Frame
               </div>
-              <div className="mt-2 text-2xl font-semibold">
-                {stats.totalRequests.toLocaleString()}
-              </div>
-              <div className="mt-1 text-sm text-burgundy/70 dark:text-white/70">
-                Avg: {stats.avgRequestsPerFrame.toFixed(2)} per frame
+              <div className="mt-2 space-y-1 text-sm">
+                <div className="flex justify-between">
+                  <span className="text-burgundy/70 dark:text-white/70">Min:</span>
+                  <span className="font-semibold">{stats.minRequestsPerFrame.toLocaleString()}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-burgundy/70 dark:text-white/70">Median:</span>
+                  <span className="font-semibold">{stats.medianRequestsPerFrame.toLocaleString()}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-burgundy/70 dark:text-white/70">Max:</span>
+                  <span className="font-semibold">{stats.maxRequestsPerFrame.toLocaleString()}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-burgundy/70 dark:text-white/70">Avg:</span>
+                  <span className="font-semibold">{stats.avgRequestsPerFrame.toFixed(2)}</span>
+                </div>
               </div>
             </div>
             <div className="rounded-2xl border border-burgundy/10 bg-white/90 p-5 dark:border-white/10 dark:bg-[#211430]">
@@ -1493,48 +1569,6 @@ export default function FramesAnalytics() {
             </ResponsiveContainer>
           </section>
         )}
-
-        {/* Frame Spacing Percentile Distribution */}
-        <section className="mb-10 rounded-3xl border border-burgundy/10 bg-white/95 p-8 shadow-[0_35px_80px_-50px_rgba(57,31,91,0.45)] dark:border-white/10 dark:bg-[#1a0f27]/95 dark:text-white">
-          <h2 className="mb-6 text-2xl font-semibold">Frame Spacing Percentile Distribution</h2>
-          <ResponsiveContainer width="100%" height={400}>
-            <BarChart
-              data={[
-                { percentile: "P50", value: stats.p50 },
-                { percentile: "P75", value: stats.p75 },
-                { percentile: "P90", value: stats.p90 },
-                { percentile: "P95", value: stats.p95 },
-                { percentile: "P99", value: stats.p99 },
-              ]}
-            >
-              <CartesianGrid strokeDasharray="3 3" stroke={gridColor} />
-              <XAxis
-                dataKey="percentile"
-                stroke={axisColor}
-                style={{ fontSize: "12px" }}
-                tick={{ fill: axisColor }}
-              />
-              <YAxis
-                stroke={axisColor}
-                style={{ fontSize: "12px" }}
-                label={{ value: "Spacing", angle: -90, position: "insideLeft" }}
-                tick={{ fill: axisColor }}
-                tickFormatter={(value) => formatSpacing(value)}
-              />
-              <Tooltip
-                contentStyle={{
-                  backgroundColor: tooltipBg,
-                  border: `1px solid ${tooltipBorder}`,
-                  borderRadius: "8px",
-                  color: isDark ? "#ffffff" : "#391F5B",
-                }}
-                formatter={(value: number) => formatSpacing(value)}
-              />
-              <Legend wrapperStyle={{ color: isDark ? "#ffffff" : "#391F5B" }} />
-              <Bar dataKey="value" fill={barColor} name="Frame Spacing" />
-            </BarChart>
-          </ResponsiveContainer>
-        </section>
       </div>
 
       {/* Clear Frame Data Modal */}
