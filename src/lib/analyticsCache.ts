@@ -13,6 +13,9 @@ interface AnalyticsCache {
     totalFrames: number;
     totalRequests: number;
     avgRequestsPerFrame: number;
+    minRequestsPerFrame: number;
+    maxRequestsPerFrame: number;
+    medianRequestsPerFrame: number;
     uniqueProvers: number;
     uniqueSelectors: number;
     avgFrameSpacing: number;

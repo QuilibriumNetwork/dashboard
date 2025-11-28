@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
-import { Helmet } from "react-helmet-async";
 import { Link, useParams } from "react-router-dom";
+import { PageLayout } from "@/components/PageLayout";
 
 import { PeerRecord, explorerApi } from "@/lib/api";
 import { formatTimestamp, formatRelative, formatRelativeTime } from "@/lib/format";
@@ -208,24 +208,14 @@ export default function PeerDetail() {
   }
 
   return (
-    <div className="relative min-h-screen bg-beige pb-24 pt-16 dark:bg-[#100418]">
-      <Helmet>
-        <title>Peer {peer?.peer_id.slice(0, 16)}… • Quilibrium Explorer</title>
-      </Helmet>
-
-      <div className="pointer-events-none absolute -left-16 top-10 h-72 w-72 rounded-full bg-light-purple/60 blur-3xl dark:bg-purple/40" />
-      <div className="pointer-events-none absolute -right-24 top-32 h-80 w-80 rounded-full bg-light-blue/70 blur-3xl dark:bg-blue/40 overflow-hidden" />
-      <div className="pointer-events-none absolute left-1/2 top-[420px] h-80 w-80 -translate-x-1/2 rounded-full bg-light-green/60 blur-3xl dark:bg-green/30" />
-
+    <PageLayout title={`Peer ${peer?.peer_id.slice(0, 16)}… • Quilibrium Explorer`}>
       <div className="relative mx-auto max-w-6xl px-6">
         <div className="flex items-center justify-between gap-4">
           <Link to="/" className="text-sm font-semibold uppercase tracking-[0.3em] text-burgundy/70 hover:text-burgundy dark:text-white/70">
             ← Back
           </Link>
-          {lastSeenTimestamp && (
-            <div className="text-xs uppercase tracking-[0.3em] text-burgundy/60 dark:text-white/60">
-              {formatTimestamp(lastSeenTimestamp)} {formatRelative(lastSeenTimestamp) && `(${formatRelative(lastSeenTimestamp)})`}
-            </div>
+          {peer && (
+            <CopyPeerDataButton peer={peer} />
           )}
         </div>
 
@@ -238,18 +228,18 @@ export default function PeerDetail() {
         {peer && (
           <>
             <section className="mt-6 rounded-3xl border border-burgundy/10 bg-white/95 p-8 text-burgundy shadow-[0_35px_80px_-50px_rgba(57,31,91,0.45)] dark:border-white/10 dark:bg-[#1a0f27]/95 dark:text-white">
-              <div className="flex items-start justify-between gap-4 -mt-2">
-                <div className="flex-1 min-w-0">
-                  <h1 className="text-3xl font-mono font-semibold break-all text-burgundy dark:text-white">
-                    <HoverableCopyText text={peer.peer_id}>
-                      {peer.peer_id}
-                    </HoverableCopyText>
-                  </h1>
-                  <h2 className="mt-2 text-lg font-semibold text-burgundy/80 dark:text-white/80">Peer Details</h2>
-                </div>
-                <div className="-mt-2 -mr-4">
-                  <CopyPeerDataButton peer={peer} />
-                </div>
+              <div className="flex-1 min-w-0">
+                <h1 className="text-xl md:text-2xl font-mono font-semibold break-all text-burgundy dark:text-white">
+                  <HoverableCopyText text={peer.peer_id}>
+                    {peer.peer_id}
+                  </HoverableCopyText>
+                </h1>
+                {lastSeenTimestamp && (
+                  <div className="mt-1 text-xs uppercase tracking-[0.3em] text-burgundy/60 dark:text-white/60">
+                    {formatTimestamp(lastSeenTimestamp)} {formatRelative(lastSeenTimestamp) && `(${formatRelative(lastSeenTimestamp)})`}
+                  </div>
+                )}
+                <h2 className="mt-3 text-lg font-semibold text-burgundy/80 dark:text-white/80">Peer Details</h2>
               </div>
 
               <div className="mt-6 grid gap-4 md:grid-cols-2">
@@ -320,7 +310,7 @@ export default function PeerDetail() {
                           <div className="text-[0.7rem] font-semibold uppercase tracking-[0.3em] text-burgundy/60 dark:text-white/60 mb-2">
                             Filter
                           </div>
-                          <div className="font-mono text-sm break-all">
+                          <div className="font-mono text-xs md:text-sm break-all md:break-normal md:truncate">
                             <HoverableCopyText text={reach.filter}>
                               {reach.filter}
                             </HoverableCopyText>
@@ -333,7 +323,7 @@ export default function PeerDetail() {
                           {reach.pubsub_multiaddrs && reach.pubsub_multiaddrs.length > 0 ? (
                             <div className="space-y-2">
                               {reach.pubsub_multiaddrs.map((addr, addrIndex) => (
-                                <div key={addrIndex} className="font-mono text-sm break-all">
+                                <div key={addrIndex} className="font-mono text-xs md:text-sm break-all md:break-normal md:truncate">
                                   <HoverableCopyText text={addr}>
                                     {addr}
                                   </HoverableCopyText>
@@ -351,7 +341,7 @@ export default function PeerDetail() {
                           {reach.stream_multiaddrs && reach.stream_multiaddrs.length > 0 ? (
                             <div className="space-y-2">
                               {reach.stream_multiaddrs.map((addr, addrIndex) => (
-                                <div key={addrIndex} className="font-mono text-sm break-all">
+                                <div key={addrIndex} className="font-mono text-xs md:text-sm break-all md:break-normal md:truncate">
                                   <HoverableCopyText text={addr}>
                                     {addr}
                                   </HoverableCopyText>
@@ -371,7 +361,7 @@ export default function PeerDetail() {
           </>
         )}
       </div>
-    </div>
+    </PageLayout>
   );
 }
 

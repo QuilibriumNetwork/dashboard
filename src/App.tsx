@@ -12,6 +12,7 @@ const NotFound = lazy(() => import("@/404"));
 const Explorer = lazy(() => import("@/Explorer"));
 const FrameDetail = lazy(() => import("@/FrameDetail"));
 const PeerDetail = lazy(() => import("@/PeerDetail"));
+const Peers = lazy(() => import("@/Peers"));
 const FramesAnalytics = lazy(() => import("@/FramesAnalytics"));
 
 const withSuspense = (
@@ -39,6 +40,7 @@ export default function App() {
             <Route path="/" element={withSuspense(Explorer)} />
             <Route path="/frames/:frameNumber" element={withSuspense(FrameDetail)} />
             <Route path="/frames-analytics" element={withSuspense(FramesAnalytics)} />
+            <Route path="/peers" element={withSuspense(Peers)} />
             <Route path="/peers/:peerId" element={withSuspense(PeerDetail)} />
             <Route path="*" element={withSuspense(NotFound)} />
           </Routes>

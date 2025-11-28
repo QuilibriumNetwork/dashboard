@@ -1,5 +1,5 @@
-import { Helmet } from "react-helmet-async";
 import { useEffect, useMemo, useState } from "react";
+import { PageLayout } from "@/components/PageLayout";
 
 interface FrameHighlight {
   frameNumber: number;
@@ -444,19 +444,7 @@ export default function Explorer() {
 
   return (
     <>
-      <Helmet>
-        <title>Quilibrium Explorer</title>
-        <meta
-          name="description"
-          content="Network explorer that surfaces global frames, shard commitments, and request routing across the Quilibrium protocol."
-        />
-      </Helmet>
-
-      <div className="relative min-h-screen bg-beige pb-24 pt-16 dark:bg-[#100418]">
-        <div className="pointer-events-none absolute -left-16 top-10 h-72 w-72 rounded-full bg-light-purple/60 blur-3xl dark:bg-purple/40" />
-        <div className="pointer-events-none absolute -right-24 top-32 h-80 w-80 rounded-full bg-light-blue/70 blur-3xl dark:bg-blue/40 overflow-hidden" />
-        <div className="pointer-events-none absolute left-1/2 top-[420px] h-80 w-80 -translate-x-1/2 rounded-full bg-light-green/60 blur-3xl dark:bg-green/30" />
-
+      <PageLayout title="Quilibrium Explorer">
         <div className="relative mx-auto max-w-6xl px-6">
           <section className="relative overflow-hidden rounded-3xl border border-burgundy/10 bg-white/95 p-10 text-burgundy shadow-[0_35px_80px_-50px_rgba(57,31,91,0.45)] backdrop-blur-lg dark:border-white/10 dark:bg-[#1a0f27]/95 dark:text-white dark:shadow-[0_40px_90px_-55px_rgba(8,4,20,0.7)]">
             <div className="pointer-events-none absolute -right-10 -top-10 h-44 w-44 rounded-full bg-pink/40 blur-3xl dark:bg-pink/30" />
@@ -777,7 +765,6 @@ export default function Explorer() {
             </div>
           </section>
         </div>
-      </div>
-    </>
+      </PageLayout>
   );
 }

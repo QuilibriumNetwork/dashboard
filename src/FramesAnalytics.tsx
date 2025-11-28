@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
-import { Helmet } from "react-helmet-async";
 import { Link } from "react-router-dom";
+import { PageLayout } from "@/components/PageLayout";
 import {
   LineChart,
   Line,
@@ -18,11 +18,18 @@ import {
 } from "recharts";
 
 import { GlobalFrame, explorerApi } from "@/lib/api";
-import { coerceTimestamp, formatTimestamp } from "@/lib/format";
+import { coerceTimestamp, formatTimestamp, base64ToIPFSCID } from "@/lib/format";
 import Spinner from "@/components/ui/Spinner";
 import Modal from "@/components/ui/Modal";
 import Callout from "@/components/ui/Callout";
 import { useTheme } from "@/components/helpers/ThemeContext";
+import { HoverableCopyText } from "@/components/HoverableCopyText";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/Accordion";
 import {
   getCachedFramesInRange,
   findGapsInCache,
@@ -115,6 +122,9 @@ export default function FramesAnalytics() {
   const [storageUsage, setStorageUsage] = useState<{ sizeBytes: number; frameCount: number } | null>(null);
   const [showClearModal, setShowClearModal] = useState(false);
   const [isClearing, setIsClearing] = useState(false);
+  const [proverQmMap, setProverQmMap] = useState<Map<string, string>>(new Map());
+  const [framesPerProverQmMap, setFramesPerProverQmMap] = useState<Map<string, string>>(new Map());
+  const [hoveredProver, setHoveredProver] = useState<string | null>(null);
 
   // Theme-aware colors
   const isDark = theme === "dark";
@@ -460,7 +470,15 @@ export default function FramesAnalytics() {
         // This handles cases where we have fewer frames than requested (some frames may be missing)
         if (cached && mounted && cached.frameCount === frameCount && cached.analyticsData.length === frames.length) {
           setCachedAnalyticsData(cached.analyticsData);
-          setCachedStats(cached.stats);
+          // Ensure cached stats has all required properties (handle old cache format)
+          const stats = cached.stats;
+          if ('minRequestsPerFrame' in stats && 'maxRequestsPerFrame' in stats && 'medianRequestsPerFrame' in stats) {
+            setCachedStats(stats);
+          } else {
+            // Old cache format - recalculate stats
+            const recalculatedStats = calculateStats(cached.analyticsData);
+            setCachedStats(recalculatedStats);
+          }
           setCachedProverDistribution(cached.proverDistribution);
           if (cached.framesPerProverPerHour) {
             setCachedFramesPerProverPerHour(cached.framesPerProverPerHour);
@@ -1076,6 +1094,48 @@ export default function FramesAnalytics() {
     return { chartData, topProvers };
   }, [analyticsData, cachedFramesPerProverPerHour]);
 
+  // Convert prover addresses to Qm format for Prover Distribution
+  useEffect(() => {
+    async function convertProversToQm() {
+      if (proverDistribution.length === 0) {
+        setProverQmMap(new Map());
+        return;
+      }
+
+      const newMap = new Map<string, string>();
+      const promises = proverDistribution.map(async (entry) => {
+        const qm = await base64ToIPFSCID(entry.prover);
+        if (qm) {
+          newMap.set(entry.prover, qm);
+        }
+      });
+      await Promise.all(promises);
+      setProverQmMap(newMap);
+    }
+    convertProversToQm();
+  }, [proverDistribution]);
+
+  // Convert prover addresses to Qm format for Frames Per Prover Over Time
+  useEffect(() => {
+    async function convertProversToQm() {
+      if (!framesPerProverPerHour || framesPerProverPerHour.topProvers.length === 0) {
+        setFramesPerProverQmMap(new Map());
+        return;
+      }
+
+      const newMap = new Map<string, string>();
+      const promises = framesPerProverPerHour.topProvers.map(async (prover) => {
+        const qm = await base64ToIPFSCID(prover);
+        if (qm) {
+          newMap.set(prover, qm);
+        }
+      });
+      await Promise.all(promises);
+      setFramesPerProverQmMap(newMap);
+    }
+    convertProversToQm();
+  }, [framesPerProverPerHour]);
+
   // Format time spacing for display
   const formatSpacing = (ms: number) => {
     if (ms < 1000) return `${ms.toFixed(0)}ms`;
@@ -1084,18 +1144,40 @@ export default function FramesAnalytics() {
     return `${(ms / 3600000).toFixed(2)}h`;
   };
 
+  // Get color for a prover by index
+  const getProverColor = (index: number) => {
+    const colors = isDark
+      ? [
+          "#ffffff",
+          "#a78bfa",
+          "#60a5fa",
+          "#34d399",
+          "#fbbf24",
+          "#fb7185",
+          "#c084fc",
+          "#818cf8",
+          "#4ade80",
+          "#fcd34d",
+        ]
+      : [
+          "#8B1538",
+          "#6B21A8",
+          "#4338CA",
+          "#059669",
+          "#D97706",
+          "#DC2626",
+          "#7C3AED",
+          "#2563EB",
+          "#16A34A",
+          "#CA8A04",
+        ];
+    return colors[index % colors.length];
+  };
+
   // Don't block the view - always show content
 
   return (
-    <div className="relative min-h-screen bg-beige pb-24 pt-16 dark:bg-[#100418]">
-      <Helmet>
-        <title>Frames Analytics • Quilibrium Explorer</title>
-      </Helmet>
-
-      <div className="pointer-events-none absolute -left-16 top-10 h-72 w-72 rounded-full bg-light-purple/60 blur-3xl dark:bg-purple/40" />
-      <div className="pointer-events-none absolute -right-24 top-32 h-80 w-80 rounded-full bg-light-blue/70 blur-3xl dark:bg-blue/40 overflow-hidden" />
-      <div className="pointer-events-none absolute left-1/2 top-[420px] h-80 w-80 -translate-x-1/2 rounded-full bg-light-green/60 blur-3xl dark:bg-green/30" />
-
+    <PageLayout title="Frames Analytics • Quilibrium Explorer">
       <div className="relative mx-auto max-w-7xl px-6">
         <div className="flex items-center justify-between gap-4 mb-6">
           <Link
@@ -1246,14 +1328,14 @@ export default function FramesAnalytics() {
                 </div>
               </div>
             </div>
-            <div className="rounded-2xl border border-burgundy/10 bg-white/90 p-5 dark:border-white/10 dark:bg-[#211430]">
+            <div className="rounded-2xl border border-burgundy/10 bg-white/90 p-4 dark:border-white/10 dark:bg-[#211430]">
               <div className="text-xs font-semibold uppercase tracking-[0.3em] text-burgundy/60 dark:text-white/60">
                 Unique Provers
               </div>
               <div className="mt-2 text-2xl font-semibold">
                 {stats.uniqueProvers.toLocaleString()}
               </div>
-              <div className="mt-1 text-sm text-burgundy/70 dark:text-white/70">
+              <div className="mt-1 text-xs text-burgundy/70 dark:text-white/70">
                 {stats.uniqueSelectors.toLocaleString()} selectors
               </div>
             </div>
@@ -1296,14 +1378,14 @@ export default function FramesAnalytics() {
               <XAxis
                 dataKey="frameNumber"
                 stroke={axisColor}
-                style={{ fontSize: "12px" }}
-                label={{ value: "Frame Number", position: "insideBottom", offset: -5 }}
+                style={{ fontSize: "clamp(10px, 2.5vw, 12px)" }}
+                label={{ value: "Frame Number", position: "insideBottom", offset: -5, style: { fontSize: "clamp(10px, 2.5vw, 12px)" } }}
                 tick={{ fill: axisColor }}
               />
               <YAxis
                 stroke={axisColor}
-                style={{ fontSize: "12px" }}
-                label={{ value: "Requests", angle: -90, position: "insideLeft" }}
+                style={{ fontSize: "clamp(10px, 2.5vw, 12px)" }}
+                label={{ value: "Requests", angle: -90, position: "insideLeft", style: { fontSize: "clamp(10px, 2.5vw, 12px)" } }}
                 tick={{ fill: axisColor }}
               />
               <Tooltip
@@ -1312,9 +1394,13 @@ export default function FramesAnalytics() {
                   border: `1px solid ${tooltipBorder}`,
                   borderRadius: "8px",
                   color: isDark ? "#ffffff" : "#391F5B",
+                  fontSize: "clamp(11px, 2.5vw, 12px)",
                 }}
               />
-              <Legend wrapperStyle={{ color: isDark ? "#ffffff" : "#391F5B" }} />
+              <Legend
+                wrapperStyle={{ color: isDark ? "#ffffff" : "#391F5B", paddingTop: "20px", fontSize: "clamp(11px, 2.5vw, 12px)" }}
+                verticalAlign="bottom"
+              />
               <Line
                 type="monotone"
                 dataKey="requests"
@@ -1332,8 +1418,10 @@ export default function FramesAnalytics() {
           <h2 className="mb-6 text-2xl font-semibold">
             Prover Distribution (Top 10 by Frame Count)
           </h2>
-          <ResponsiveContainer width="100%" height={400}>
-            <PieChart>
+          <div className="flex flex-col md:flex-row items-center md:items-start gap-6">
+            <div className="md:w-1/2 flex items-center justify-center min-h-[400px]">
+              <ResponsiveContainer width="100%" height={400}>
+              <PieChart>
               <Pie
                 data={proverDistribution}
                 dataKey="count"
@@ -1341,41 +1429,22 @@ export default function FramesAnalytics() {
                 cx="50%"
                 cy="50%"
                 outerRadius={120}
-                label={({ prover, percentage }) =>
-                  `${percentage.toFixed(1)}%`
-                }
+                label={(entry: any) => {
+                  if (entry && typeof entry === 'object' && 'percentage' in entry) {
+                    return `${entry.percentage.toFixed(1)}%`;
+                  }
+                  return '';
+                }}
               >
                 {proverDistribution.map((entry, index) => {
-                  // Generate colors that work in both light and dark mode
-                  const colors = isDark
-                    ? [
-                        "#ffffff",
-                        "#a78bfa",
-                        "#60a5fa",
-                        "#34d399",
-                        "#fbbf24",
-                        "#fb7185",
-                        "#c084fc",
-                        "#818cf8",
-                        "#4ade80",
-                        "#fcd34d",
-                      ]
-                    : [
-                        "#8B1538",
-                        "#6B21A8",
-                        "#4338CA",
-                        "#059669",
-                        "#D97706",
-                        "#DC2626",
-                        "#7C3AED",
-                        "#2563EB",
-                        "#16A34A",
-                        "#CA8A04",
-                      ];
                   return (
                     <Cell
                       key={`cell-${index}`}
-                      fill={colors[index % colors.length]}
+                      fill={getProverColor(index)}
+                      onMouseEnter={() => setHoveredProver(entry.prover)}
+                      onMouseLeave={() => {
+                        // Keep the last hovered prover - don't clear on mouse leave
+                      }}
                     />
                   );
                 })}
@@ -1386,25 +1455,95 @@ export default function FramesAnalytics() {
                   border: `1px solid ${tooltipBorder}`,
                   borderRadius: "8px",
                   color: isDark ? "#ffffff" : "#391F5B",
+                  fontSize: "clamp(11px, 2.5vw, 12px)",
                 }}
-                formatter={(value: number, name: string, props: any) => [
-                  `${value} frames (${props.payload.percentage.toFixed(2)}%) - Last frame: ${props.payload.lastFrameNumber.toLocaleString()} at ${formatTimestamp(String(props.payload.lastTimestamp))}`,
-                  "Frames",
-                ]}
-              />
-              <Legend
-                wrapperStyle={{ color: isDark ? "#ffffff" : "#391F5B" }}
-                formatter={(value: string) => {
-                  const entry = proverDistribution.find((p) => p.prover === value);
-                  if (!entry) return value;
-                  const shortProver = value.length > 20
-                    ? `${value.slice(0, 10)}...${value.slice(-6)}`
-                    : value;
-                  return `${shortProver} (${entry.count} frames, last: ${entry.lastFrameNumber.toLocaleString()} at ${formatTimestamp(String(entry.lastTimestamp))})`;
+                content={({ active, payload }) => {
+                  if (!active || !payload || payload.length === 0) {
+                    // Keep the last hovered prover - don't clear on tooltip inactive
+                    return null;
+                  }
+                  const data = payload[0].payload;
+                  setHoveredProver(data.prover);
+                  return null; // Don't show tooltip, we show info in accordion instead
                 }}
               />
-            </PieChart>
-          </ResponsiveContainer>
+              </PieChart>
+              </ResponsiveContainer>
+            </div>
+            <div className="md:w-1/2 w-full">
+              <Accordion
+                type="single"
+                collapsible
+                value={hoveredProver || undefined}
+                onValueChange={(value) => {
+                  // Allow manual accordion control, but also sync with hover
+                  if (value) {
+                    setHoveredProver(value);
+                  }
+                }}
+                className="w-full"
+              >
+                {proverDistribution.map((entry, index) => {
+                  const qm = proverQmMap.get(entry.prover);
+                  const borderColor = getProverColor(index);
+                  const isHovered = hoveredProver === entry.prover;
+
+                  return (
+                    <AccordionItem
+                      key={entry.prover}
+                      value={entry.prover}
+                      className="border border-burgundy/10 dark:border-white/10 rounded-lg transition-all p-2 mb-2"
+                      style={{
+                        borderColor: borderColor,
+                      }}
+                    >
+                      <AccordionTrigger
+                        className="hover:no-underline px-2"
+                        onMouseEnter={() => setHoveredProver(entry.prover)}
+                      >
+                        <div className="flex items-center gap-3 w-full text-left">
+                          <div
+                            className="w-4 h-4 rounded flex-shrink-0"
+                            style={{ backgroundColor: borderColor }}
+                          />
+                          <div className="flex-1">
+                            <div className="text-sm font-semibold text-burgundy dark:text-white">
+                              {qm ? (
+                                <HoverableCopyText text={qm}>
+                                  <span className="font-mono break-all">{qm}</span>
+                                </HoverableCopyText>
+                              ) : (
+                                <span className="font-mono break-all">{entry.prover}</span>
+                              )}
+                            </div>
+                            <div className="text-xs text-burgundy/60 dark:text-white/60 mt-1">
+                              {entry.percentage.toFixed(2)}% • {entry.count.toLocaleString()} frames
+                            </div>
+                          </div>
+                        </div>
+                      </AccordionTrigger>
+                      <AccordionContent>
+                        <div className="pt-2 pb-4 px-4 space-y-2 text-xs">
+                          <div className="flex justify-between">
+                            <span className="text-burgundy/70 dark:text-white/70">Frames processed:</span>
+                            <span className="font-semibold">{entry.count.toLocaleString()}/{stats.totalFrames.toLocaleString()} ({entry.percentage.toFixed(2)}%)</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="text-burgundy/70 dark:text-white/70">Last frame processed:</span>
+                            <span className="font-semibold">{entry.lastFrameNumber.toLocaleString()}</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="text-burgundy/70 dark:text-white/70">Last frame processed timestamp:</span>
+                            <span className="font-semibold">{formatTimestamp(String(entry.lastTimestamp))}</span>
+                          </div>
+                        </div>
+                      </AccordionContent>
+                    </AccordionItem>
+                  );
+                })}
+              </Accordion>
+            </div>
+          </div>
         </section>
 
         {/* Frames Per Prover Per Hour */}
@@ -1469,7 +1608,7 @@ export default function FramesAnalytics() {
                 <XAxis
                   dataKey="hour"
                   stroke={axisColor}
-                  style={{ fontSize: "11px" }}
+                  style={{ fontSize: "clamp(10px, 2.5vw, 11px)" }}
                   angle={-45}
                   textAnchor="end"
                   height={80}
@@ -1477,8 +1616,8 @@ export default function FramesAnalytics() {
                 />
                 <YAxis
                   stroke={axisColor}
-                  style={{ fontSize: "12px" }}
-                  label={{ value: "Frames", angle: -90, position: "insideLeft" }}
+                  style={{ fontSize: "clamp(10px, 2.5vw, 12px)" }}
+                  label={{ value: "Frames", angle: -90, position: "insideLeft", style: { fontSize: "clamp(10px, 2.5vw, 12px)" } }}
                   tick={{ fill: axisColor }}
                 />
                 <Tooltip
@@ -1487,19 +1626,47 @@ export default function FramesAnalytics() {
                     border: `1px solid ${tooltipBorder}`,
                     borderRadius: "8px",
                     color: isDark ? "#ffffff" : "#391F5B",
+                    fontSize: "clamp(11px, 2.5vw, 12px)",
                   }}
-                  formatter={(value: number, name: string) => [
-                    `${value} frames`,
-                    name.length > 20 ? `${name.slice(0, 10)}...${name.slice(-6)}` : name,
-                  ]}
+                  formatter={(value: number, name: string) => {
+                    const qm = framesPerProverQmMap.get(name);
+                    const displayName = qm ? (qm.length > 20 ? `${qm.slice(0, 10)}...${qm.slice(-6)}` : qm) : (name.length > 20 ? `${name.slice(0, 10)}...${name.slice(-6)}` : name);
+                    return [`${value} frames`, displayName];
+                  }}
                 />
                 <Legend
-                  wrapperStyle={{ color: isDark ? "#ffffff" : "#391F5B" }}
-                  formatter={(value: string) => {
-                    const shortProver = value.length > 20
-                      ? `${value.slice(0, 10)}...${value.slice(-6)}`
-                      : value;
-                    return shortProver;
+                  wrapperStyle={{ color: isDark ? "#ffffff" : "#391F5B", fontSize: "clamp(10px, 2.5vw, 12px)" }}
+                  verticalAlign="bottom"
+                  content={(props) => {
+                    const { payload } = props;
+                    if (!payload || !Array.isArray(payload)) return null;
+                    return (
+                      <div className="flex flex-col sm:flex-row sm:flex-wrap justify-center gap-2 sm:gap-3 mt-4">
+                        {payload.map((entry: any, index: number) => {
+                          const qm = framesPerProverQmMap.get(entry.value);
+                          const displayText = qm ? (qm.length > 20 ? `${qm.slice(0, 10)}...${qm.slice(-6)}` : qm) : (entry.value.length > 20 ? `${entry.value.slice(0, 10)}...${entry.value.slice(-6)}` : entry.value);
+                          return (
+                            <div key={index} className="flex items-center gap-2 text-xs">
+                              <div
+                                style={{
+                                  width: "12px",
+                                  height: "12px",
+                                  backgroundColor: entry.color,
+                                  borderRadius: "2px",
+                                }}
+                              />
+                              {qm ? (
+                                <HoverableCopyText text={qm}>
+                                  <span className="font-mono">{displayText}</span>
+                                </HoverableCopyText>
+                              ) : (
+                                <span className="font-mono">{displayText}</span>
+                              )}
+                            </div>
+                          );
+                        })}
+                      </div>
+                    );
                   }}
                 />
                 {framesPerProverPerHour.topProvers.map((prover, index) => {
@@ -1550,12 +1717,12 @@ export default function FramesAnalytics() {
           <section className="mb-10 rounded-3xl border border-burgundy/10 bg-white/95 p-8 shadow-[0_35px_80px_-50px_rgba(57,31,91,0.45)] dark:border-white/10 dark:bg-[#1a0f27]/95 dark:text-white">
             <h2 className="mb-6 text-2xl font-semibold">Average Time Between Frames Over Time</h2>
             <ResponsiveContainer width="100%" height={400}>
-              <LineChart data={frameSpacingOverTime}>
+              <LineChart data={frameSpacingOverTime} margin={{ left: 50, right: 20 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke={gridColor} />
                 <XAxis
                   dataKey="timeLabel"
                   stroke={axisColor}
-                  style={{ fontSize: "11px" }}
+                  style={{ fontSize: "clamp(10px, 2.5vw, 11px)" }}
                   angle={-45}
                   textAnchor="end"
                   height={80}
@@ -1563,8 +1730,19 @@ export default function FramesAnalytics() {
                 />
                 <YAxis
                   stroke={axisColor}
-                  style={{ fontSize: "12px" }}
-                  label={{ value: "Average Spacing", angle: -90, position: "insideLeft" }}
+                  style={{ fontSize: "clamp(10px, 2.5vw, 12px)" }}
+                  width={100}
+                  label={{
+                    value: "Average Spacing",
+                    angle: -90,
+                    position: "insideLeft",
+                    style: {
+                      fontSize: "clamp(11px, 2.5vw, 12px)",
+                      fontWeight: "bold",
+                      textAnchor: "middle"
+                    },
+                    offset: 15
+                  }}
                   tick={{ fill: axisColor }}
                   tickFormatter={(value) => formatSpacing(value)}
                 />
@@ -1574,6 +1752,7 @@ export default function FramesAnalytics() {
                     border: `1px solid ${tooltipBorder}`,
                     borderRadius: "8px",
                     color: isDark ? "#ffffff" : "#391F5B",
+                    fontSize: "clamp(11px, 2.5vw, 12px)",
                   }}
                   formatter={(value: number, name: string, props: any) => [
                     `${formatSpacing(value)} (${props.payload.frameCount} frame${props.payload.frameCount === 1 ? "" : "s"})`,
@@ -1581,7 +1760,7 @@ export default function FramesAnalytics() {
                   ]}
                   labelFormatter={(label) => `Time: ${label}`}
                 />
-                <Legend wrapperStyle={{ color: isDark ? "#ffffff" : "#391F5B" }} />
+                <Legend wrapperStyle={{ color: isDark ? "#ffffff" : "#391F5B", fontSize: "clamp(11px, 2.5vw, 12px)" }} />
                 <Line
                   type="monotone"
                   dataKey="avgSpacing"
@@ -1618,7 +1797,7 @@ export default function FramesAnalytics() {
             <div className="space-y-2">
               <button
                 onClick={() => handleDeleteFrames(10)}
-                disabled={isClearing || (storageUsage && storageUsage.frameCount <= 10)}
+                disabled={isClearing || !!(storageUsage && storageUsage.frameCount <= 10)}
                 className="w-full text-left px-4 py-3 rounded-lg border border-burgundy/20 dark:border-white/20 bg-white dark:bg-[#1a0f27] text-burgundy dark:text-white hover:bg-burgundy/10 dark:hover:bg-white/10 hover:border-burgundy/30 dark:hover:border-white/30 focus:outline-none focus:ring-2 focus:ring-burgundy/30 dark:focus:ring-white/30 transition-colors disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-white disabled:dark:hover:bg-[#1a0f27] disabled:hover:border-burgundy/20 disabled:dark:hover:border-white/20"
               >
                 Delete All Frames
@@ -1659,7 +1838,7 @@ export default function FramesAnalytics() {
           )}
         </div>
       </Modal>
-    </div>
+    </PageLayout>
   );
 }
 

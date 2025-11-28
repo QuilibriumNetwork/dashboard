@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
-import { Helmet } from "react-helmet-async";
 import { Link, useParams } from "react-router-dom";
+import { PageLayout } from "@/components/PageLayout";
 
 import { GlobalFrame, FrameRequest, explorerApi } from "@/lib/api";
 import {
@@ -140,15 +140,7 @@ export default function FrameDetail() {
   }
 
   return (
-    <div className="relative min-h-screen bg-beige pb-24 pt-16 dark:bg-[#100418]">
-      <Helmet>
-        <title>Frame {header?.frameNumber.toLocaleString() ?? ""} • Quilibrium Explorer</title>
-      </Helmet>
-
-      <div className="pointer-events-none absolute -left-16 top-10 h-72 w-72 rounded-full bg-light-purple/60 blur-3xl dark:bg-purple/40" />
-      <div className="pointer-events-none absolute -right-24 top-32 h-80 w-80 rounded-full bg-light-blue/70 blur-3xl dark:bg-blue/40 overflow-hidden" />
-      <div className="pointer-events-none absolute left-1/2 top-[420px] h-80 w-80 -translate-x-1/2 rounded-full bg-light-green/60 blur-3xl dark:bg-green/30" />
-
+    <PageLayout title={`Frame ${header?.frameNumber.toLocaleString() ?? ""} • Quilibrium Explorer`}>
       <div className="relative mx-auto max-w-6xl px-6">
         {/* Hidden element with frame data for copying */}
         {frame && (
@@ -163,10 +155,8 @@ export default function FrameDetail() {
           <Link to="/" className="text-sm font-semibold uppercase tracking-[0.3em] text-burgundy/70 hover:text-burgundy dark:text-white/70">
             ← Back
           </Link>
-          {header && (
-            <div className="text-xs uppercase tracking-[0.3em] text-burgundy/60 dark:text-white/60">
-              {formatTimestamp(header.timestamp)} {formatRelative(header.timestamp) && `(${formatRelative(header.timestamp)})`}
-            </div>
+          {frame && (
+            <CopyFrameDataButton />
           )}
         </div>
 
@@ -177,11 +167,11 @@ export default function FrameDetail() {
         )}
 
         <section className="mt-6 rounded-3xl border border-burgundy/10 bg-white/95 p-8 text-burgundy shadow-[0_35px_80px_-50px_rgba(57,31,91,0.45)] dark:border-white/10 dark:bg-[#1a0f27]/95 dark:text-white">
-          <div className="flex items-start justify-between gap-4 -mt-2">
+          <div className="-mt-2">
             <h1 className="text-3xl font-semibold">Frame #{header?.frameNumber.toLocaleString() ?? frameNumber}</h1>
-            {frame && (
-              <div className="-mt-2 -mr-4">
-                <CopyFrameDataButton />
+            {header && (
+              <div className="mt-2 text-xs uppercase tracking-[0.3em] text-burgundy/60 dark:text-white/60">
+                {formatTimestamp(header.timestamp)} {formatRelative(header.timestamp) && `(${formatRelative(header.timestamp)})`}
               </div>
             )}
           </div>
@@ -262,7 +252,7 @@ export default function FrameDetail() {
           )}
         </section>
       </div>
-    </div>
+    </PageLayout>
   );
 }
 

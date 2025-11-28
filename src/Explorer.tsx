@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState, useRef, useCallback } from "react";
-import { Helmet } from "react-helmet-async";
 import { useNavigate, useSearchParams, useLocation, Link } from "react-router-dom";
+import { PageLayout } from "@/components/PageLayout";
 
 import {
   CertifiedProposal,
@@ -29,9 +29,10 @@ import ChevronDown from "@/components/ui/ChevronDown";
 import Icon from "@/components/ui/Icons";
 import Arrow from "@/components/ui/Arrow";
 import { HoverableCopyText } from "@/components/HoverableCopyText";
+import { usePeerFilters, serializePeerFilters } from "@/components/PeerDirectoryFiltersAndExport";
 import { PeerDirectoryFilters, type PeerFilterState } from "@/components/PeerDirectoryFilters";
-import { PeerDirectory } from "@/components/PeerDirectory";
 import { PeerDirectoryExport } from "@/components/PeerDirectoryExport";
+import { PeerDirectory } from "@/components/PeerDirectory";
 import { FrameFeedFilters, type FrameFilterState } from "@/components/FrameFeedFilters";
 import { FrameFeedExport } from "@/components/FrameFeedExport";
 import {
@@ -419,61 +420,6 @@ function CollapsibleMessage({
   );
 }
 
-// Helper functions to serialize/deserialize filters to/from URL params
-function serializePeerFilters(filters: PeerFilterState): URLSearchParams {
-  const params = new URLSearchParams();
-
-  if (filters.searchQuery) {
-    params.set("filter_peer_id", filters.searchQuery);
-  }
-  if (filters.selectedVersions.size > 0) {
-    params.set("filter_version", Array.from(filters.selectedVersions).join(","));
-  }
-  if (filters.selectedPubsubProtocols.size > 0) {
-    params.set("filter_pubsub", Array.from(filters.selectedPubsubProtocols).join(","));
-  }
-  if (filters.selectedStreamProtocols.size > 0) {
-    params.set("filter_stream", Array.from(filters.selectedStreamProtocols).join(","));
-  }
-  if (filters.selectedCapabilityCounts.size > 0) {
-    params.set("filter_capability_count", Array.from(filters.selectedCapabilityCounts).sort((a, b) => a - b).join(","));
-  }
-
-  return params;
-}
-
-function deserializePeerFilters(params: URLSearchParams, defaultFilters: PeerFilterState): PeerFilterState {
-  const filters = { ...defaultFilters };
-
-  const peerId = params.get("filter_peer_id");
-  if (peerId) {
-    filters.searchQuery = peerId;
-  }
-
-  const versions = params.get("filter_version");
-  if (versions) {
-    filters.selectedVersions = new Set(versions.split(",").filter(Boolean));
-  }
-
-  const pubsub = params.get("filter_pubsub");
-  if (pubsub) {
-    filters.selectedPubsubProtocols = new Set(pubsub.split(",").filter(Boolean) as Array<"tcp" | "udp" | "other">);
-  }
-
-  const stream = params.get("filter_stream");
-  if (stream) {
-    filters.selectedStreamProtocols = new Set(stream.split(",").filter(Boolean) as Array<"tcp" | "udp" | "other">);
-  }
-
-  const capabilityCounts = params.get("filter_capability_count");
-  if (capabilityCounts) {
-    filters.selectedCapabilityCounts = new Set(
-      capabilityCounts.split(",").map(c => parseInt(c, 10)).filter(n => !isNaN(n))
-    );
-  }
-
-  return filters;
-}
 
 function serializeFrameFilters(filters: FrameFilterState): URLSearchParams {
   const params = new URLSearchParams();
@@ -876,167 +822,18 @@ export default function Explorer() {
 
   const peerRows = useMemo(() => formatPeerRows(peers), [peers]);
 
-  // Filter state - initialize from URL params
-  const defaultPeerFilters: PeerFilterState = {
-    searchQuery: "",
-    selectedVersions: new Set(),
-    selectedPubsubProtocols: new Set<"tcp" | "udp" | "other">(),
-    selectedStreamProtocols: new Set<"tcp" | "udp" | "other">(),
-    selectedCapabilityCounts: new Set(),
-  };
-
-  const peerFiltersInitialized = useRef(false);
-  const [filters, setFilters] = useState<PeerFilterState>(() =>
-    deserializePeerFilters(searchParams, defaultPeerFilters)
-  );
-
-  // Mark as initialized after first render
-  useEffect(() => {
-    peerFiltersInitialized.current = true;
-  }, []);
-
-  // Update URL when peer filters change (but not on initial mount)
-  useEffect(() => {
-    if (!peerFiltersInitialized.current) return;
-
-    const newParams = serializePeerFilters(filters);
-    const currentParams = new URLSearchParams(searchParams);
-
-    // Remove old peer filter params
-    currentParams.delete("filter_peer_id");
-    currentParams.delete("filter_version");
-    currentParams.delete("filter_pubsub");
-    currentParams.delete("filter_stream");
-    currentParams.delete("filter_capability_count");
-
-    // Add new peer filter params
-    newParams.forEach((value, key) => {
-      currentParams.set(key, value);
-    });
-
-    // Only update if params actually changed
-    const newParamsStr = currentParams.toString();
-    const oldParamsStr = searchParams.toString();
-    if (newParamsStr !== oldParamsStr) {
-      setSearchParams(currentParams, { replace: true });
-    }
-  }, [filters, searchParams, setSearchParams]);
-
-  // Filter peers excluding version, capability count, and protocol filters (for count calculations)
-  const peersForVersionCounts = useMemo(() => {
-    return peerRows.filter((peer) => {
-      // Search filter
-      if (!matchesSearch(peer, filters.searchQuery)) {
-        return false;
-      }
-
-      return true;
-    });
-  }, [peerRows, filters.searchQuery]);
-
-  // Extract unique versions from filtered peers (excluding version filter)
-  const uniqueVersions = useMemo(() => {
-    const versions = new Set<string>();
-    peersForVersionCounts.forEach((peer) => {
-      versions.add(peer.version);
-    });
-    return Array.from(versions).sort(compareVersions);
-  }, [peersForVersionCounts]);
-
-  // Count peers per version (based on filtered peers, excluding version filter)
-  const versionCounts = useMemo(() => {
-    const counts = new Map<string, number>();
-    peersForVersionCounts.forEach((peer) => {
-      counts.set(peer.version, (counts.get(peer.version) || 0) + 1);
-    });
-    return counts;
-  }, [peersForVersionCounts]);
-
-  // Extract unique capability counts from filtered peers (excluding capability count filter)
-  const uniqueCapabilityCounts = useMemo(() => {
-    const counts = new Set<number>();
-    peersForVersionCounts.forEach((peer) => {
-      counts.add(peer.capabilityCount);
-    });
-    return Array.from(counts).sort((a, b) => a - b);
-  }, [peersForVersionCounts]);
-
-  // Count peers per capability count (based on filtered peers, excluding capability count filter)
-  const capabilityCountCounts = useMemo(() => {
-    const counts = new Map<number, number>();
-    peersForVersionCounts.forEach((peer) => {
-      counts.set(peer.capabilityCount, (counts.get(peer.capabilityCount) || 0) + 1);
-    });
-    return counts;
-  }, [peersForVersionCounts]);
-
-  // Count peers per pubsub protocol (based on filtered peers, excluding protocol filters)
-  const pubsubProtocolCounts = useMemo(() => {
-    const counts = new Map<"tcp" | "udp" | "other", number>();
-    peersForVersionCounts.forEach((peer) => {
-      const protocols = getProtocolsFromAddresses(peer.pubsub);
-      protocols.forEach((protocol) => {
-        counts.set(protocol, (counts.get(protocol) || 0) + 1);
-      });
-    });
-    return counts;
-  }, [peersForVersionCounts]);
-
-  // Count peers per stream protocol (based on filtered peers, excluding protocol filters)
-  const streamProtocolCounts = useMemo(() => {
-    const counts = new Map<"tcp" | "udp" | "other", number>();
-    peersForVersionCounts.forEach((peer) => {
-      const protocols = getProtocolsFromAddresses(peer.stream);
-      protocols.forEach((protocol) => {
-        counts.set(protocol, (counts.get(protocol) || 0) + 1);
-      });
-    });
-    return counts;
-  }, [peersForVersionCounts]);
-
-  // Filter peers based on search, version, and protocol
-  const filteredPeerRows = useMemo(() => {
-    return peerRows.filter((peer) => {
-      // Search filter
-      if (!matchesSearch(peer, filters.searchQuery)) {
-        return false;
-      }
-
-      // Version filter
-      if (filters.selectedVersions.size > 0 && !filters.selectedVersions.has(peer.version)) {
-        return false;
-      }
-
-      // Pubsub protocol filter
-      if (filters.selectedPubsubProtocols.size > 0) {
-        const pubsubProtocols = getProtocolsFromAddresses(peer.pubsub);
-        const hasSelectedProtocol = Array.from(filters.selectedPubsubProtocols).some((protocol) =>
-          pubsubProtocols.has(protocol)
-        );
-        if (!hasSelectedProtocol) {
-          return false;
-        }
-      }
-
-      // Stream protocol filter
-      if (filters.selectedStreamProtocols.size > 0) {
-        const streamProtocols = getProtocolsFromAddresses(peer.stream);
-        const hasSelectedProtocol = Array.from(filters.selectedStreamProtocols).some((protocol) =>
-          streamProtocols.has(protocol)
-        );
-        if (!hasSelectedProtocol) {
-          return false;
-        }
-      }
-
-      // Capability count filter
-      if (filters.selectedCapabilityCounts.size > 0 && !filters.selectedCapabilityCounts.has(peer.capabilityCount)) {
-        return false;
-      }
-
-      return true;
-    });
-  }, [peerRows, filters]);
+  // Use the peer filters hook
+  const {
+    filters,
+    setFilters,
+    filteredPeers: filteredPeerRows,
+    uniqueVersions,
+    versionCounts,
+    uniqueCapabilityCounts,
+    capabilityCountCounts,
+    pubsubProtocolCounts,
+    streamProtocolCounts,
+  } = usePeerFilters(peerRows, peers);
 
   const totalPeerCount = peerRows.length;
   const filteredPeerCount = filteredPeerRows.length;
@@ -1105,16 +902,7 @@ export default function Explorer() {
   }
 
   return (
-    <>
-      <Helmet>
-        <title>Quilibrium Explorer</title>
-      </Helmet>
-
-      <div className="relative min-h-screen bg-beige pb-24 pt-16 dark:bg-[#100418]">
-        <div className="pointer-events-none absolute -left-16 top-10 h-72 w-72 rounded-full bg-light-purple/60 blur-3xl dark:bg-purple/40" />
-        <div className="pointer-events-none absolute -right-24 top-32 h-80 w-80 rounded-full bg-light-blue/70 blur-3xl dark:bg-blue/40 overflow-hidden" />
-        <div className="pointer-events-none absolute left-1/2 top-[420px] h-80 w-80 -translate-x-1/2 rounded-full bg-light-green/60 blur-3xl dark:bg-green/30" />
-
+    <PageLayout title="Quilibrium Explorer">
         <div className="relative mx-auto max-w-6xl px-6">
           <section className="relative overflow-hidden rounded-3xl border border-burgundy/10 bg-white/95 p-10 text-burgundy shadow-[0_35px_80px_-50px_rgba(57,31,91,0.45)] backdrop-blur-lg dark:border-white/10 dark:bg-[#1a0f27]/95 dark:text-white dark:shadow-[0_40px_90px_-55px_rgba(8,4,20,0.7)]">
             <div className="pointer-events-none absolute -right-10 -top-10 h-44 w-44 rounded-full bg-pink/40 blur-3xl dark:bg-pink/30" />
@@ -1364,14 +1152,22 @@ export default function Explorer() {
 
             <div className="relative space-y-6">
               <div className="flex flex-wrap items-start justify-between gap-3">
-                <h2 className="text-lg md:text-3xl font-semibold uppercase tracking-[0.35em] text-burgundy dark:text-white">
-                  Peer directory
-                </h2>
-                <div className="flex flex-col items-end gap-2">
+                <div className="flex flex-col gap-2">
+                  <h2 className="text-lg md:text-3xl font-semibold uppercase tracking-[0.35em] text-burgundy dark:text-white">
+                    Peer directory
+                  </h2>
                   <div className="text-xs font-semibold uppercase tracking-[0.35em] text-burgundy/70 dark:text-white/70">
                     {formattedPeerCount} peers
                   </div>
                   <CopyFilterLinkButton filters={filters} />
+                </div>
+                <div className="flex flex-col items-end gap-2">
+                  <Link
+                    to="/peers"
+                    className="text-xs font-semibold uppercase tracking-[0.3em] text-burgundy/70 hover:text-burgundy dark:text-white/70 dark:hover:text-white transition-colors"
+                  >
+                    View Peers →
+                  </Link>
                 </div>
               </div>
 
@@ -1430,8 +1226,7 @@ export default function Explorer() {
             </div>
           </section>
         </div>
-      </div>
-    </>
+    </PageLayout>
   );
 }
 
