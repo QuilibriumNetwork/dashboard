@@ -23,4 +23,3 @@ export function PageLayout({ title, children }: PageLayoutProps) {
     </div>
   );
 }
-
