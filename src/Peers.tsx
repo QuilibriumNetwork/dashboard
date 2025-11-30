@@ -15,6 +15,7 @@ import {
   formatPeerRows,
   type PeerRow,
 } from "@/lib/peers";
+import { formatRelativeTime, formatTimestamp } from "@/lib/format";
 import { HoverableCopyText } from "@/components/HoverableCopyText";
 import Arrow from "@/components/ui/Arrow";
 import ChevronDown from "@/components/ui/ChevronDown";
@@ -282,100 +283,118 @@ export default function Peers() {
           </div>
         )}
 
-        {/* Total Peers and Favorites Overview */}
+        {/* Total Peers Overview */}
         <section className="mb-10 rounded-3xl border border-burgundy/10 bg-white/95 p-8 text-burgundy shadow-[0_35px_80px_-50px_rgba(57,31,91,0.45)] dark:border-white/10 dark:bg-[#1a0f27]/95 dark:text-white">
           <h2 className="mb-6 text-2xl font-semibold">Peers Overview</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {/* Total Peers */}
-            <div className="rounded-2xl border border-burgundy/10 bg-white/90 p-6 dark:border-white/10 dark:bg-[#211430]">
-              <div className="text-xs font-semibold uppercase tracking-[0.3em] text-burgundy/60 dark:text-white/60">
-                Total Peers
-              </div>
-              <div className="mt-2 text-4xl font-semibold">
-                {peerRows.length.toLocaleString()}
-              </div>
-              {filteredPeers.length !== peerRows.length && (
-                <div className="mt-2 text-sm text-burgundy/70 dark:text-white/70">
-                  {filteredPeers.length.toLocaleString()} match{filteredPeers.length !== 1 ? "es" : ""} your filters
-                </div>
-              )}
+          <div className="rounded-2xl border border-burgundy/10 bg-white/90 p-6 dark:border-white/10 dark:bg-[#211430]">
+            <div className="text-xs font-semibold uppercase tracking-[0.3em] text-burgundy/60 dark:text-white/60">
+              Total Peers
             </div>
-
-            {/* Favorites Section */}
-            {favorites.length > 0 && (
-              <div className="rounded-2xl border border-burgundy/10 bg-white/90 p-6 dark:border-white/10 dark:bg-[#211430]">
-                <div className="flex items-center justify-between mb-2">
-                  <div className="text-xs font-semibold uppercase tracking-[0.3em] text-burgundy/60 dark:text-white/60">
-                    Favorites
-                  </div>
-                  <Link
-                    to="/peer-favorites"
-                    className="text-xs font-semibold uppercase tracking-[0.2em] text-burgundy/70 hover:text-burgundy dark:text-white/70 dark:hover:text-white transition-colors"
-                  >
-                    View All →
-                  </Link>
-                </div>
-                <div className="mt-2 text-4xl font-semibold">
-                  {favorites.length.toLocaleString()}
-                </div>
-                <div className="mt-4 space-y-2 max-h-48 overflow-y-auto">
-                  {favorites
-                    .slice((favoritesPage - 1) * favoritesItemsPerPage, favoritesPage * favoritesItemsPerPage)
-                    .map((favorite) => {
-                      const peerRow = peerRows.find((p) => p.peerId === favorite.peerId);
-                      const peerRecord = peerRecords.find((p) => p.peer_id === favorite.peerId);
-                      return (
-                        <div
-                          key={favorite.peerId}
-                          onClick={() => navigate(`/peers/${favorite.peerId}`)}
-                          className="flex items-center gap-2 p-2 rounded-lg border border-burgundy/10 dark:border-white/10 hover:bg-burgundy/5 dark:hover:bg-white/5 cursor-pointer transition-colors"
-                        >
-                          <Icon name="starbadge" className="w-4 h-4 text-yellow-500 dark:text-yellow-400 flex-shrink-0" />
-                          <div className="flex-1 min-w-0">
-                            <div className="font-mono text-xs truncate">
-                              <HoverableCopyText text={favorite.peerId}>
-                                {favorite.label || shortenPeerId(favorite.peerId)}
-                              </HoverableCopyText>
-                            </div>
-                            {peerRecord ? (
-                              <div className="text-xs text-burgundy/60 dark:text-white/60">
-                                Version {peerRow?.version || peerRecord.version}
-                              </div>
-                            ) : (
-                              <div className="text-xs text-burgundy/60 dark:text-white/60 italic">
-                                Peer not seen
-                              </div>
-                            )}
-                          </div>
-                        </div>
-                      );
-                    })}
-                </div>
-                {favorites.length > favoritesItemsPerPage && (
-                  <div className="mt-3 flex items-center justify-between text-xs">
-                    <button
-                      onClick={() => setFavoritesPage(Math.max(1, favoritesPage - 1))}
-                      disabled={favoritesPage === 1}
-                      className="px-2 py-1 text-burgundy/70 hover:text-burgundy dark:text-white/70 dark:hover:text-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
-                      ← Prev
-                    </button>
-                    <span className="text-burgundy/60 dark:text-white/60">
-                      Page {favoritesPage} of {Math.ceil(favorites.length / favoritesItemsPerPage)}
-                    </span>
-                    <button
-                      onClick={() => setFavoritesPage(Math.min(Math.ceil(favorites.length / favoritesItemsPerPage), favoritesPage + 1))}
-                      disabled={favoritesPage >= Math.ceil(favorites.length / favoritesItemsPerPage)}
-                      className="px-2 py-1 text-burgundy/70 hover:text-burgundy dark:text-white/70 dark:hover:text-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
-                      Next →
-                    </button>
-                  </div>
-                )}
+            <div className="mt-2 text-4xl font-semibold">
+              {peerRows.length.toLocaleString()}
+            </div>
+            {filteredPeers.length !== peerRows.length && (
+              <div className="mt-2 text-sm text-burgundy/70 dark:text-white/70">
+                {filteredPeers.length.toLocaleString()} match{filteredPeers.length !== 1 ? "es" : ""} your filters
               </div>
             )}
           </div>
         </section>
+
+        {/* Favorites Section */}
+        {favorites.length > 0 && (
+          <section className="mb-10 rounded-3xl border border-burgundy/10 bg-white/95 p-8 text-burgundy shadow-[0_35px_80px_-50px_rgba(57,31,91,0.45)] dark:border-white/10 dark:bg-[#1a0f27]/95 dark:text-white">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-2xl font-semibold">Favorites</h2>
+              <Link
+                to="/peer-favorites"
+                className="text-xs font-semibold uppercase tracking-[0.2em] text-burgundy/70 hover:text-burgundy dark:text-white/70 dark:hover:text-white transition-colors"
+              >
+                View All →
+              </Link>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-2 max-h-48 overflow-y-auto">
+              {favorites
+                .slice((favoritesPage - 1) * favoritesItemsPerPage, favoritesPage * favoritesItemsPerPage)
+                .map((favorite) => {
+                  const peerRow = peerRows.find((p) => p.peerId === favorite.peerId);
+                  const peerRecord = peerRecords.find((p) => p.peer_id === favorite.peerId);
+                  const lastSeenTimestamp = peerRecord?.last_seen
+                    ? (peerRecord.last_seen > 1e12
+                        ? new Date(peerRecord.last_seen).toISOString()
+                        : new Date(peerRecord.last_seen * 1000).toISOString())
+                    : null;
+                  return (
+                    <div
+                      key={favorite.peerId}
+                      onClick={() => navigate(`/peers/${favorite.peerId}`)}
+                      className="flex items-center gap-2 p-2 rounded-lg border border-burgundy/10 dark:border-white/10 hover:bg-burgundy/5 dark:hover:bg-white/5 cursor-pointer transition-colors"
+                    >
+                      <div className="flex-1 min-w-0">
+                        <div className="font-mono text-xs truncate md:truncate-none md:break-words">
+                          <HoverableCopyText text={favorite.peerId}>
+                            <span className="md:hidden">{favorite.label || shortenPeerId(favorite.peerId)}</span>
+                            <span className="hidden md:inline">{favorite.label || favorite.peerId}</span>
+                          </HoverableCopyText>
+                        </div>
+                        {peerRecord ? (
+                          <>
+                            <div className="text-xs text-burgundy/60 dark:text-white/60">
+                              Version {peerRow?.version || peerRecord.version}
+                            </div>
+                            {lastSeenTimestamp ? (
+                              <div className="text-xs text-burgundy/50 dark:text-white/50 mt-0.5">
+                                Last seen {formatRelativeTime(lastSeenTimestamp)}
+                              </div>
+                            ) : (
+                              <div className="text-xs text-burgundy/60 dark:text-white/60 italic mt-0.5">
+                                Peer reachability data not found.
+                              </div>
+                            )}
+                          </>
+                        ) : (
+                          <div className="text-xs text-burgundy/60 dark:text-white/60 italic">
+                            Peer not seen
+                          </div>
+                        )}
+                      </div>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          navigate(`/peers/${favorite.peerId}`);
+                        }}
+                        className="flex-shrink-0 p-1.5 rounded-lg border border-burgundy/20 dark:border-white/20 hover:bg-burgundy/10 dark:hover:bg-white/10 transition-colors"
+                        aria-label="View peer"
+                      >
+                        <Icon name="visible" className="w-4 h-4 text-burgundy/70 dark:text-white/70" />
+                      </button>
+                    </div>
+                  );
+                })}
+            </div>
+            {favorites.length > favoritesItemsPerPage && (
+              <div className="mt-3 flex items-center justify-between text-xs">
+                <button
+                  onClick={() => setFavoritesPage(Math.max(1, favoritesPage - 1))}
+                  disabled={favoritesPage === 1}
+                  className="px-2 py-1 text-burgundy/70 hover:text-burgundy dark:text-white/70 dark:hover:text-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  ← Prev
+                </button>
+                <span className="text-burgundy/60 dark:text-white/60">
+                  Page {favoritesPage} of {Math.ceil(favorites.length / favoritesItemsPerPage)}
+                </span>
+                <button
+                  onClick={() => setFavoritesPage(Math.min(Math.ceil(favorites.length / favoritesItemsPerPage), favoritesPage + 1))}
+                  disabled={favoritesPage >= Math.ceil(favorites.length / favoritesItemsPerPage)}
+                  className="px-2 py-1 text-burgundy/70 hover:text-burgundy dark:text-white/70 dark:hover:text-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  Next →
+                </button>
+              </div>
+            )}
+          </section>
+        )}
 
         {/* Version Distribution Pie Chart */}
         {versionDistribution.length > 0 && (
