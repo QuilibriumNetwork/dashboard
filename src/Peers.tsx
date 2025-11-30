@@ -358,16 +358,18 @@ export default function Peers() {
                           </div>
                         )}
                       </div>
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          navigate(`/peers/${favorite.peerId}`);
-                        }}
-                        className="flex-shrink-0 p-1.5 rounded-lg border border-burgundy/20 dark:border-white/20 hover:bg-burgundy/10 dark:hover:bg-white/10 transition-colors"
-                        aria-label="View peer"
-                      >
-                        <Icon name="visible" className="w-4 h-4 text-burgundy/70 dark:text-white/70" />
-                      </button>
+                      {peerRecord && (
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            navigate(`/peers/${favorite.peerId}`);
+                          }}
+                          className="flex-shrink-0 p-1.5 rounded-lg border border-burgundy/20 dark:border-white/20 hover:bg-burgundy/10 dark:hover:bg-white/10 transition-colors"
+                          aria-label="View peer"
+                        >
+                          <Icon name="visible" className="w-4 h-4 text-burgundy/70 dark:text-white/70" />
+                        </button>
+                      )}
                     </div>
                   );
                 })}
