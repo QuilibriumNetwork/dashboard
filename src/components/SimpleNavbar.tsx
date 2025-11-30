@@ -4,11 +4,13 @@ import { createPortal } from "react-dom";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { HeaderSearch } from "@/components/HeaderSearch";
 import HamburgerMenu from "@/assets/icons/iconset/HamburgerMenu";
+import Close from "@/assets/icons/iconset/Close";
 
 export function SimpleNavbar() {
   const location = useLocation();
   const isAnalyticsActive = location.pathname === "/frames-analytics";
   const isPeersActive = location.pathname === "/peers" || location.pathname.startsWith("/peers/");
+  const isFavoritesActive = location.pathname === "/peer-favorites";
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   // Close mobile menu when route changes
@@ -30,7 +32,7 @@ export function SimpleNavbar() {
 
   return (
     <>
-      <nav className="sticky top-0 z-50 border-b border-burgundy/10 bg-white/95 backdrop-blur dark:border-white/10 dark:bg-[#160c21]/90 overflow-visible">
+      <nav className={`sticky top-0 border-b border-burgundy/10 bg-white/95 backdrop-blur dark:border-white/10 dark:bg-[#160c21]/90 overflow-visible ${isMobileMenuOpen ? 'z-[80]' : 'z-50'}`}>
         <div className="container mx-auto px-4 md:px-4 pr-6 md:pr-4">
           <div className="flex h-16 items-center justify-between gap-4">
             <Link to="/" className="flex items-center space-x-3 flex-shrink-0">
@@ -62,6 +64,16 @@ export function SimpleNavbar() {
                 Peers
               </Link>
               <Link
+                to="/peer-favorites"
+                className={`text-sm font-semibold transition-colors ${
+                  isFavoritesActive
+                    ? "text-purple dark:text-light-blue"
+                    : "text-burgundy hover:text-purple dark:text-white dark:hover:text-light-blue"
+                }`}
+              >
+                Favorites
+              </Link>
+              <Link
                 to="/frames-analytics"
                 className={`text-sm font-semibold transition-colors ${
                   isAnalyticsActive
@@ -80,14 +92,18 @@ export function SimpleNavbar() {
               <ThemeToggle />
             </div>
 
-            {/* Mobile Hamburger Button */}
+            {/* Mobile Hamburger/Close Button */}
             <button
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              className="md:hidden flex items-center justify-center h-10 w-10 text-burgundy dark:text-white hover:bg-burgundy/10 dark:hover:bg-white/10 rounded transition-colors"
+              className="md:hidden flex items-center justify-center h-10 w-10 text-burgundy dark:text-white hover:bg-burgundy/10 dark:hover:bg-white/10 rounded transition-colors relative z-[80]"
               aria-label="Toggle menu"
               aria-expanded={isMobileMenuOpen}
             >
-              <HamburgerMenu className="h-6 w-6" />
+              {isMobileMenuOpen ? (
+                <Close className="h-6 w-6" />
+              ) : (
+                <HamburgerMenu className="h-6 w-6" />
+              )}
             </button>
           </div>
         </div>
@@ -98,37 +114,26 @@ export function SimpleNavbar() {
         <>
           {/* Backdrop */}
           <div
-            className="md:hidden fixed top-16 left-0 right-0 bottom-0 w-screen bg-black/20 dark:bg-black/40 z-[60]"
+            className="md:hidden fixed top-0 left-0 right-0 bottom-0 w-screen bg-black/20 dark:bg-black/40 z-[60]"
             onClick={() => setIsMobileMenuOpen(false)}
             style={{ width: '100vw', maxWidth: '100vw' }}
           />
           {/* Menu Drawer */}
-          <div className="md:hidden fixed top-16 left-0 right-0 bottom-0 w-screen bg-white/95 backdrop-blur dark:bg-[#160c21]/95 z-[70] overflow-y-auto"
+          <div className="md:hidden fixed top-0 left-0 right-0 bottom-0 w-screen bg-white/95 backdrop-blur dark:bg-[#160c21]/95 z-[70] overflow-y-auto"
             style={{ width: '100vw', maxWidth: '100vw' }}
           >
-            <div className="w-full px-4 pt-2 pb-6 space-y-4">
-              {/* Header Row: Operational Badge and Close Button */}
-              <div className="flex items-center justify-between -mt-1">
-                {/* Status Badge */}
-                <div className="flex items-center gap-2 rounded-full border border-green/20 bg-light-green/70 px-4 py-2 text-[0.65rem] font-semibold uppercase tracking-[0.35em] text-green shadow-[0_20px_40px_-28px_rgba(34,169,65,0.5)] w-fit dark:border-green/30 dark:bg-green/15 dark:text-green">
-                  <span className="relative inline-flex h-2 w-2">
-                    <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-green/70 opacity-75 dark:bg-green/60" />
-                    <span className="relative inline-flex h-2 w-2 rounded-full bg-green" />
-                  </span>
-                  Operational
-                </div>
-                {/* Close Button */}
-                <button
-                  onClick={() => setIsMobileMenuOpen(false)}
-                  className="flex items-center justify-center w-10 h-10 text-burgundy dark:text-white hover:bg-burgundy/10 dark:hover:bg-white/10 rounded transition-colors -mr-1"
-                  aria-label="Close menu"
-                >
-                  <span className="text-2xl leading-none">×</span>
-                </button>
+            <div className="w-full px-4 pt-20 pb-6 space-y-4">
+              {/* Status Badge */}
+              <div className="flex items-center gap-2 rounded-full border border-green/20 bg-light-green/70 px-4 py-2 text-[0.65rem] font-semibold uppercase tracking-[0.35em] text-green shadow-[0_20px_40px_-28px_rgba(34,169,65,0.5)] w-fit dark:border-green/30 dark:bg-green/15 dark:text-green">
+                <span className="relative inline-flex h-2 w-2">
+                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-green/70 opacity-75 dark:bg-green/60" />
+                  <span className="relative inline-flex h-2 w-2 rounded-full bg-green" />
+                </span>
+                Operational
               </div>
 
               {/* Search */}
-            <div className="w-full -mt-2">
+            <div className="w-full">
               <HeaderSearch fullWidth={true} />
             </div>
 
@@ -144,6 +149,17 @@ export function SimpleNavbar() {
                 onClick={() => setIsMobileMenuOpen(false)}
               >
                 Peers
+              </Link>
+              <Link
+                to="/peer-favorites"
+                className={`text-base font-semibold transition-colors py-2 ${
+                  isFavoritesActive
+                    ? "text-purple dark:text-light-blue"
+                    : "text-burgundy hover:text-purple dark:text-white dark:hover:text-light-blue"
+                }`}
+                onClick={() => setIsMobileMenuOpen(false)}
+              >
+                Favorites
               </Link>
               <Link
                 to="/frames-analytics"

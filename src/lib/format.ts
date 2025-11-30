@@ -231,3 +231,17 @@ export function convertBase64ToHex(obj: unknown): unknown {
 
   return obj;
 }
+
+/**
+ * Truncates text in the middle, showing the beginning and end with ellipsis.
+ * Useful for displaying long IDs or addresses.
+ * @param text - The text to truncate
+ * @param maxLength - Maximum length of the truncated text (default: 30)
+ * @returns Truncated text with ellipsis in the middle
+ */
+export function truncateMiddle(text: string, maxLength: number = 30): string {
+  if (text.length <= maxLength) return text;
+  const start = Math.floor(maxLength / 2) - 2;
+  const end = text.length - (Math.floor(maxLength / 2) - 2);
+  return `${text.slice(0, start)}....${text.slice(end)}`;
+}

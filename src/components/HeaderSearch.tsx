@@ -2,7 +2,10 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { explorerApi, PeerRecord } from "@/lib/api";
 import { formatPeerRows, matchesSearch, PeerRow } from "@/lib/peers";
+import { truncateMiddle } from "@/lib/format";
 import Magnifyingglass from "@/assets/icons/iconset/Magnifyingglass";
+import { usePeerFavorites } from "@/components/helpers/PeerFavoritesContext";
+import Icon from "@/components/ui/Icons";
 
 interface SearchResult {
   type: "peer" | "frame";
@@ -18,6 +21,7 @@ interface HeaderSearchProps {
 
 export function HeaderSearch({ fullWidth = false }: HeaderSearchProps) {
   const navigate = useNavigate();
+  const { isFavorite } = usePeerFavorites();
   const [query, setQuery] = useState("");
   const [showDropdown, setShowDropdown] = useState(false);
   const [isFocused, setIsFocused] = useState(false);
@@ -98,7 +102,23 @@ export function HeaderSearch({ fullWidth = false }: HeaderSearchProps) {
 
     // Search peers
     const matchingPeers = peers.filter((peer) => matchesSearch(peer, trimmedQuery));
+
+    // Separate favorites and non-favorites
+    const favoritePeers: PeerRow[] = [];
+    const nonFavoritePeers: PeerRow[] = [];
+
     for (const peer of matchingPeers) {
+      if (isFavorite(peer.peerId)) {
+        favoritePeers.push(peer);
+      } else {
+        nonFavoritePeers.push(peer);
+      }
+    }
+
+    // Process favorites first, then non-favorites
+    const orderedPeers = [...favoritePeers, ...nonFavoritePeers];
+
+    for (const peer of orderedPeers) {
       // Extract IP addresses for display
       const allAddresses = [...peer.pubsub, ...peer.stream];
       const ipAddresses: string[] = [];
@@ -113,7 +133,7 @@ export function HeaderSearch({ fullWidth = false }: HeaderSearchProps) {
       results.push({
         type: "peer",
         peer,
-        displayText: peer.peerId.slice(0, 20) + (peer.peerId.length > 20 ? "..." : ""),
+        displayText: truncateMiddle(peer.peerId, 30),
         subtitle: ipDisplay,
       });
     }
@@ -273,8 +293,11 @@ export function HeaderSearch({ fullWidth = false }: HeaderSearchProps) {
                     </div>
                   )}
                 </div>
-                <div className="ml-2 text-xs font-semibold uppercase tracking-wider text-burgundy/40 dark:text-white/40">
-                  {result.type === "peer" ? "PEER" : "FRAME"}
+                <div className="ml-2 flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-burgundy/40 dark:text-white/40">
+                  {result.type === "peer" && result.peer && isFavorite(result.peer.peerId) && (
+                    <Icon name="starfilled" className="w-3.5 h-3.5 text-yellow-500 dark:text-yellow-400 flex-shrink-0" />
+                  )}
+                  <span>{result.type === "peer" ? "PEER" : "FRAME"}</span>
                 </div>
               </div>
             </button>

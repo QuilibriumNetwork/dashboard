@@ -21,6 +21,8 @@ import ChevronDown from "@/components/ui/ChevronDown";
 import Spinner from "@/components/ui/Spinner";
 import { useTheme } from "@/components/helpers/ThemeContext";
 import { PeerDirectoryFiltersAndExport } from "@/components/PeerDirectoryFiltersAndExport";
+import { usePeerFavorites } from "@/components/helpers/PeerFavoritesContext";
+import Icon from "@/components/ui/Icons";
 
 function shortenPeerId(peerId: string): string {
   if (peerId.length <= 16) return peerId;
@@ -31,14 +33,19 @@ interface PeerCardProps {
   peer: PeerRow;
 }
 
-function PeerCard({ peer, onNavigate }: PeerCardProps & { onNavigate: () => void }) {
+function PeerCard({ peer, onNavigate, isFavorite }: PeerCardProps & { onNavigate: () => void; isFavorite: boolean }) {
   const shortenedId = shortenPeerId(peer.peerId);
   return (
     <div
       onClick={onNavigate}
       className="rounded-2xl border border-burgundy/10 bg-white/95 p-4 text-sm text-burgundy shadow-[0_20px_55px_-45px_rgba(64,0,27,0.5)] dark:border-white/10 dark:bg-[#211430]/95 dark:text-white cursor-pointer transition hover:bg-light-grey/60 dark:hover:bg-white/5"
     >
-      <div className="text-xs font-semibold uppercase tracking-[0.3em] text-burgundy/60 dark:text-white/60">Peer</div>
+      <div className="flex items-center justify-between mb-1">
+        <div className="text-xs font-semibold uppercase tracking-[0.3em] text-burgundy/60 dark:text-white/60">Peer</div>
+        {isFavorite && (
+          <Icon name="starbadge" className="w-4 h-4 text-yellow-500 dark:text-yellow-400" />
+        )}
+      </div>
       <div className="mt-1 font-mono text-xs">
         <HoverableCopyText text={peer.peerId}>
           {shortenedId}
@@ -80,6 +87,7 @@ function PeerCard({ peer, onNavigate }: PeerCardProps & { onNavigate: () => void
 export default function Peers() {
   const navigate = useNavigate();
   const { theme } = useTheme();
+  const { favorites, isFavorite } = usePeerFavorites();
   const [peerRows, setPeerRows] = useState<PeerRow[]>([]);
   const [peerRecords, setPeerRecords] = useState<PeerRecord[]>([]);
   const [filteredPeers, setFilteredPeers] = useState<PeerRow[]>([]);
@@ -87,6 +95,8 @@ export default function Peers() {
   const [error, setError] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
+  const [favoritesPage, setFavoritesPage] = useState(1);
+  const [favoritesItemsPerPage, setFavoritesItemsPerPage] = useState(10);
 
   // Load peers
   useEffect(() => {
@@ -272,19 +282,96 @@ export default function Peers() {
           </div>
         )}
 
-        {/* Total Peers Panel */}
+        {/* Total Peers and Favorites Overview */}
         <section className="mb-10 rounded-3xl border border-burgundy/10 bg-white/95 p-8 text-burgundy shadow-[0_35px_80px_-50px_rgba(57,31,91,0.45)] dark:border-white/10 dark:bg-[#1a0f27]/95 dark:text-white">
           <h2 className="mb-6 text-2xl font-semibold">Peers Overview</h2>
-          <div className="rounded-2xl border border-burgundy/10 bg-white/90 p-6 dark:border-white/10 dark:bg-[#211430]">
-            <div className="text-xs font-semibold uppercase tracking-[0.3em] text-burgundy/60 dark:text-white/60">
-              Total Peers
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* Total Peers */}
+            <div className="rounded-2xl border border-burgundy/10 bg-white/90 p-6 dark:border-white/10 dark:bg-[#211430]">
+              <div className="text-xs font-semibold uppercase tracking-[0.3em] text-burgundy/60 dark:text-white/60">
+                Total Peers
+              </div>
+              <div className="mt-2 text-4xl font-semibold">
+                {peerRows.length.toLocaleString()}
+              </div>
+              {filteredPeers.length !== peerRows.length && (
+                <div className="mt-2 text-sm text-burgundy/70 dark:text-white/70">
+                  {filteredPeers.length.toLocaleString()} match{filteredPeers.length !== 1 ? "es" : ""} your filters
+                </div>
+              )}
             </div>
-            <div className="mt-2 text-4xl font-semibold">
-              {peerRows.length.toLocaleString()}
-            </div>
-            {filteredPeers.length !== peerRows.length && (
-              <div className="mt-2 text-sm text-burgundy/70 dark:text-white/70">
-                {filteredPeers.length.toLocaleString()} match{filteredPeers.length !== 1 ? "es" : ""} your filters
+
+            {/* Favorites Section */}
+            {favorites.length > 0 && (
+              <div className="rounded-2xl border border-burgundy/10 bg-white/90 p-6 dark:border-white/10 dark:bg-[#211430]">
+                <div className="flex items-center justify-between mb-2">
+                  <div className="text-xs font-semibold uppercase tracking-[0.3em] text-burgundy/60 dark:text-white/60">
+                    Favorites
+                  </div>
+                  <Link
+                    to="/peer-favorites"
+                    className="text-xs font-semibold uppercase tracking-[0.2em] text-burgundy/70 hover:text-burgundy dark:text-white/70 dark:hover:text-white transition-colors"
+                  >
+                    View All →
+                  </Link>
+                </div>
+                <div className="mt-2 text-4xl font-semibold">
+                  {favorites.length.toLocaleString()}
+                </div>
+                <div className="mt-4 space-y-2 max-h-48 overflow-y-auto">
+                  {favorites
+                    .slice((favoritesPage - 1) * favoritesItemsPerPage, favoritesPage * favoritesItemsPerPage)
+                    .map((favorite) => {
+                      const peerRow = peerRows.find((p) => p.peerId === favorite.peerId);
+                      const peerRecord = peerRecords.find((p) => p.peer_id === favorite.peerId);
+                      return (
+                        <div
+                          key={favorite.peerId}
+                          onClick={() => navigate(`/peers/${favorite.peerId}`)}
+                          className="flex items-center gap-2 p-2 rounded-lg border border-burgundy/10 dark:border-white/10 hover:bg-burgundy/5 dark:hover:bg-white/5 cursor-pointer transition-colors"
+                        >
+                          <Icon name="starbadge" className="w-4 h-4 text-yellow-500 dark:text-yellow-400 flex-shrink-0" />
+                          <div className="flex-1 min-w-0">
+                            <div className="font-mono text-xs truncate">
+                              <HoverableCopyText text={favorite.peerId}>
+                                {favorite.label || shortenPeerId(favorite.peerId)}
+                              </HoverableCopyText>
+                            </div>
+                            {peerRecord ? (
+                              <div className="text-xs text-burgundy/60 dark:text-white/60">
+                                Version {peerRow?.version || peerRecord.version}
+                              </div>
+                            ) : (
+                              <div className="text-xs text-burgundy/60 dark:text-white/60 italic">
+                                Peer not seen
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      );
+                    })}
+                </div>
+                {favorites.length > favoritesItemsPerPage && (
+                  <div className="mt-3 flex items-center justify-between text-xs">
+                    <button
+                      onClick={() => setFavoritesPage(Math.max(1, favoritesPage - 1))}
+                      disabled={favoritesPage === 1}
+                      className="px-2 py-1 text-burgundy/70 hover:text-burgundy dark:text-white/70 dark:hover:text-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      ← Prev
+                    </button>
+                    <span className="text-burgundy/60 dark:text-white/60">
+                      Page {favoritesPage} of {Math.ceil(favorites.length / favoritesItemsPerPage)}
+                    </span>
+                    <button
+                      onClick={() => setFavoritesPage(Math.min(Math.ceil(favorites.length / favoritesItemsPerPage), favoritesPage + 1))}
+                      disabled={favoritesPage >= Math.ceil(favorites.length / favoritesItemsPerPage)}
+                      className="px-2 py-1 text-burgundy/70 hover:text-burgundy dark:text-white/70 dark:hover:text-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      Next →
+                    </button>
+                  </div>
+                )}
               </div>
             )}
           </div>
@@ -462,6 +549,7 @@ export default function Peers() {
                   <PeerCard
                     key={peer.peerId}
                     peer={peer}
+                    isFavorite={isFavorite(peer.peerId)}
                     onNavigate={() => navigate(`/peers/${peer.peerId}`)}
                   />
                 ))}
@@ -487,7 +575,12 @@ export default function Peers() {
                         className="cursor-pointer transition hover:bg-light-grey/60 dark:hover:bg-white/5"
                       >
                         <td className="py-3 pr-6 font-mono text-xs whitespace-nowrap">
-                          <HoverableCopyText text={peer.peerId}>{shortenPeerId(peer.peerId)}</HoverableCopyText>
+                          <div className="flex items-center gap-2">
+                            <HoverableCopyText text={peer.peerId}>{shortenPeerId(peer.peerId)}</HoverableCopyText>
+                            {isFavorite(peer.peerId) && (
+                              <Icon name="starbadge" className="w-4 h-4 text-yellow-500 dark:text-yellow-400 flex-shrink-0" />
+                            )}
+                          </div>
                         </td>
                         <td className="py-3 pr-6 text-xs">{peer.version}</td>
                         <td className="py-3 pr-6 text-xs text-right">

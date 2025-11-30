@@ -9,6 +9,7 @@ import { getCapabilityLabel, formatCapability, getAllCapabilityIdentifiers } fro
 import Spinner from "@/components/ui/Spinner";
 import Icon from "@/components/ui/Icons";
 import { HoverableCopyText } from "@/components/HoverableCopyText";
+import { usePeerFavorites } from "@/components/helpers/PeerFavoritesContext";
 
 function DetailCard({
   label,
@@ -151,6 +152,7 @@ export default function PeerDetail() {
   const [peer, setPeer] = useState<PeerRecord | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const { isFavorite, addFavorite, removeFavorite } = usePeerFavorites();
 
   useEffect(() => {
     let mounted = true;
@@ -214,9 +216,30 @@ export default function PeerDetail() {
           <Link to="/" className="text-sm font-semibold uppercase tracking-[0.3em] text-burgundy/70 hover:text-burgundy dark:text-white/70">
             ← Back
           </Link>
-          {peer && (
-            <CopyPeerDataButton peer={peer} />
-          )}
+          <div className="flex items-center gap-4">
+            {peer && (
+              <>
+                <button
+                  onClick={() => {
+                    if (isFavorite(peer.peer_id)) {
+                      removeFavorite(peer.peer_id);
+                    } else {
+                      addFavorite(peer.peer_id);
+                    }
+                  }}
+                  className="flex items-center justify-center w-8 h-8 text-burgundy/70 hover:text-burgundy dark:text-white/70 dark:hover:text-white transition-colors"
+                  aria-label={isFavorite(peer.peer_id) ? "Remove from favorites" : "Add to favorites"}
+                >
+                  {isFavorite(peer.peer_id) ? (
+                    <Icon name="starfilled" className="w-5 h-5 text-yellow-500 dark:text-yellow-400" />
+                  ) : (
+                    <Icon name="staroutline" className="w-5 h-5" />
+                  )}
+                </button>
+                <CopyPeerDataButton peer={peer} />
+              </>
+            )}
+          </div>
         </div>
 
         {error && (
@@ -310,7 +333,7 @@ export default function PeerDetail() {
                           <div className="text-[0.7rem] font-semibold uppercase tracking-[0.3em] text-burgundy/60 dark:text-white/60 mb-2">
                             Filter
                           </div>
-                          <div className="font-mono text-xs md:text-sm break-all md:break-normal md:truncate">
+                          <div className="font-mono text-xs md:text-sm break-all md:break-normal md:truncate text-burgundy dark:text-white">
                             <HoverableCopyText text={reach.filter}>
                               {reach.filter}
                             </HoverableCopyText>
@@ -323,7 +346,7 @@ export default function PeerDetail() {
                           {reach.pubsub_multiaddrs && reach.pubsub_multiaddrs.length > 0 ? (
                             <div className="space-y-2">
                               {reach.pubsub_multiaddrs.map((addr, addrIndex) => (
-                                <div key={addrIndex} className="font-mono text-xs md:text-sm break-all md:break-normal md:truncate">
+                                <div key={addrIndex} className="font-mono text-xs md:text-sm break-all md:break-normal md:truncate text-burgundy dark:text-white">
                                   <HoverableCopyText text={addr}>
                                     {addr}
                                   </HoverableCopyText>
@@ -341,7 +364,7 @@ export default function PeerDetail() {
                           {reach.stream_multiaddrs && reach.stream_multiaddrs.length > 0 ? (
                             <div className="space-y-2">
                               {reach.stream_multiaddrs.map((addr, addrIndex) => (
-                                <div key={addrIndex} className="font-mono text-xs md:text-sm break-all md:break-normal md:truncate">
+                                <div key={addrIndex} className="font-mono text-xs md:text-sm break-all md:break-normal md:truncate text-burgundy dark:text-white">
                                   <HoverableCopyText text={addr}>
                                     {addr}
                                   </HoverableCopyText>

@@ -74,6 +74,8 @@ import Googleplay from "./iconset/Googleplay"
 import Graduationcap from "./iconset/Graduationcap";
 import Graphdot from "./iconset/Graphdot";
 import Happyface from "./iconset/Happyface";
+import HamburgerMenu from "./iconset/HamburgerMenu";
+import Close from "./iconset/Close";
 import Healthcare2 from "./iconset/Healthcare2";
 import Heartrateclipboard from "./iconset/Heartrateclipboard";
 import Helpchat2 from "./iconset/Helpchat2";
@@ -145,6 +147,8 @@ import Smileyshocked from "./iconset/Smileyshocked";
 import Songrecommendation from "./iconset/Songrecommendation";
 import Starbadge from "./iconset/Starbadge";
 import Starcircle from "./iconset/Starcircle";
+import StarFilled from "./iconset/StarFilled";
+import StarOutline from "./iconset/StarOutline";
 import Startup from "./iconset/Startup";
 import Stepsnumber from "./iconset/Stepsnumber";
 import Stopwatch from "./iconset/Stopwatch";
@@ -247,6 +251,8 @@ export const icon = {
   graduationcap: Graduationcap,
   graphdot: Graphdot,
   happyface: Happyface,
+  hamburgermenu: HamburgerMenu,
+  close: Close,
   healthcare2: Healthcare2,
   heartrateclipboard: Heartrateclipboard,
   helpchat2: Helpchat2,
@@ -318,6 +324,8 @@ export const icon = {
   songrecommendation: Songrecommendation,
   starbadge: Starbadge,
   starcircle: Starcircle,
+  starfilled: StarFilled,
+  staroutline: StarOutline,
   startup: Startup,
   stepsnumber: Stepsnumber,
   stopwatch: Stopwatch,
