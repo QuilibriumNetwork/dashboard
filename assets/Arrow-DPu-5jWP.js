@@ -1,0 +1,1 @@
+import{j as r}from"./index-Di1YMQk1.js";function e({className:o="",...t}){return r.jsx("svg",{viewBox:"0 0 24 24",xmlns:"http://www.w3.org/2000/svg",fill:"none",stroke:"currentColor",className:o,...t,children:r.jsx("path",{d:"M5 12h14M12 5l7 7-7 7",strokeWidth:"2",strokeLinecap:"round",strokeLinejoin:"round"})})}export{e as A};
