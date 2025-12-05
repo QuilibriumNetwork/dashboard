@@ -6,6 +6,7 @@ export function HoverableCopyText({ text, children }: { text: string; children: 
   const [copied, setCopied] = useState(false);
 
   const handleCopy = async (e: React.MouseEvent) => {
+    e.preventDefault();
     e.stopPropagation();
     try {
       await navigator.clipboard.writeText(text);
@@ -39,4 +40,3 @@ export function HoverableCopyText({ text, children }: { text: string; children: 
     </span>
   );
 }
-

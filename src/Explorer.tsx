@@ -8,6 +8,8 @@ import {
   GossipMessage,
   HypergraphRecord,
   PeerRecord,
+  ProverRecord,
+  ProverShardSummary,
   explorerApi,
 } from "@/lib/api";
 import {
@@ -41,6 +43,44 @@ import {
   saveFramesToCache,
   pruneCache,
 } from "@/lib/frameCache";
+import { formatProvers } from "@/lib/provers";
+import { ProverCard } from "@/components/ProverCard";
+
+const SHARD_STATUS_COLUMNS = [
+  "active",
+  "joining",
+  "paused",
+  "leaving",
+  "rejected",
+  "kicked",
+];
+
+function getShardTotal(summary: ProverShardSummary) {
+  const counts = summary.counts ?? {};
+  return Object.values(counts).reduce((sum, value) => sum + (Number(value) || 0), 0);
+}
+
+function getShardStatusCount(summary: ProverShardSummary, status: string) {
+  const counts = summary.counts ?? {};
+  const value = counts[status];
+  return Number.isFinite(value) ? Number(value) : 0;
+}
+
+function getCoverageToneForActive(activeCount: number) {
+  if (activeCount < 3) return "risk";
+  if (activeCount < 6) return "warn";
+  return "safe";
+}
+
+function truncateFilter(filter: string) {
+  if (!filter) return "–";
+  const prefix = filter.startsWith("0x") ? "0x" : "";
+  const value = prefix ? filter.slice(2) : filter;
+  if (value.length <= 16) {
+    return filter;
+  }
+  return `${prefix}${value.slice(0, 8)}…${value.slice(-6)}`;
+}
 
 function Tag({ label }: { label: string }) {
   return (
@@ -300,6 +340,83 @@ function FrameDataRow({ frameNumber, requests, prover, selector, timestamp, onNa
   );
 }
 
+function PeerCard({ peer }: { peer: ReturnType<typeof formatPeerRows>[number] }) {
+  return (
+    <div className="rounded-2xl border border-burgundy/10 bg-white/95 p-4 text-sm text-burgundy shadow-[0_20px_55px_-45px_rgba(64,0,27,0.5)] dark:border-white/10 dark:bg-[#211430]/95 dark:text-white">
+      <div className="text-xs font-semibold uppercase tracking-[0.3em] text-burgundy/60 dark:text-white/60">Peer</div>
+      <div className="mt-1 font-mono text-xs">
+        <HoverableCopyText text={peer.peerId}>{peer.peerId}</HoverableCopyText>
+      </div>
+      <div className="mt-2 text-xs text-burgundy/70 dark:text-white/70">Version {peer.version}</div>
+      <div className="mt-3 text-xs">
+        <div className="text-[0.65rem] uppercase tracking-[0.3em] text-burgundy/50 dark:text-white/50">Pubsub</div>
+        {peer.pubsub.length ? peer.pubsub.map((addr) => (
+          <div key={addr} className="break-all">
+            <HoverableCopyText text={addr}>{addr}</HoverableCopyText>
+          </div>
+        )) : "–"}
+      </div>
+      <div className="mt-3 text-xs">
+        <div className="text-[0.65rem] uppercase tracking-[0.3em] text-burgundy/50 dark:text-white/50">Stream</div>
+        {peer.stream.length ? peer.stream.map((addr) => (
+          <div key={addr} className="break-all">
+            <HoverableCopyText text={addr}>{addr}</HoverableCopyText>
+          </div>
+        )) : "–"}
+      </div>
+    </div>
+  );
+}
+
+const coverageBadgeClasses: Record<string, string> = {
+  safe: "bg-green/10 text-green dark:bg-green/20 dark:text-light-green",
+  warn: "bg-yellow-200/40 text-amber-800 dark:bg-yellow-100/20 dark:text-yellow-100",
+  risk: "bg-red/20 text-red-900 dark:bg-red/30 dark:text-red-200",
+};
+
+function ShardSummaryCard({ summary }: { summary: ProverShardSummary }) {
+  const counts = summary.counts ?? {};
+  const total = getShardTotal(summary);
+  const activeCount = getShardStatusCount(summary, "active");
+  const tone = getCoverageToneForActive(activeCount);
+  const badgeClass = coverageBadgeClasses[tone] ?? "";
+
+  const orderedStatuses = [
+    ...SHARD_STATUS_COLUMNS,
+    ...Object.keys(counts).filter((key) => !SHARD_STATUS_COLUMNS.includes(key)),
+  ];
+
+  return (
+    <Link to={`/provers/shards/${summary.filter}`} className="block">
+      <div className="rounded-2xl border border-burgundy/10 bg-white/95 p-4 text-sm text-burgundy shadow-[0_20px_55px_-45px_rgba(64,0,27,0.5)] dark:border-white/10 dark:bg-[#211430]/95 dark:text-white transition hover:bg-light-grey/60 dark:hover:bg-white/5">
+        <div className="text-xs font-semibold uppercase tracking-[0.3em] text-burgundy/60 dark:text-white/60">Shard filter</div>
+        <div className="mt-1 font-mono text-xs break-all">
+          <HoverableCopyText text={summary.filter}>{truncateFilter(summary.filter)}</HoverableCopyText>
+        </div>
+        <div className="mt-3 flex items-center gap-2">
+          <span className="text-sm text-burgundy/60 dark:text-white/60">Total provers:</span>
+          <span className="font-semibold text-burgundy dark:text-white">{total.toLocaleString()}</span>
+          <span className={`text-[0.65rem] font-semibold uppercase tracking-[0.3em] rounded-full px-3 py-1 ${badgeClass}`}>
+            {tone === "safe" ? "healthy" : tone === "warn" ? "warning" : "risk"}
+          </span>
+        </div>
+        <div className="mt-3 text-xs text-burgundy/70 dark:text-white/70 space-y-1">
+          {orderedStatuses.map((status) => {
+            const value = counts[status];
+            if (value === undefined) return null;
+            return (
+              <div key={status} className="flex justify-between">
+                <span className="capitalize">{status}</span>
+                <span className="font-semibold text-burgundy dark:text-white">{value.toLocaleString()}</span>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    </Link>
+  );
+}
+
 interface FrameSearchState {
   frame?: GlobalFrame;
   error?: string;
@@ -483,6 +600,8 @@ export default function Explorer() {
   const [certified, setCertified] = useState<CertifiedProposal | null>(null);
   const [messages, setMessages] = useState<GossipMessage[]>([]);
   const [peers, setPeers] = useState<PeerRecord[]>([]);
+  const [provers, setProvers] = useState<ProverRecord[]>([]);
+  const [shardSummaries, setShardSummaries] = useState<ProverShardSummary[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [expandedMessages, setExpandedMessages] = useState<Set<string>>(new Set());
@@ -632,11 +751,13 @@ export default function Explorer() {
       setLoading(true);
       setError(null);
       try {
-        const [frame, proposal, gossip, peerList] = await Promise.all([
+        const [frame, proposal, gossip, peerList, proversList, shardList] = await Promise.all([
           explorerApi.getLatestFrame(),
           explorerApi.getLatestCertified().catch(() => null),
           explorerApi.getMessages(20).catch(() => []),
           explorerApi.getPeers().catch(() => []),
+          explorerApi.getProvers().catch(() => []),
+          explorerApi.getProverShardSummaries().catch(() => []),
         ]);
         if (!mounted) {
           return;
@@ -645,6 +766,8 @@ export default function Explorer() {
         setCertified(proposal);
         setMessages(gossip);
         setPeers(peerList);
+        setProvers(proversList);
+        setShardSummaries(shardList);
         // Don't call hydrateFrameFeed here - let the frameCount effect handle it
       } catch (err) {
         if (mounted) {
@@ -821,6 +944,21 @@ export default function Explorer() {
   }, [frameFeedRows, frameFilters]);
 
   const peerRows = useMemo(() => formatPeerRows(peers), [peers]);
+  const shardRows = useMemo(() => {
+    return [...shardSummaries].sort((a, b) => a.filter.localeCompare(b.filter));
+  }, [shardSummaries]);
+  const shardCoverageStats = useMemo(() => {
+    let risk = 0;
+    let warn = 0;
+    shardRows.forEach((summary) => {
+      const activeCount = getShardStatusCount(summary, "active");
+      const tone = getCoverageToneForActive(activeCount);
+      if (tone === "risk") risk += 1;
+      else if (tone === "warn") warn += 1;
+    });
+    return { risk, warn };
+  }, [shardRows]);
+  const proverRows = useMemo(() => formatProvers(provers), [provers]);
 
   // Use the peer filters hook
   const {
@@ -1192,6 +1330,112 @@ export default function Explorer() {
             </div>
           </section>
 
+          <section id="prover-shards" className="mt-14 relative overflow-hidden rounded-3xl border border-burgundy/10 bg-white/95 p-10 text-burgundy shadow-[0_35px_80px_-50px_rgba(57,31,91,0.45)] backdrop-blur-lg dark:border-white/10 dark:bg-[#1a0f27]/95 dark:text-white dark:shadow-[0_40px_90px_-55px_rgba(8,4,20,0.7)]">
+            <div className="pointer-events-none absolute -right-10 -top-10 h-44 w-44 rounded-full bg-pink/40 blur-3xl dark:bg-pink/30" />
+            <div className="pointer-events-none absolute left-6 top-8 h-24 w-24 rounded-full bg-light-purple/80 blur-2xl dark:bg-purple/40" />
+
+            <div className="relative space-y-6">
+              <div className="flex flex-wrap items-start justify-between gap-3">
+                <h2 className="text-lg md:text-3xl font-semibold uppercase tracking-[0.35em] text-burgundy dark:text-white">
+                  Shard coverage
+                </h2>
+                <div className="text-xs font-semibold uppercase tracking-[0.3em] text-burgundy/70 dark:text-white/70">
+                  {shardRows.length.toLocaleString()}/4096 Shards
+                </div>
+              </div>
+              {shardRows.length > 0 && (
+                <div className="flex flex-wrap gap-4 text-sm text-burgundy/70 dark:text-white/70">
+                  <div>
+                    Halt risk (&lt; 3 active):
+                    <span className="ml-1 font-semibold text-red-700 dark:text-red-300">{shardCoverageStats.risk.toLocaleString()}</span>
+                  </div>
+                  <div>
+                    Needs coverage (&lt; 6 active):
+                    <span className="ml-1 font-semibold text-amber-700 dark:text-yellow-200">{shardCoverageStats.warn.toLocaleString()}</span>
+                  </div>
+                  <div>
+                    Healthy (≥ 6 active):
+                    <span className="ml-1 font-semibold text-green-700 dark:text-green-300">
+                      {(shardRows.length - shardCoverageStats.risk - shardCoverageStats.warn).toLocaleString()}
+                    </span>
+                  </div>
+                </div>
+              )}
+
+              {shardRows.length === 0 ? (
+                <p className="text-sm text-burgundy/70 dark:text-white/70">
+                  No shard filters reported yet.
+                </p>
+              ) : (
+                <>
+                  <div className="space-y-4 md:hidden">
+                    {shardRows.map((summary) => (
+                      <ShardSummaryCard key={summary.filter} summary={summary} />
+                    ))}
+                  </div>
+                  <div className="hidden md:block overflow-x-auto">
+                    <div className="max-h-[420px] overflow-y-auto">
+                      <table className="min-w-full divide-y divide-burgundy/10 text-left text-sm text-burgundy dark:divide-white/10 dark:text-white">
+                        <thead className="sticky top-0 z-10 bg-white/95 dark:bg-[#1a0f27]/95 text-xs font-semibold uppercase tracking-[0.3em] text-burgundy/60 dark:text-white/60">
+                          <tr>
+                            <th className="py-3 px-4">Filter</th>
+                            <th className="py-3 px-4">Active</th>
+                            {SHARD_STATUS_COLUMNS.filter((status) => status !== "active").map((status) => (
+                              <th key={status} className="py-3 px-4">{status}</th>
+                            ))}
+                            <th className="py-3 px-4">Other</th>
+                            <th className="py-3 px-4">Total</th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-burgundy/10 dark:divide-white/10">
+                          {shardRows.map((summary) => {
+                            const activeCount = getShardStatusCount(summary, "active");
+                            const joiningCount = getShardStatusCount(summary, "joining");
+                            const tone = getCoverageToneForActive(activeCount);
+                            const statusCounts = SHARD_STATUS_COLUMNS.filter((status) => status !== "active").map((status) => ({
+                              status,
+                              value: getShardStatusCount(summary, status),
+                            }));
+                            const totalStatusCount = activeCount + statusCounts.reduce((sum, entry) => sum + entry.value, 0);
+                            const total = getShardTotal(summary);
+                            if (joiningCount < 3 && total - joiningCount <= 0) {
+                              return null;
+                            }
+                            const otherCount = Math.max(0, total - totalStatusCount);
+                            const rowToneClasses = {
+                              risk: "bg-red-50 dark:bg-red-400/10",
+                              warn: "bg-yellow-50 dark:bg-yellow-100/10",
+                              safe: "",
+                            } as const;
+                            const rowClass = rowToneClasses[tone] ?? "";
+
+                            return (
+                              <tr
+                                key={summary.filter}
+                                className={`${rowClass} cursor-pointer hover:bg-light-grey/60 dark:hover:bg-white/5`}
+                                onClick={() => navigate(`/provers/shards/${summary.filter}`)}
+                              >
+                                <td className="py-3 px-4 font-mono text-xs break-all align-top">
+                                  <HoverableCopyText text={summary.filter}>{truncateFilter(summary.filter)}</HoverableCopyText>
+                                </td>
+                                <td className="py-3 px-4 text-xs align-top font-semibold">{activeCount.toLocaleString()}</td>
+                                {statusCounts.map(({ status, value }) => (
+                                  <td key={status} className="py-3 px-4 text-xs align-top">{value.toLocaleString()}</td>
+                                ))}
+                                <td className="py-3 px-4 text-xs align-top">{otherCount.toLocaleString()}</td>
+                                <td className="py-3 px-4 text-xs align-top font-semibold">{total.toLocaleString()}</td>
+                              </tr>
+                            );
+                          })}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                </>
+              )}
+            </div>
+          </section>
+
           <section id="consensus-gossip" className="mt-14 relative overflow-hidden rounded-3xl border border-burgundy/10 bg-white/95 p-10 text-burgundy shadow-[0_35px_80px_-50px_rgba(57,31,91,0.45)] backdrop-blur-lg dark:border-white/10 dark:bg-[#1a0f27]/95 dark:text-white dark:shadow-[0_40px_90px_-55px_rgba(8,4,20,0.7)]">
             <div className="pointer-events-none absolute -right-10 -top-10 h-44 w-44 rounded-full bg-pink/40 blur-3xl dark:bg-pink/30" />
             <div className="pointer-events-none absolute left-6 top-8 h-24 w-24 rounded-full bg-light-purple/80 blur-2xl dark:bg-purple/40" />
@@ -1229,5 +1473,3 @@ export default function Explorer() {
     </PageLayout>
   );
 }
-
-

@@ -45,6 +45,38 @@ export interface FrameRequest {
   [key: string]: unknown;
 }
 
+export interface ProverAllocation {
+  status: string;
+  confirmation_filter?: string;
+  rejection_filter?: string;
+  join_frame_number?: number;
+  leave_frame_number?: number;
+  pause_frame_number?: number;
+  resume_frame_number?: number;
+  kick_frame_number?: number;
+  join_confirm_frame_number?: number;
+  join_reject_frame_number?: number;
+  leave_confirm_frame_number?: number;
+  leave_reject_frame_number?: number;
+  last_active_frame_number?: number;
+}
+
+export interface ProverRecord {
+  address: string;
+  public_key: string;
+  delegate_address?: string;
+  status: string;
+  kick_frame_number?: number;
+  available_storage?: number;
+  seniority?: number;
+  allocations: ProverAllocation[];
+}
+
+export interface ProverShardSummary {
+  filter: string;
+  counts: Record<string, number>;
+}
+
 export interface PeerReachability {
   filter: string;
   pubsub_multiaddrs: string[];
@@ -108,4 +140,15 @@ export const explorerApi = {
   getVertex: (id: string) => request<HypergraphRecord>(`/hypergraph/vertex/${id}`),
   getHyperedge: (id: string) => request<HypergraphRecord>(`/hypergraph/hyperedge/${id}`),
   getPeers: () => request<PeerRecord[]>("/peers"),
+  getProvers: (params?: { address?: string; filter?: string; status?: string }) => {
+    const query = new URLSearchParams();
+    if (params?.address) query.set("address", params.address);
+    if (params?.filter) query.set("filter", params.filter);
+    if (params?.status) query.set("status", params.status);
+    const qs = query.toString();
+    const suffix = qs ? `?${qs}` : "";
+    return request<ProverRecord[]>(`/provers${suffix}`);
+  },
+  getProverShardSummaries: () => request<ProverShardSummary[]>("/provers/shards"),
+  getShardProvers: (filter: string) => request<ProverRecord[]>(`/provers/shards/${filter}`),
 };
