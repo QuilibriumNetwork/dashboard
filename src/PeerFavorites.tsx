@@ -4,7 +4,7 @@ import { PageLayout } from "@/components/PageLayout";
 import { usePeerFavorites } from "@/components/helpers/PeerFavoritesContext";
 import { explorerApi, type PeerRecord } from "@/lib/api";
 import { formatPeerRows, type PeerRow } from "@/lib/peers";
-import { truncateMiddle } from "@/lib/format";
+import { truncateMiddle, formatTimestamp, formatRelativeTime } from "@/lib/format";
 import { HoverableCopyText } from "@/components/HoverableCopyText";
 import Icon from "@/components/ui/Icons";
 import Spinner from "@/components/ui/Spinner";
@@ -67,6 +67,26 @@ function FavoritePeerItem({ favorite, peerRecord, peerRow, onDelete, onNavigate,
               {peerRow && (
                 <>
                   <div className="mt-3 text-xs">
+                    <div className="text-[0.65rem] uppercase tracking-[0.3em] text-burgundy/50 dark:text-white/50 mb-1">
+                      Version
+                    </div>
+                    <div className="text-[0.7rem] mb-2">{peerRow.version}</div>
+                  </div>
+                  {peerRecord && peerRecord.last_seen && (() => {
+                    const timestamp = peerRecord.last_seen > 1e12 ? peerRecord.last_seen : peerRecord.last_seen * 1000;
+                    const isoString = new Date(timestamp).toISOString();
+                    return (
+                      <div className="mt-2 text-xs">
+                        <div className="text-[0.65rem] uppercase tracking-[0.3em] text-burgundy/50 dark:text-white/50 mb-1">
+                          Last Seen
+                        </div>
+                        <div className="text-[0.7rem] mb-2">
+                          {formatTimestamp(isoString)} ({formatRelativeTime(isoString)})
+                        </div>
+                      </div>
+                    );
+                  })()}
+                  <div className="mt-2 text-xs">
                     <div className="text-[0.65rem] uppercase tracking-[0.3em] text-burgundy/50 dark:text-white/50 mb-1">
                       Pubsub
                     </div>

@@ -95,6 +95,53 @@ export interface PeerRecord {
   reachability: PeerReachability[];
 }
 
+export interface KeyRegistry {
+  identityKey: {
+    keyValue: string;
+  };
+  proverKey: {
+    keyValue: string;
+  };
+  identityToProver: {
+    signature: string;
+    publicKey: string | null;
+  };
+  proverToIdentity: {
+    signature: string;
+    publicKey: string | null;
+  };
+  keysByPurpose: Record<string, {
+    keyPurpose: string;
+    x448Keys: Array<{
+      key: {
+        keyValue: string;
+      };
+      parentKeyAddress: string;
+      ed448Signature: {
+        signature: string;
+        publicKey: string | null;
+      };
+      createdAt: string;
+      expiresAt: string;
+      keyPurpose: string;
+    }>;
+    decaf448Keys: Array<{
+      key: {
+        keyValue: string;
+      };
+      parentKeyAddress: string;
+      ed448Signature: {
+        signature: string;
+        publicKey: string | null;
+      };
+      createdAt: string;
+      expiresAt: string;
+      keyPurpose: string;
+    }>;
+  }>;
+  lastUpdated: string;
+}
+
 export interface CertifiedProposal {
   state: GlobalFrame;
   parentQuorumCertificate: {
@@ -131,6 +178,17 @@ export interface HypergraphRecord {
   size: string;
 }
 
+/**
+ * Converts a base58 peer ID to hex format
+ */
+export async function base58ToHex(base58: string): Promise<string> {
+  const { base58_to_binary } = await import("base58-js");
+  const bytes = base58_to_binary(base58);
+  return Array.from(bytes)
+    .map((byte) => byte.toString(16).padStart(2, "0"))
+    .join("");
+}
+
 export const explorerApi = {
   getLatestFrame: () => request<GlobalFrame>("/frames/latest"),
   getFrame: (frameNumber: number) => request<GlobalFrame>(`/frames/${frameNumber}`),
@@ -151,4 +209,5 @@ export const explorerApi = {
   },
   getProverShardSummaries: () => request<ProverShardSummary[]>("/provers/shards"),
   getShardProvers: (filter: string) => request<ProverRecord[]>(`/provers/shards/${filter}`),
+  getKeyRegistry: (hexIdentity: string) => request<KeyRegistry>(`/keys/identity/${hexIdentity}`),
 };

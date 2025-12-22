@@ -1,8 +1,8 @@
 import { useEffect, useMemo, useState } from "react";
-import { Link, useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { PageLayout } from "@/components/PageLayout";
 
-import { PeerRecord, explorerApi } from "@/lib/api";
+import { PeerRecord, explorerApi, base58ToHex, KeyRegistry } from "@/lib/api";
 import { formatTimestamp, formatRelative, formatRelativeTime } from "@/lib/format";
 import { formatPeerVersion } from "@/lib/peers";
 import { getCapabilityLabel, formatCapability, getAllCapabilityIdentifiers } from "@/lib/capabilities";
@@ -49,6 +49,30 @@ function CopyPeerDataButton({ peer }: { peer: PeerRecord }) {
     try {
       const peerData = JSON.stringify(peer, null, 2);
       await navigator.clipboard.writeText(peerData);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch (err) {
+      console.error("Copy failed", err);
+    }
+  };
+
+  return (
+    <button
+      onClick={handleCopy}
+      className="flex items-center gap-2 px-2 py-1 text-sm font-semibold uppercase tracking-[0.2em] text-burgundy/70 hover:text-burgundy dark:text-white/70 transition-colors bg-transparent hover:bg-transparent"
+    >
+      <span>{copied ? 'Copied!' : 'Copy data'}</span>
+    </button>
+  );
+}
+
+function CopyKeyRegistryButton({ keyRegistry }: { keyRegistry: KeyRegistry }) {
+  const [copied, setCopied] = useState(false);
+
+  const handleCopy = async () => {
+    try {
+      const registryData = JSON.stringify(keyRegistry, null, 2);
+      await navigator.clipboard.writeText(registryData);
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     } catch (err) {
@@ -149,9 +173,13 @@ function CapabilityBadge({
 
 export default function PeerDetail() {
   const { peerId } = useParams<{ peerId: string }>();
+  const navigate = useNavigate();
   const [peer, setPeer] = useState<PeerRecord | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [keyRegistry, setKeyRegistry] = useState<KeyRegistry | null>(null);
+  const [keyRegistryLoading, setKeyRegistryLoading] = useState(false);
+  const [keyRegistryError, setKeyRegistryError] = useState<string | null>(null);
   const { isFavorite, addFavorite, removeFavorite } = usePeerFavorites();
 
   useEffect(() => {
@@ -188,6 +216,36 @@ export default function PeerDetail() {
     };
   }, [peerId]);
 
+  useEffect(() => {
+    let mounted = true;
+    async function loadKeyRegistry() {
+      if (!peer?.peer_id) {
+        return;
+      }
+      setKeyRegistryLoading(true);
+      setKeyRegistryError(null);
+      try {
+        const hexIdentity = await base58ToHex(peer.peer_id);
+        const registry = await explorerApi.getKeyRegistry(hexIdentity);
+        if (mounted) {
+          setKeyRegistry(registry);
+        }
+      } catch (err) {
+        if (mounted) {
+          setKeyRegistryError(err instanceof Error ? err.message : "Failed to load key registry");
+        }
+      } finally {
+        if (mounted) {
+          setKeyRegistryLoading(false);
+        }
+      }
+    }
+    loadKeyRegistry();
+    return () => {
+      mounted = false;
+    };
+  }, [peer?.peer_id]);
+
   const formattedVersion = useMemo(() => {
     if (!peer) return "–";
     return formatPeerVersion(peer);
@@ -213,9 +271,12 @@ export default function PeerDetail() {
     <PageLayout title={`Peer ${peer?.peer_id.slice(0, 16)}… • Quilibrium Explorer`}>
       <div className="relative mx-auto max-w-6xl px-6">
         <div className="flex items-center justify-between gap-4">
-          <Link to="/" className="text-sm font-semibold uppercase tracking-[0.3em] text-burgundy/70 hover:text-burgundy dark:text-white/70">
+          <button
+            onClick={() => navigate(-1)}
+            className="text-sm font-semibold uppercase tracking-[0.3em] text-burgundy/70 hover:text-burgundy dark:text-white/70 transition-colors bg-transparent hover:bg-transparent"
+          >
             ← Back
-          </Link>
+          </button>
           <div className="flex items-center gap-4">
             {peer && (
               <>
@@ -381,6 +442,176 @@ export default function PeerDetail() {
                 </div>
               </section>
             )}
+
+            <section className="mt-10 rounded-3xl border border-burgundy/10 bg-white/95 p-8 shadow-[0_34px_80px_-55px_rgba(57,31,91,0.4)] dark:border-white/10 dark:bg-[#1a0f27]/95">
+              <div className="flex items-center justify-between gap-4">
+                <h2 className="text-2xl font-semibold text-burgundy dark:text-white">Key Registry</h2>
+                {keyRegistry && (
+                  <CopyKeyRegistryButton keyRegistry={keyRegistry} />
+                )}
+              </div>
+              {keyRegistryLoading && (
+                <div className="mt-6 flex items-center justify-center py-8">
+                  <Spinner size="40" />
+                </div>
+              )}
+              {keyRegistryError && (
+                <div className="mt-6 rounded-2xl border border-pink/30 bg-light-pink/40 p-4 text-sm text-pink">
+                  {keyRegistryError}
+                </div>
+              )}
+              {keyRegistry && !keyRegistryLoading && (
+                <div className="mt-6 space-y-6">
+                  <div className="rounded-2xl border border-burgundy/10 bg-white/90 p-5 shadow-[0_20px_55px_-45px_rgba(64,0,27,0.5)] dark:border-white/10 dark:bg-[#211430]/95">
+                    <div className="text-sm font-semibold uppercase tracking-[0.25em] text-burgundy/60 dark:text-white/60 mb-4">
+                      Identity Key
+                    </div>
+                    <div className="font-mono text-xs md:text-sm break-all text-burgundy dark:text-white">
+                      <HoverableCopyText text={keyRegistry.identityKey.keyValue}>
+                        {keyRegistry.identityKey.keyValue}
+                      </HoverableCopyText>
+                    </div>
+                  </div>
+
+                  <div className="rounded-2xl border border-burgundy/10 bg-white/90 p-5 shadow-[0_20px_55px_-45px_rgba(64,0,27,0.5)] dark:border-white/10 dark:bg-[#211430]/95">
+                    <div className="text-sm font-semibold uppercase tracking-[0.25em] text-burgundy/60 dark:text-white/60 mb-4">
+                      Prover Key
+                    </div>
+                    <div className="font-mono text-xs md:text-sm break-all text-burgundy dark:text-white">
+                      <HoverableCopyText text={keyRegistry.proverKey.keyValue}>
+                        {keyRegistry.proverKey.keyValue}
+                      </HoverableCopyText>
+                    </div>
+                  </div>
+
+                  <div className="grid gap-4 md:grid-cols-2">
+                    <div className="rounded-2xl border border-burgundy/10 bg-white/90 p-5 shadow-[0_20px_55px_-45px_rgba(64,0,27,0.5)] dark:border-white/10 dark:bg-[#211430]/95">
+                      <div className="text-sm font-semibold uppercase tracking-[0.25em] text-burgundy/60 dark:text-white/60 mb-4">
+                        Identity to Prover Signature
+                      </div>
+                      <div className="font-mono text-xs md:text-sm break-all text-burgundy dark:text-white">
+                        <HoverableCopyText text={keyRegistry.identityToProver.signature}>
+                          {keyRegistry.identityToProver.signature}
+                        </HoverableCopyText>
+                      </div>
+                    </div>
+
+                    <div className="rounded-2xl border border-burgundy/10 bg-white/90 p-5 shadow-[0_20px_55px_-45px_rgba(64,0,27,0.5)] dark:border-white/10 dark:bg-[#211430]/95">
+                      <div className="text-sm font-semibold uppercase tracking-[0.25em] text-burgundy/60 dark:text-white/60 mb-4">
+                        Prover to Identity Signature
+                      </div>
+                      <div className="font-mono text-xs md:text-sm break-all text-burgundy dark:text-white">
+                        <HoverableCopyText text={keyRegistry.proverToIdentity.signature}>
+                          {keyRegistry.proverToIdentity.signature}
+                        </HoverableCopyText>
+                      </div>
+                    </div>
+                  </div>
+
+                  {Object.keys(keyRegistry.keysByPurpose).length > 0 && (
+                    <div className="rounded-2xl border border-burgundy/10 bg-white/90 p-5 shadow-[0_20px_55px_-45px_rgba(64,0,27,0.5)] dark:border-white/10 dark:bg-[#211430]/95">
+                      <div className="text-sm font-semibold uppercase tracking-[0.25em] text-burgundy/60 dark:text-white/60 mb-4">
+                        Keys by Purpose ({Object.keys(keyRegistry.keysByPurpose).length})
+                      </div>
+                      <div className="space-y-4">
+                        {Object.entries(keyRegistry.keysByPurpose).map(([purpose, keys]) => (
+                          <div key={purpose} className="border-t border-burgundy/10 dark:border-white/10 pt-4 first:border-t-0 first:pt-0">
+                            <div className="text-xs font-semibold uppercase tracking-[0.2em] text-burgundy/60 dark:text-white/60 mb-3">
+                              Purpose: {purpose || "(empty)"}
+                            </div>
+                            {keys.x448Keys.length > 0 && (
+                              <div className="mb-3">
+                                <div className="text-xs font-semibold text-burgundy/70 dark:text-white/70 mb-2">
+                                  X448 Keys ({keys.x448Keys.length})
+                                </div>
+                                <div className="space-y-2">
+                                  {keys.x448Keys.map((key, idx) => (
+                                    <div key={idx} className="pl-4 border-l-2 border-burgundy/20 dark:border-white/20">
+                                      <div className="text-[0.7rem] font-semibold uppercase tracking-[0.2em] text-burgundy/50 dark:text-white/50 mb-1">
+                                        Key Value
+                                      </div>
+                                      <div className="font-mono text-xs break-all text-burgundy dark:text-white mb-2">
+                                        <HoverableCopyText text={key.key.keyValue}>
+                                          {key.key.keyValue}
+                                        </HoverableCopyText>
+                                      </div>
+                                      <div className="text-[0.7rem] font-semibold uppercase tracking-[0.2em] text-burgundy/50 dark:text-white/50 mb-1">
+                                        Parent Key Address
+                                      </div>
+                                      <div className="font-mono text-xs break-all text-burgundy dark:text-white mb-2">
+                                        <HoverableCopyText text={key.parentKeyAddress}>
+                                          {key.parentKeyAddress}
+                                        </HoverableCopyText>
+                                      </div>
+                                      <div className="text-[0.7rem] font-semibold uppercase tracking-[0.2em] text-burgundy/50 dark:text-white/50 mb-1">
+                                        Signature
+                                      </div>
+                                      <div className="font-mono text-xs break-all text-burgundy dark:text-white">
+                                        <HoverableCopyText text={key.ed448Signature.signature}>
+                                          {key.ed448Signature.signature}
+                                        </HoverableCopyText>
+                                      </div>
+                                    </div>
+                                  ))}
+                                </div>
+                              </div>
+                            )}
+                            {keys.decaf448Keys.length > 0 && (
+                              <div>
+                                <div className="text-xs font-semibold text-burgundy/70 dark:text-white/70 mb-2">
+                                  Decaf448 Keys ({keys.decaf448Keys.length})
+                                </div>
+                                <div className="space-y-2">
+                                  {keys.decaf448Keys.map((key, idx) => (
+                                    <div key={idx} className="pl-4 border-l-2 border-burgundy/20 dark:border-white/20">
+                                      <div className="text-[0.7rem] font-semibold uppercase tracking-[0.2em] text-burgundy/50 dark:text-white/50 mb-1">
+                                        Key Value
+                                      </div>
+                                      <div className="font-mono text-xs break-all text-burgundy dark:text-white mb-2">
+                                        <HoverableCopyText text={key.key.keyValue}>
+                                          {key.key.keyValue}
+                                        </HoverableCopyText>
+                                      </div>
+                                      <div className="text-[0.7rem] font-semibold uppercase tracking-[0.2em] text-burgundy/50 dark:text-white/50 mb-1">
+                                        Parent Key Address
+                                      </div>
+                                      <div className="font-mono text-xs break-all text-burgundy dark:text-white mb-2">
+                                        <HoverableCopyText text={key.parentKeyAddress}>
+                                          {key.parentKeyAddress}
+                                        </HoverableCopyText>
+                                      </div>
+                                      <div className="text-[0.7rem] font-semibold uppercase tracking-[0.2em] text-burgundy/50 dark:text-white/50 mb-1">
+                                        Signature
+                                      </div>
+                                      <div className="font-mono text-xs break-all text-burgundy dark:text-white">
+                                        <HoverableCopyText text={key.ed448Signature.signature}>
+                                          {key.ed448Signature.signature}
+                                        </HoverableCopyText>
+                                      </div>
+                                    </div>
+                                  ))}
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {keyRegistry.lastUpdated && keyRegistry.lastUpdated !== "0" && (
+                    <div className="rounded-2xl border border-burgundy/10 bg-white/90 p-5 shadow-[0_20px_55px_-45px_rgba(64,0,27,0.5)] dark:border-white/10 dark:bg-[#211430]/95">
+                      <div className="text-sm font-semibold uppercase tracking-[0.25em] text-burgundy/60 dark:text-white/60 mb-2">
+                        Last Updated
+                      </div>
+                      <div className="text-base font-semibold text-burgundy dark:text-white">
+                        {formatTimestamp(keyRegistry.lastUpdated)}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
+            </section>
           </>
         )}
       </div>
