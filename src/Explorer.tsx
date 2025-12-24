@@ -55,6 +55,9 @@ const SHARD_STATUS_COLUMNS = [
   "kicked",
 ];
 
+const FRAME_COUNT_STORAGE_KEY = "explorer-frame-count";
+const VALID_FRAME_COUNTS = [10, 25, 50] as const;
+
 function getShardTotal(summary: ProverShardSummary) {
   const counts = summary.counts ?? {};
   return Object.values(counts).reduce((sum, value) => sum + (Number(value) || 0), 0);
@@ -605,7 +608,19 @@ export default function Explorer() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [expandedMessages, setExpandedMessages] = useState<Set<string>>(new Set());
-  const [frameCount, setFrameCount] = useState<number>(10);
+  const [frameCount, setFrameCount] = useState<number>(() => {
+    // Load from localStorage or default to 10
+    if (typeof window !== "undefined") {
+      const saved = localStorage.getItem(FRAME_COUNT_STORAGE_KEY);
+      if (saved) {
+        const parsed = parseInt(saved, 10);
+        if (VALID_FRAME_COUNTS.includes(parsed as any)) {
+          return parsed;
+        }
+      }
+    }
+    return 10;
+  });
   const frameCountRef = useRef<number>(10);
 
   const [frameQuery, setFrameQuery] = useState("");
@@ -808,10 +823,21 @@ export default function Explorer() {
     frameCountRef.current = frameCount;
   }, [frameCount]);
 
+  // Save frameCount to localStorage when it changes
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      try {
+        localStorage.setItem(FRAME_COUNT_STORAGE_KEY, String(frameCount));
+      } catch (err) {
+        console.error("Failed to save frame count to localStorage:", err);
+      }
+    }
+  }, [frameCount]);
+
   // Reset frameCount to valid value if it's set to an unavailable option
   useEffect(() => {
-    if (frameCount !== 10 && frameCount !== 25 && frameCount !== 50) {
-      setFrameCount(50);
+    if (!VALID_FRAME_COUNTS.includes(frameCount as any)) {
+      setFrameCount(10);
     }
   }, [frameCount]);
 
@@ -1177,7 +1203,9 @@ export default function Explorer() {
                     value={frameCount}
                     onChange={(e) => {
                       const newCount = parseInt(e.target.value, 10);
-                      setFrameCount(newCount);
+                      if (VALID_FRAME_COUNTS.includes(newCount as any)) {
+                        setFrameCount(newCount);
+                      }
                     }}
                     className="text-xs font-semibold uppercase tracking-[0.3em] text-burgundy dark:text-white bg-white dark:bg-[#1a0f27] border border-burgundy/20 dark:border-white/20 rounded-lg px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-burgundy/30 dark:focus:ring-white/30 transition-colors cursor-pointer"
                   >
