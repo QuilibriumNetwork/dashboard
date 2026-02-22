@@ -299,7 +299,7 @@ export default function PeerDetail() {
                   </HoverableCopyText>
                 </h1>
                 {lastSeenTimestamp && (
-                  <div className="mt-1 text-sm sm:text-xs uppercase tracking-label text-muted">
+                  <div className="mt-1 text-sm sm:text-xs text-muted">
                     {formatTimestamp(lastSeenTimestamp)} {formatRelative(lastSeenTimestamp) && `(${formatRelative(lastSeenTimestamp)})`}
                   </div>
                 )}
@@ -371,7 +371,7 @@ export default function PeerDetail() {
                       </div>
                       <div className="mt-4 grid gap-4">
                         <div>
-                          <div className="label-text mb-2">
+                          <div className="form-label mb-2">
                             Filter
                           </div>
                           <div className="font-mono text-sm sm:text-xs md:text-sm break-all md:break-normal md:truncate text-primary">
@@ -381,7 +381,7 @@ export default function PeerDetail() {
                           </div>
                         </div>
                         <div>
-                          <div className="label-text mb-2">
+                          <div className="form-label mb-2">
                             Pubsub Multiaddrs ({reach.pubsub_multiaddrs?.length ?? 0})
                           </div>
                           {reach.pubsub_multiaddrs && reach.pubsub_multiaddrs.length > 0 ? (
@@ -399,7 +399,7 @@ export default function PeerDetail() {
                           )}
                         </div>
                         <div>
-                          <div className="label-text mb-2">
+                          <div className="form-label mb-2">
                             Stream Multiaddrs ({reach.stream_multiaddrs?.length ?? 0})
                           </div>
                           {reach.stream_multiaddrs && reach.stream_multiaddrs.length > 0 ? (
@@ -496,7 +496,7 @@ export default function PeerDetail() {
                       <div className="space-y-4">
                         {Object.entries(keyRegistry.keysByPurpose).map(([purpose, keys]) => (
                           <div key={purpose} className="border-t border-subtle pt-4 first:border-t-0 first:pt-0">
-                            <div className="label-text mb-3">
+                            <div className="form-label mb-3">
                               Purpose: {purpose || "(empty)"}
                             </div>
                             {keys.x448Keys.length > 0 && (
@@ -507,7 +507,7 @@ export default function PeerDetail() {
                                 <div className="space-y-2">
                                   {keys.x448Keys.map((key, idx) => (
                                     <div key={idx} className="pl-4 border-l-2 border-default">
-                                      <div className="text-xs font-semibold uppercase tracking-label text-muted mb-1">
+                                      <div className="form-label mb-1">
                                         Key Value
                                       </div>
                                       <div className="font-mono text-sm sm:text-xs break-all text-primary mb-2">
@@ -515,7 +515,7 @@ export default function PeerDetail() {
                                           {key.key.keyValue}
                                         </HoverableCopyText>
                                       </div>
-                                      <div className="text-xs font-semibold uppercase tracking-label text-muted mb-1">
+                                      <div className="form-label mb-1">
                                         Parent Key Address
                                       </div>
                                       <div className="font-mono text-sm sm:text-xs break-all text-primary mb-2">
@@ -523,7 +523,7 @@ export default function PeerDetail() {
                                           {key.parentKeyAddress}
                                         </HoverableCopyText>
                                       </div>
-                                      <div className="text-xs font-semibold uppercase tracking-label text-muted mb-1">
+                                      <div className="form-label mb-1">
                                         Signature
                                       </div>
                                       <div className="font-mono text-sm sm:text-xs break-all text-primary">
@@ -544,7 +544,7 @@ export default function PeerDetail() {
                                 <div className="space-y-2">
                                   {keys.decaf448Keys.map((key, idx) => (
                                     <div key={idx} className="pl-4 border-l-2 border-default">
-                                      <div className="text-xs font-semibold uppercase tracking-label text-muted mb-1">
+                                      <div className="form-label mb-1">
                                         Key Value
                                       </div>
                                       <div className="font-mono text-sm sm:text-xs break-all text-primary mb-2">
@@ -552,7 +552,7 @@ export default function PeerDetail() {
                                           {key.key.keyValue}
                                         </HoverableCopyText>
                                       </div>
-                                      <div className="text-xs font-semibold uppercase tracking-label text-muted mb-1">
+                                      <div className="form-label mb-1">
                                         Parent Key Address
                                       </div>
                                       <div className="font-mono text-sm sm:text-xs break-all text-primary mb-2">
@@ -560,7 +560,7 @@ export default function PeerDetail() {
                                           {key.parentKeyAddress}
                                         </HoverableCopyText>
                                       </div>
-                                      <div className="text-xs font-semibold uppercase tracking-label text-muted mb-1">
+                                      <div className="form-label mb-1">
                                         Signature
                                       </div>
                                       <div className="font-mono text-sm sm:text-xs break-all text-primary">

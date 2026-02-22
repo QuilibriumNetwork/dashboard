@@ -36,7 +36,7 @@ export function ProverCard({ prover }: ProverCardProps) {
         </div>
       )}
       <div className="mt-3 text-sm sm:text-xs">
-        <div className="sub-label-text">Allocations</div>
+        <div className="text-sm sm:text-xs font-medium text-muted">Allocations</div>
         {prover.allocations.length ? (
           prover.allocations.map((alloc, idx) => (
             <div key={alloc.id} className="mt-2 border-l border-default pl-3">

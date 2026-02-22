@@ -62,7 +62,7 @@ export function FrameFeedFilters({
         <div className="px-6 pb-6 pt-2 space-y-4 border-t border-subtle">
           {/* Search by Prover or Selector */}
           <div>
-            <label className="block label-text mb-2">
+            <label className="block form-label mb-2">
               Search by Prover or Selector
             </label>
             <div className="relative">
@@ -88,7 +88,7 @@ export function FrameFeedFilters({
           {/* Frame Number Range */}
           <div className="flex gap-4">
             <div className="flex-1 min-w-0">
-              <label className="block label-text mb-2">
+              <label className="block form-label mb-2">
                 Min Frame Number
               </label>
               <input
@@ -100,7 +100,7 @@ export function FrameFeedFilters({
               />
             </div>
             <div className="flex-1 min-w-0">
-              <label className="block label-text mb-2">
+              <label className="block form-label mb-2">
                 Max Frame Number
               </label>
               <input
@@ -116,7 +116,7 @@ export function FrameFeedFilters({
           {/* Requests Count Range */}
           <div className="flex gap-4">
             <div className="flex-1 min-w-0">
-              <label className="block label-text mb-2">
+              <label className="block form-label mb-2">
                 Min Requests
               </label>
               <input
@@ -128,7 +128,7 @@ export function FrameFeedFilters({
               />
             </div>
             <div className="flex-1 min-w-0">
-              <label className="block label-text mb-2">
+              <label className="block form-label mb-2">
                 Max Requests
               </label>
               <input

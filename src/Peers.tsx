@@ -55,7 +55,7 @@ function PeerCard({ peer, onNavigate, isFavorite }: PeerCardProps & { onNavigate
       </div>
       <div className="mt-2 text-sm sm:text-xs text-secondary">Version {peer.version}</div>
       <div className="mt-4 text-sm sm:text-xs">
-        <div className="sub-label-text">Pubsub</div>
+        <div className="text-sm sm:text-xs font-medium text-muted">Pubsub</div>
         {peer.pubsub.length ? peer.pubsub.map((addr) => (
           <div key={addr} className="truncate text-xs">
             <HoverableCopyText text={addr}>{addr}</HoverableCopyText>
@@ -63,7 +63,7 @@ function PeerCard({ peer, onNavigate, isFavorite }: PeerCardProps & { onNavigate
         )) : "–"}
       </div>
       <div className="mt-3 text-sm sm:text-xs">
-        <div className="sub-label-text">Stream</div>
+        <div className="text-sm sm:text-xs font-medium text-muted">Stream</div>
         {peer.stream.length ? peer.stream.map((addr) => (
           <div key={addr} className="truncate text-xs">
             <HoverableCopyText text={addr}>{addr}</HoverableCopyText>
@@ -546,7 +546,7 @@ export default function Peers() {
             <>
               {/* Items per page selector */}
               <div className="flex flex-wrap items-center gap-3 mb-6">
-                <span className="label-text">
+                <span className="text-sm sm:text-xs text-muted">
                   Show
                 </span>
                 <select
@@ -555,14 +555,14 @@ export default function Peers() {
                     setItemsPerPage(Number(e.target.value));
                     setCurrentPage(1);
                   }}
-                  className="border border-default bg-white dark:bg-surface px-3 py-1.5 text-sm sm:text-xs font-semibold uppercase tracking-label text-primary rounded-lg focus:outline-none focus:ring-2 focus:ring-brand/30 transition-colors"
+                  className="border border-default bg-white dark:bg-surface px-3 py-1.5 text-sm sm:text-xs font-semibold text-primary rounded-lg focus:outline-none focus:ring-2 focus:ring-brand/30 transition-colors"
                 >
                   <option value={10}>10</option>
                   <option value={25}>25</option>
                   <option value={50}>50</option>
                   <option value={100}>100</option>
                 </select>
-                <span className="label-text">
+                <span className="text-sm sm:text-xs text-muted">
                   per page
                 </span>
               </div>
@@ -645,7 +645,7 @@ export default function Peers() {
 
               {/* Pagination Controls */}
               <div className="flex flex-wrap items-center justify-between gap-4 pt-4">
-                <div className="label-text">
+                <div className="text-sm sm:text-xs text-muted">
                   Showing {startIndex + 1}–{Math.min(endIndex, filteredPeers.length)} of {filteredPeers.length}
                 </div>
                 <div className="flex items-center gap-2">
@@ -673,7 +673,7 @@ export default function Peers() {
                         <button
                           key={pageNum}
                           onClick={() => handlePageChange(pageNum)}
-                          className={`px-3 py-1.5 text-sm sm:text-xs font-semibold uppercase tracking-label rounded-lg transition-colors ${
+                          className={`px-3 py-1.5 text-sm sm:text-xs font-semibold rounded-lg transition-colors ${
                             currentPage === pageNum
                               ? 'bg-burgundy/20 dark:bg-white/20 text-primary'
                               : 'text-secondary hover:text-primary hover:bg-active-highlight'

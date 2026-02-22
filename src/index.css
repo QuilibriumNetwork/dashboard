@@ -7,19 +7,19 @@
 /* -------------------------------------------------- */
 
 @layer components {
-  /* Uppercase label used for field names, table headers, section sub-headings */
+  /* SPACED CAPS — data card labels, table headers, section sub-headings, badges */
   .label-text {
     @apply text-sm sm:text-xs font-semibold uppercase tracking-label text-muted;
   }
 
-  /* Interactive action link / nav button (back links, filter toggles, dialog buttons) */
+  /* SPACED CAPS — interactive action link / nav button (back links, toggles) */
   .action-text {
     @apply font-semibold uppercase tracking-label text-secondary hover:text-primary transition-colors;
   }
 
-  /* Lightweight secondary label (protocol names, item counters, data tree keys) */
-  .sub-label-text {
-    @apply text-xs uppercase tracking-label text-muted;
+  /* Sentence-case — form input labels, filter group headings, checkbox headings */
+  .form-label {
+    @apply text-sm font-medium text-muted;
   }
 }
 
@@ -609,30 +609,3 @@ html.dark::-webkit-scrollbar-thumb:hover,
   }
 }
 
-/* -------------------------------------------------- */
-/* Particle Animations & SVG Effects */
-/* -------------------------------------------------- */
-
-@layer utilities {
-  .pa--particle-glow {
-    transition: opacity 0.2s ease;
-  }
-  .pa--particle-glow--pink {
-    fill: var(--pink);
-    filter: drop-shadow(0 0 4px var(--pink)) drop-shadow(0 0 10px var(--pink));
-  }
-  .pa--particle-glow--white {
-    fill: white;
-    filter: drop-shadow(0 0 6px white) drop-shadow(0 0 14px white);
-  }
-
-  .svg-tags {
-    opacity: 1;
-    transition: opacity 0.3s ease, filter 0.3s ease;
-    filter: brightness(0.9);
-  }
-
-  .svg-tags:hover {
-    filter: brightness(1.75) drop-shadow(0 0 6px var(--pink));
-  }
-}

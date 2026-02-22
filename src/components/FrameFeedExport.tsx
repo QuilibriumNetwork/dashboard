@@ -243,7 +243,7 @@ export function FrameFeedExport({
 
           <div className="space-y-3">
             <div className="flex items-center justify-between">
-              <div className="label-text">
+              <div className="form-label">
                 Include Properties
               </div>
               <button

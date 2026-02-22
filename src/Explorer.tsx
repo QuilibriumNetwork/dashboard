@@ -352,7 +352,7 @@ function PeerCard({ peer }: { peer: ReturnType<typeof formatPeerRows>[number] })
       </div>
       <div className="mt-2 text-sm sm:text-xs text-secondary">Version {peer.version}</div>
       <div className="mt-3 text-sm sm:text-xs">
-        <div className="sub-label-text">Pubsub</div>
+        <div className="text-sm sm:text-xs font-medium text-muted">Pubsub</div>
         {peer.pubsub.length ? peer.pubsub.map((addr) => (
           <div key={addr} className="break-all">
             <HoverableCopyText text={addr}>{addr}</HoverableCopyText>
@@ -360,7 +360,7 @@ function PeerCard({ peer }: { peer: ReturnType<typeof formatPeerRows>[number] })
         )) : "–"}
       </div>
       <div className="mt-3 text-sm sm:text-xs">
-        <div className="sub-label-text">Stream</div>
+        <div className="text-sm sm:text-xs font-medium text-muted">Stream</div>
         {peer.stream.length ? peer.stream.map((addr) => (
           <div key={addr} className="break-all">
             <HoverableCopyText text={addr}>{addr}</HoverableCopyText>
@@ -472,7 +472,7 @@ function CollapsibleMessage({
 
   return (
     <div className="rounded-2xl border border-default bg-white px-4 py-4 text-sm text-burgundy dark:bg-surface-raised dark:text-white">
-      <div className="label-text">
+      <div className="text-sm sm:text-xs text-muted">
         {formatTimestamp(message.timestamp)}
       </div>
       <div className="mt-1 font-mono text-sm sm:text-xs text-secondary break-words">
@@ -497,7 +497,7 @@ function CollapsibleMessage({
       </div>
       <div className="relative mt-2">
         <div className="flex items-start justify-between mb-1">
-          <div className="label-text">Data</div>
+          <div className="text-sm sm:text-xs font-medium text-muted">Data</div>
           <CopyButton text={message.data} showText={true} className="mb-1" />
         </div>
         <div className="relative">
@@ -1084,7 +1084,7 @@ export default function Explorer() {
                     {loading ? (
                       "Refreshing explorer data…"
                     ) : latestHeader?.timestamp ? (
-                      <span className="text-xs tracking-label text-muted">
+                      <span className="text-sm sm:text-xs text-muted">
                         {formatTimestamp(latestHeader.timestamp)} ({formatRelative(latestHeader.timestamp)})
                       </span>
                     ) : null}
@@ -1190,7 +1190,7 @@ export default function Explorer() {
               {/* Add this new section */}
               <div className="flex flex-col gap-3">
                 <div className="flex flex-wrap items-center gap-3">
-                  <span className="label-text">
+                  <span className="text-sm sm:text-xs text-muted">
                     Showing statistics from the last
                   </span>
                   <select
@@ -1201,13 +1201,13 @@ export default function Explorer() {
                         setFrameCount(newCount);
                       }
                     }}
-                    className="text-sm sm:text-xs font-semibold uppercase tracking-label text-primary bg-white dark:bg-surface border border-default rounded-lg px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-brand/30 transition-colors cursor-pointer"
+                    className="text-sm sm:text-xs font-semibold text-primary bg-white dark:bg-surface border border-default rounded-lg px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-brand/30 transition-colors cursor-pointer"
                   >
                     <option value={10}>10</option>
                     <option value={25}>25</option>
                     <option value={50}>50</option>
                   </select>
-                  <span className="label-text">
+                  <span className="text-sm sm:text-xs text-muted">
                     frames
                   </span>
                 </div>

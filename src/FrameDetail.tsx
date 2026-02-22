@@ -133,7 +133,7 @@ export default function FrameDetail() {
           <div className="-mt-2">
             <h1 className="text-3xl font-semibold">Frame #{header?.frameNumber.toLocaleString() ?? frameNumber}</h1>
             {header && (
-              <div className="mt-2 text-sm sm:sub-label-text">
+              <div className="mt-2 text-sm sm:text-xs text-muted">
                 {formatTimestamp(header.timestamp)} {formatRelative(header.timestamp) && `(${formatRelative(header.timestamp)})`}
               </div>
             )}
@@ -304,7 +304,7 @@ function CollapsibleValue({
     <div>
       <button
         onClick={toggleExpanded}
-        className="flex w-full items-center gap-2 text-left sub-label-text hover:text-secondary transition-colors"
+        className="flex w-full items-center gap-2 text-left text-sm sm:text-xs font-medium text-muted hover:text-secondary transition-colors"
       >
         <ChevronDown
           className={`size-3 transition-transform flex-shrink-0 ${isExpanded ? 'rotate-180' : ''}`}
@@ -346,7 +346,7 @@ function CollapsibleList({
     <div>
       <button
         onClick={toggleExpanded}
-        className="flex w-full items-center gap-2 text-left sub-label-text hover:text-secondary transition-colors"
+        className="flex w-full items-center gap-2 text-left text-sm sm:text-xs font-medium text-muted hover:text-secondary transition-colors"
       >
         <ChevronDown
           className={`size-3 transition-transform flex-shrink-0 ${isExpanded ? 'rotate-180' : ''}`}
@@ -357,7 +357,7 @@ function CollapsibleList({
         <ol className="space-y-2">
           {displayItems.map((item, idx) => (
             <li key={idx}>
-              <div className="sub-label-text">Item {idx + 1}</div>
+              <div className="text-sm sm:text-xs font-medium text-muted">Item {idx + 1}</div>
               <div className="mt-1 border-l border-default pl-3">
                 <ValueTree value={item} parentKey={label} />
               </div>
@@ -408,7 +408,7 @@ function ValueTree({ value, parentKey }: { value: unknown; parentKey?: string })
       <ol className="space-y-2">
         {value.map((item, idx) => (
           <li key={idx}>
-            <div className="sub-label-text">Item {idx + 1}</div>
+            <div className="text-sm sm:text-xs font-medium text-muted">Item {idx + 1}</div>
             <div className="mt-1 border-l border-default pl-3">
               <ValueTree value={item} parentKey={parentKey} />
             </div>
@@ -444,7 +444,7 @@ function ValueTree({ value, parentKey }: { value: unknown; parentKey?: string })
                 <CollapsibleList label={`${formattedKey} (${entryValue.length})`} items={entryValue} />
               ) : (
                 <>
-                  <dt className="sub-label-text">{formattedKey}</dt>
+                  <dt className="text-sm sm:text-xs font-medium text-muted">{formattedKey}</dt>
                   <dd className="mt-1 border-l border-default pl-3">
                     <ValueTree value={entryValue} parentKey={key} />
                   </dd>

@@ -68,7 +68,7 @@ function FavoritePeerItem({ favorite, peerRecord, peerRow, onDelete, onNavigate,
               {peerRow && (
                 <>
                   <div className="mt-3 text-sm sm:text-xs">
-                    <div className="sub-label-text mb-1">
+                    <div className="text-sm sm:text-xs font-medium text-muted mb-1">
                       Version
                     </div>
                     <div className="text-xs mb-2">{peerRow.version}</div>
@@ -78,7 +78,7 @@ function FavoritePeerItem({ favorite, peerRecord, peerRow, onDelete, onNavigate,
                     const isoString = new Date(timestamp).toISOString();
                     return (
                       <div className="mt-2 text-sm sm:text-xs">
-                        <div className="sub-label-text mb-1">
+                        <div className="text-sm sm:text-xs font-medium text-muted mb-1">
                           Last Seen
                         </div>
                         <div className="text-xs mb-2">
@@ -88,7 +88,7 @@ function FavoritePeerItem({ favorite, peerRecord, peerRow, onDelete, onNavigate,
                     );
                   })()}
                   <div className="mt-2 text-sm sm:text-xs">
-                    <div className="sub-label-text mb-1">
+                    <div className="text-sm sm:text-xs font-medium text-muted mb-1">
                       Pubsub
                     </div>
                     {peerRow.pubsub.length > 0 ? (
@@ -102,7 +102,7 @@ function FavoritePeerItem({ favorite, peerRecord, peerRow, onDelete, onNavigate,
                     )}
                   </div>
                   <div className="mt-2 text-sm sm:text-xs">
-                    <div className="sub-label-text mb-1">
+                    <div className="text-sm sm:text-xs font-medium text-muted mb-1">
                       Stream
                     </div>
                     {peerRow.stream.length > 0 ? (
@@ -601,7 +601,7 @@ export default function PeerFavorites() {
             <>
               {/* Items per page selector */}
               <div className="flex flex-wrap items-center gap-3 mb-6">
-                <span className="label-text">
+                <span className="text-sm sm:text-xs text-muted">
                   Show
                 </span>
                 <select
@@ -610,14 +610,14 @@ export default function PeerFavorites() {
                     setItemsPerPage(Number(e.target.value));
                     setCurrentPage(1);
                   }}
-                  className="border border-default bg-white dark:bg-overlay px-3 py-1.5 text-sm sm:text-xs font-semibold uppercase tracking-label text-primary rounded-lg focus:outline-none focus:ring-2 focus:ring-brand/30 transition-colors"
+                  className="border border-default bg-white dark:bg-overlay px-3 py-1.5 text-sm sm:text-xs font-semibold text-primary rounded-lg focus:outline-none focus:ring-2 focus:ring-brand/30 transition-colors"
                 >
                   <option value={10}>10</option>
                   <option value={25}>25</option>
                   <option value={50}>50</option>
                   <option value={100}>100</option>
                 </select>
-                <span className="label-text">
+                <span className="text-sm sm:text-xs text-muted">
                   per page
                 </span>
               </div>
@@ -640,7 +640,7 @@ export default function PeerFavorites() {
               {/* Pagination Controls */}
               {totalPages > 1 && (
                 <div className="flex flex-wrap items-center justify-between gap-4 pt-6">
-                  <div className="label-text">
+                  <div className="text-sm sm:text-xs text-muted">
                     Showing {startIndex + 1}–{Math.min(endIndex, favorites.length)} of {favorites.length}
                   </div>
                   <div className="flex items-center gap-2">
@@ -657,7 +657,7 @@ export default function PeerFavorites() {
                         <button
                           key={page}
                           onClick={() => setCurrentPage(page)}
-                          className={`px-3 py-1.5 text-sm sm:text-xs font-semibold uppercase tracking-label rounded-lg transition-colors ${
+                          className={`px-3 py-1.5 text-sm sm:text-xs font-semibold rounded-lg transition-colors ${
                             currentPage === page
                               ? "bg-burgundy/20 dark:bg-white/20 text-primary"
                               : "text-secondary hover:text-primary hover:bg-active-highlight"
@@ -696,7 +696,7 @@ export default function PeerFavorites() {
         >
           <div className="space-y-6">
             <div>
-              <label className="block label-text mb-2">
+              <label className="block form-label mb-2">
                 Peer Address
               </label>
               <input
@@ -728,7 +728,7 @@ export default function PeerFavorites() {
               )}
             </div>
             <div>
-              <label className="block label-text mb-2">
+              <label className="block form-label mb-2">
                 Label <span className="text-faint font-normal normal-case">(optional)</span>
               </label>
               <input
@@ -788,7 +788,7 @@ export default function PeerFavorites() {
         >
           <div className="space-y-6">
             <div>
-              <label className="block label-text mb-2">
+              <label className="block form-label mb-2">
                 Peer Address
               </label>
               <input
@@ -821,7 +821,7 @@ export default function PeerFavorites() {
               )}
             </div>
             <div>
-              <label className="block label-text mb-2">
+              <label className="block form-label mb-2">
                 Label <span className="text-faint font-normal normal-case">(optional)</span>
               </label>
               <input

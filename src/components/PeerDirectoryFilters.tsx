@@ -74,7 +74,7 @@ export function PeerDirectoryFilters({
         <div className="px-6 pb-6 pt-2 space-y-4 border-t border-subtle">
           {/* Search by Peer ID or IP */}
           <div>
-            <label className="block label-text mb-2">
+            <label className="block form-label mb-2">
               Search by Peer ID or IP Address
             </label>
             <div className="relative">
@@ -100,7 +100,7 @@ export function PeerDirectoryFilters({
           {/* Version Filter */}
           <div>
             <div className="flex items-center justify-between mb-2">
-              <label className="block label-text">
+              <label className="block form-label">
                 Version
               </label>
               {uniqueVersions.length > 0 && (
@@ -158,7 +158,7 @@ export function PeerDirectoryFilters({
           <div className="space-y-4">
             {/* Pubsub Protocol Filter */}
             <div>
-              <label className="block label-text mb-2">
+              <label className="block form-label mb-2">
                 Pubsub Protocol
               </label>
               <div className="flex gap-3">
@@ -191,7 +191,7 @@ export function PeerDirectoryFilters({
 
             {/* Stream Protocol Filter */}
             <div>
-              <label className="block label-text mb-2">
+              <label className="block form-label mb-2">
                 Stream Protocol
               </label>
               <div className="flex gap-3">
@@ -226,7 +226,7 @@ export function PeerDirectoryFilters({
           {/* Capability Count Filter */}
           <div>
             <div className="flex items-center justify-between mb-2">
-              <label className="block label-text">
+              <label className="block form-label">
                 Capability Count
               </label>
               {uniqueCapabilityCounts.length > 0 && (

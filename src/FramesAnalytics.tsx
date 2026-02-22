@@ -1205,7 +1205,7 @@ export default function FramesAnalytics() {
           </div>
           <div className="flex flex-col gap-2">
             <div className="flex items-center gap-3">
-              <span className="label-text">
+              <span className="text-sm sm:text-xs text-muted">
                 Analyze last
               </span>
               <div className="flex items-center gap-2">
@@ -1223,7 +1223,7 @@ export default function FramesAnalytics() {
                       }}
                       disabled={loading || calculatingAnalytics}
                       title={loading ? "Loading frames..." : calculatingAnalytics ? "Calculating analytics..." : ""}
-                      className={`text-sm sm:text-xs font-semibold uppercase tracking-label transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${
+                      className={`text-sm sm:text-xs font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${
                         frameCount === count
                           ? "text-primary font-bold"
                           : "text-muted hover:text-burgundy dark:hover:text-white"
@@ -1237,13 +1237,13 @@ export default function FramesAnalytics() {
                   </span>
                 ))}
               </div>
-              <span className="label-text">
+              <span className="text-sm sm:text-xs text-muted">
                 frames
               </span>
             </div>
             {(showProgressBar || calculatingAnalytics) && (
               <div className="flex items-center gap-3 w-full max-w-2xl">
-                <span className="label-text whitespace-nowrap">
+                <span className="text-sm sm:text-xs text-muted whitespace-nowrap">
                   {progress.phase === "analytics" || calculatingAnalytics
                     ? "Calculating analytics"
                     : "Downloading frames"}
@@ -1793,7 +1793,7 @@ export default function FramesAnalytics() {
             </div>
           )}
           <div className="space-y-2">
-            <p className="label-text mb-4">
+            <p className="form-label mb-4">
               Select how many frames to keep:
             </p>
             <div className="space-y-2">
