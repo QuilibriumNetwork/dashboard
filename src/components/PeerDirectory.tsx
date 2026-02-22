@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { HoverableCopyText } from "./HoverableCopyText";
 import { type PeerRow } from "@/lib/peers";
 import Arrow from "@/components/ui/Arrow";
+import { Button } from "@/components/ui/Button";
 import ChevronDown from "@/components/ui/ChevronDown";
 
 function shortenPeerId(peerId: string): string {
@@ -232,14 +233,16 @@ export function PeerDirectory({ peers }: PeerDirectoryProps) {
           Showing {startIndex + 1}–{Math.min(endIndex, peers.length)} of {peers.length}
         </div>
         <div className="flex items-center gap-2">
-          <button
+          <Button
+            variant="secondary"
+            size="xs"
             onClick={() => handlePageChange(currentPage - 1)}
             disabled={currentPage === 1}
-            className="flex items-center gap-1 px-3 py-1.5 text-sm sm:text-xs action-text disabled:opacity-50 disabled:cursor-not-allowed border border-default rounded-lg hover:bg-active-highlight"
+            className="gap-1"
           >
             <ChevronDown className="w-3 h-3 rotate-90" />
             <span>Previous</span>
-          </button>
+          </Button>
           <div className="flex items-center gap-1">
             {getPageNumbers().map((page, idx) => {
               if (page === '...') {
@@ -265,14 +268,16 @@ export function PeerDirectory({ peers }: PeerDirectoryProps) {
               );
             })}
           </div>
-          <button
+          <Button
+            variant="secondary"
+            size="xs"
             onClick={() => handlePageChange(currentPage + 1)}
             disabled={currentPage === totalPages}
-            className="flex items-center gap-1 px-3 py-1.5 text-sm sm:text-xs action-text disabled:opacity-50 disabled:cursor-not-allowed border border-default rounded-lg hover:bg-active-highlight"
+            className="gap-1"
           >
             <span>Next</span>
             <ChevronDown className="w-3 h-3 -rotate-90" />
-          </button>
+          </Button>
         </div>
       </div>
     </div>

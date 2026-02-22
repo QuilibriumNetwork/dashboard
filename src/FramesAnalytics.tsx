@@ -19,6 +19,7 @@ import {
 
 import { GlobalFrame, explorerApi } from "@/lib/api";
 import { coerceTimestamp, formatTimestamp, base64ToIPFSCID } from "@/lib/format";
+import { Button } from "@/components/ui/Button";
 import Spinner from "@/components/ui/Spinner";
 import Modal from "@/components/ui/Modal";
 import Callout from "@/components/ui/Callout";
@@ -1193,12 +1194,13 @@ export default function FramesAnalytics() {
               </div>
             )}
             {storageUsage && storageUsage.frameCount > 10 && (
-              <button
+              <Button
+                variant="ghost"
+                size="xs"
                 onClick={() => setShowClearModal(true)}
-                className="text-sm sm:text-xs action-text"
               >
                 Clear Frame Data
-              </button>
+              </Button>
             )}
           </div>
           <div className="flex flex-col gap-2">

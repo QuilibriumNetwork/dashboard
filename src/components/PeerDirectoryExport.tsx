@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Button } from "@/components/ui/Button";
 import ChevronDown from "@/components/ui/ChevronDown";
 import { type PeerRow } from "@/lib/peers";
 import { type PeerRecord } from "@/lib/api";
@@ -321,20 +322,24 @@ export function PeerDirectoryExport({
           </div>
 
           <div className="flex gap-3 pt-2">
-            <button
+            <Button
+              variant="secondary"
+              size="xs"
               onClick={exportToCSV}
               disabled={filteredPeers.length === 0}
-              className="flex-1 px-4 py-2 text-sm sm:text-xs action-text border border-default rounded-lg hover:bg-active-highlight disabled:opacity-50 disabled:cursor-not-allowed"
+              className="flex-1"
             >
               Export CSV
-            </button>
-            <button
+            </Button>
+            <Button
+              variant="secondary"
+              size="xs"
               onClick={exportToJSON}
               disabled={filteredPeers.length === 0}
-              className="flex-1 px-4 py-2 text-sm sm:text-xs action-text border border-default rounded-lg hover:bg-active-highlight disabled:opacity-50 disabled:cursor-not-allowed"
+              className="flex-1"
             >
               Export JSON
-            </button>
+            </Button>
           </div>
         </div>
       )}

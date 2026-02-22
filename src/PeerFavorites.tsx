@@ -9,6 +9,7 @@ import { HoverableCopyText } from "@/components/HoverableCopyText";
 import Icon from "@/components/ui/Icons";
 import Spinner from "@/components/ui/Spinner";
 import Arrow from "@/components/ui/Arrow";
+import { Button } from "@/components/ui/Button";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import Modal from "@/components/ui/Modal";
 
@@ -125,32 +126,38 @@ function FavoritePeerItem({ favorite, peerRecord, peerRow, onDelete, onNavigate,
         </div>
         <div className="flex flex-row md:flex-col gap-2 flex-shrink-0 md:mt-0 mt-4 pt-4 md:pt-0 border-t md:border-t-0 border-subtle">
           {isSeen && (
-            <button
+            <Button
+              variant="secondary"
+              size="xs"
               onClick={() => onNavigate(favorite.peerId)}
-              className="flex items-center justify-center gap-1 px-3 py-1.5 text-sm sm:text-xs action-text border border-default rounded-lg hover:bg-active-highlight flex-1 md:flex-none"
+              className="flex-1 md:flex-none gap-1"
               aria-label="View peer"
             >
               <Icon name="visible" className="w-4 h-4 md:w-3 md:h-3" />
               <span className="hidden md:inline">View</span>
               <Arrow className="hidden md:inline w-3 h-3" />
-            </button>
+            </Button>
           )}
-          <button
+          <Button
+            variant="secondary"
+            size="xs"
             onClick={() => onEdit(favorite.peerId)}
-            className="flex items-center justify-center gap-1 px-3 py-1.5 text-sm sm:text-xs action-text border border-default rounded-lg hover:bg-active-highlight flex-1 md:flex-none"
+            className="flex-1 md:flex-none gap-1"
             aria-label="Edit peer"
           >
             <Icon name="pen1" className="w-4 h-4 md:w-3 md:h-3" />
             <span className="hidden md:inline">Edit</span>
-          </button>
-          <button
+          </Button>
+          <Button
+            variant="danger"
+            size="xs"
             onClick={() => onDelete(favorite.peerId)}
-            className="flex items-center justify-center gap-1 px-3 py-1.5 text-sm sm:text-xs font-semibold uppercase tracking-label text-danger hover:text-danger/80 transition-colors border border-danger/20 rounded-lg hover:bg-danger/10 flex-1 md:flex-none"
+            className="flex-1 md:flex-none gap-1"
             aria-label="Delete peer"
           >
             <Icon name="recyclebin2" className="w-4 h-4 md:w-3 md:h-3" />
             <span className="hidden md:inline">Delete</span>
-          </button>
+          </Button>
         </div>
       </div>
     </div>
@@ -497,23 +504,27 @@ export default function PeerFavorites() {
           <div className="flex items-center gap-4">
             {/* Import/Export buttons - hidden on mobile, shown on desktop */}
             <div className="hidden md:flex items-center gap-4">
-              <button
+              <Button
+                variant="ghost"
+                size="small"
                 onClick={handleExportCSV}
                 disabled={favorites.length === 0}
-                className="flex items-center gap-2 text-sm action-text bg-transparent hover:bg-transparent disabled:opacity-50 disabled:cursor-not-allowed"
+                className="gap-2"
                 aria-label="Export favorites to CSV"
               >
                 <Icon name="downloadsquare" className="w-4 h-4" />
                 <span>Export CSV</span>
-              </button>
-              <button
+              </Button>
+              <Button
+                variant="ghost"
+                size="small"
                 onClick={handleImportClick}
-                className="flex items-center gap-2 text-sm action-text bg-transparent hover:bg-transparent"
+                className="gap-2"
                 aria-label="Import favorites from CSV"
               >
                 <Icon name="arrowuplarge2" className="w-4 h-4" />
                 <span>Import CSV</span>
-              </button>
+              </Button>
             </div>
             <input
               ref={fileInputRef}
@@ -523,13 +534,15 @@ export default function PeerFavorites() {
               className="hidden"
               aria-label="Import CSV file"
             />
-            <button
+            <Button
+              variant="ghost"
+              size="small"
               onClick={() => setShowAddDialog(true)}
-              className="flex items-center gap-2 text-sm action-text bg-transparent hover:bg-transparent"
+              className="gap-2"
             >
               <Icon name="applicationadd" className="w-4 h-4" />
               <span>Add Peer</span>
-            </button>
+            </Button>
           </div>
         </div>
 
@@ -554,23 +567,27 @@ export default function PeerFavorites() {
             <h2 className="text-2xl font-semibold">Peer Favorites</h2>
             {/* Import/Export buttons - shown on mobile, hidden on desktop */}
             <div className="flex md:hidden items-center gap-4">
-              <button
+              <Button
+                variant="ghost"
+                size="xs"
                 onClick={handleExportCSV}
                 disabled={favorites.length === 0}
-                className="flex items-center gap-1.5 text-sm sm:text-xs action-text bg-transparent hover:bg-transparent disabled:opacity-50 disabled:cursor-not-allowed"
+                className="gap-1.5"
                 aria-label="Export favorites to CSV"
               >
                 <Icon name="downloadsquare" className="w-3.5 h-3.5" />
                 <span>Export</span>
-              </button>
-              <button
+              </Button>
+              <Button
+                variant="ghost"
+                size="xs"
                 onClick={handleImportClick}
-                className="flex items-center gap-1.5 text-sm sm:text-xs action-text bg-transparent hover:bg-transparent"
+                className="gap-1.5"
                 aria-label="Import favorites from CSV"
               >
                 <Icon name="arrowuplarge2" className="w-3.5 h-3.5" />
                 <span>Import</span>
-              </button>
+              </Button>
             </div>
           </div>
 
@@ -627,13 +644,14 @@ export default function PeerFavorites() {
                     Showing {startIndex + 1}–{Math.min(endIndex, favorites.length)} of {favorites.length}
                   </div>
                   <div className="flex items-center gap-2">
-                    <button
+                    <Button
+                      variant="secondary"
+                      size="xs"
                       onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
                       disabled={currentPage === 1}
-                      className="px-3 py-1.5 text-sm sm:text-xs action-text disabled:opacity-50 disabled:cursor-not-allowed border border-default rounded-lg hover:bg-active-highlight"
                     >
                       Previous
-                    </button>
+                    </Button>
                     <div className="flex items-center gap-1">
                       {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
                         <button
@@ -649,13 +667,14 @@ export default function PeerFavorites() {
                         </button>
                       ))}
                     </div>
-                    <button
+                    <Button
+                      variant="secondary"
+                      size="xs"
                       onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
                       disabled={currentPage === totalPages}
-                      className="px-3 py-1.5 text-sm sm:text-xs action-text disabled:opacity-50 disabled:cursor-not-allowed border border-default rounded-lg hover:bg-active-highlight"
                     >
                       Next
-                    </button>
+                    </Button>
                   </div>
                 </div>
               )}
@@ -731,23 +750,25 @@ export default function PeerFavorites() {
               />
             </div>
             <div className="flex items-center justify-end gap-3">
-              <button
+              <Button
+                variant="ghost"
+                size="small"
                 onClick={() => {
                   setShowAddDialog(false);
                   setNewPeerId("");
                   setNewLabel("");
                   setAddValidationError(null);
                 }}
-                className="px-4 py-2 text-sm action-text border border-default rounded-lg hover:bg-active-highlight"
               >
                 Cancel
-              </button>
-              <button
+              </Button>
+              <Button
+                variant="burgundy"
+                size="small"
                 onClick={handleAdd}
-                className="px-4 py-2 text-sm action-text border border-default rounded-lg hover:bg-active-highlight"
               >
                 Add
-              </button>
+              </Button>
             </div>
           </div>
         </Modal>
@@ -822,7 +843,9 @@ export default function PeerFavorites() {
               />
             </div>
             <div className="flex items-center justify-end gap-3">
-              <button
+              <Button
+                variant="ghost"
+                size="small"
                 onClick={() => {
                   setShowEditDialog(false);
                   setEditPeerId("");
@@ -830,16 +853,16 @@ export default function PeerFavorites() {
                   setOriginalPeerId("");
                   setEditValidationError(null);
                 }}
-                className="px-4 py-2 text-sm action-text border border-default rounded-lg hover:bg-active-highlight"
               >
                 Cancel
-              </button>
-              <button
+              </Button>
+              <Button
+                variant="burgundy"
+                size="small"
                 onClick={handleSaveEdit}
-                className="px-4 py-2 text-sm action-text border border-default rounded-lg hover:bg-active-highlight"
               >
                 Save
-              </button>
+              </Button>
             </div>
           </div>
         </Modal>

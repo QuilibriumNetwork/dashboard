@@ -1,3 +1,4 @@
+import { Button } from "./Button";
 import Modal from "./Modal";
 
 interface ConfirmDialogProps {
@@ -40,27 +41,24 @@ export function ConfirmDialog({
       <div className="space-y-6">
         <p className="text-sm text-primary">{message}</p>
         <div className="flex items-center justify-end gap-3">
-          <button
+          <Button
+            variant="ghost"
+            size="small"
             onClick={onClose}
             disabled={isLoading}
-            className="px-4 py-2 text-sm action-text border border-default rounded-lg hover:bg-active-highlight disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {cancelText}
-          </button>
-          <button
+          </Button>
+          <Button
+            variant={confirmVariant === "danger" ? "danger" : "burgundy"}
+            size="small"
             onClick={handleConfirm}
             disabled={isLoading}
-            className={`px-4 py-2 text-sm font-semibold uppercase tracking-label transition-colors rounded-lg disabled:opacity-50 disabled:cursor-not-allowed ${
-              confirmVariant === "danger"
-                ? "text-danger hover:text-danger/80 border border-danger/20 hover:bg-danger/10"
-                : "text-secondary hover:text-primary border border-default hover:bg-active-highlight"
-            }`}
           >
             {isLoading ? "Processing..." : confirmText}
-          </button>
+          </Button>
         </div>
       </div>
     </Modal>
   );
 }
-
