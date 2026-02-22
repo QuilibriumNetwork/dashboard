@@ -242,7 +242,7 @@ export function HeaderSearch({ fullWidth = false }: HeaderSearchProps) {
           }}
           onKeyDown={handleKeyDown}
           placeholder="Search IP, peer, or frame..."
-          className="w-full rounded-lg border border-default bg-white/50 px-10 py-2 text-sm text-burgundy placeholder:text-burgundy/40 focus:border-strong focus:bg-white focus:outline-none focus:ring-2 focus:ring-brand/20 dark:bg-[#1a0f27]/50 dark:text-white dark:placeholder:text-white/40 dark:focus:bg-overlay"
+          className="w-full rounded-lg border border-default bg-white/50 px-10 py-2 text-sm text-burgundy placeholder:text-burgundy/40 focus:border-strong focus:bg-white focus:outline-none focus:ring-2 focus:ring-brand/20 dark:border-white/20 dark:bg-white/[0.08] dark:text-white dark:placeholder:text-white/40 dark:focus:border-white/30 dark:focus:bg-overlay"
         />
         {query && (
           <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-2">

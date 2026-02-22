@@ -171,7 +171,7 @@ export function PeerDirectory({ peers }: PeerDirectoryProps) {
       {/* Desktop Table Layout */}
       <div className="hidden md:block overflow-x-auto">
         <table className="min-w-full divide-y divide-subtle text-left text-sm text-primary">
-          <thead className="sticky top-0 z-10 bg-overlay label-text">
+          <thead className="sticky top-0 z-10 bg-surface label-text">
             <tr>
               <th className="py-3 pr-6">Peer ID</th>
               <th className="py-3 pr-6">Version</th>

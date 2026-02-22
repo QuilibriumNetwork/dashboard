@@ -58,7 +58,7 @@ export function SimpleNavbar() {
                 className={`text-sm font-semibold transition-colors ${
                   isPeersActive
                     ? "text-purple dark:text-light-blue"
-                    : "text-burgundy hover:text-purple dark:text-white dark:hover:text-light-blue"
+                    : "text-burgundy hover:text-pink dark:text-white dark:hover:text-pink"
                 }`}
               >
                 Peers
@@ -68,7 +68,7 @@ export function SimpleNavbar() {
                 className={`text-sm font-semibold transition-colors ${
                   isFavoritesActive
                     ? "text-purple dark:text-light-blue"
-                    : "text-burgundy hover:text-purple dark:text-white dark:hover:text-light-blue"
+                    : "text-burgundy hover:text-pink dark:text-white dark:hover:text-pink"
                 }`}
               >
                 Favorites
@@ -78,14 +78,14 @@ export function SimpleNavbar() {
                 className={`text-sm font-semibold transition-colors ${
                   isAnalyticsActive
                     ? "text-purple dark:text-light-blue"
-                    : "text-burgundy hover:text-purple dark:text-white dark:hover:text-light-blue"
+                    : "text-burgundy hover:text-pink dark:text-white dark:hover:text-pink"
                 }`}
               >
                 Frame Analytics
               </Link>
               <a
                 href="https://status.quilibrium.com"
-                className="text-sm font-semibold text-burgundy transition-colors hover:text-purple dark:text-white dark:hover:text-light-blue"
+                className="text-sm font-semibold text-burgundy transition-colors hover:text-pink dark:text-white dark:hover:text-pink"
               >
                 Status
               </a>
@@ -144,7 +144,7 @@ export function SimpleNavbar() {
                 className={`text-base font-semibold transition-colors py-2 ${
                   isPeersActive
                     ? "text-purple dark:text-light-blue"
-                    : "text-burgundy hover:text-purple dark:text-white dark:hover:text-light-blue"
+                    : "text-burgundy hover:text-pink dark:text-white dark:hover:text-pink"
                 }`}
                 onClick={() => setIsMobileMenuOpen(false)}
               >
@@ -155,7 +155,7 @@ export function SimpleNavbar() {
                 className={`text-base font-semibold transition-colors py-2 ${
                   isFavoritesActive
                     ? "text-purple dark:text-light-blue"
-                    : "text-burgundy hover:text-purple dark:text-white dark:hover:text-light-blue"
+                    : "text-burgundy hover:text-pink dark:text-white dark:hover:text-pink"
                 }`}
                 onClick={() => setIsMobileMenuOpen(false)}
               >
@@ -166,7 +166,7 @@ export function SimpleNavbar() {
                 className={`text-base font-semibold transition-colors py-2 ${
                   isAnalyticsActive
                     ? "text-purple dark:text-light-blue"
-                    : "text-burgundy hover:text-purple dark:text-white dark:hover:text-light-blue"
+                    : "text-burgundy hover:text-pink dark:text-white dark:hover:text-pink"
                 }`}
                 onClick={() => setIsMobileMenuOpen(false)}
               >
@@ -174,7 +174,7 @@ export function SimpleNavbar() {
               </Link>
               <a
                 href="https://status.quilibrium.com"
-                className="text-base font-semibold text-burgundy transition-colors hover:text-purple dark:text-white dark:hover:text-light-blue py-2"
+                className="text-base font-semibold text-burgundy transition-colors hover:text-pink dark:text-white dark:hover:text-pink py-2"
                 onClick={() => setIsMobileMenuOpen(false)}
               >
                 Status
