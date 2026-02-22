@@ -358,6 +358,35 @@ h6, nav {
     );
   }
 
+  /* Section ambient glow patterns — 3 variants cycled across sections.
+     Fixed-size ellipses so the glow stays consistent regardless of section height. */
+  .section-glow-a {
+    background-image: radial-gradient(400px 350px at 95% 0%, rgba(255, 5, 109, 0.12), transparent 70%),
+                      radial-gradient(600px 500px at 0% 95%, rgba(231, 221, 255, 0.25), transparent 70%);
+  }
+  .dark .section-glow-a {
+    background-image: radial-gradient(400px 350px at 95% 0%, rgba(255, 5, 109, 0.12), transparent 70%),
+                      radial-gradient(600px 500px at 0% 95%, rgba(99, 48, 202, 0.18), transparent 70%);
+  }
+
+  .section-glow-b {
+    background-image: radial-gradient(400px 350px at 5% 0%, rgba(255, 160, 60, 0.22), transparent 70%),
+                      radial-gradient(600px 500px at 100% 95%, rgba(255, 96, 0, 0.14), transparent 70%);
+  }
+  .dark .section-glow-b {
+    background-image: radial-gradient(400px 350px at 5% 0%, rgba(255, 140, 0, 0.12), transparent 70%),
+                      radial-gradient(600px 500px at 100% 95%, rgba(255, 96, 0, 0.12), transparent 70%);
+  }
+
+  .section-glow-c {
+    background-image: radial-gradient(400px 350px at 95% 0%, rgba(147, 112, 219, 0.2), transparent 70%),
+                      radial-gradient(600px 500px at 5% 95%, rgba(147, 112, 219, 0.16), transparent 70%);
+  }
+  .dark .section-glow-c {
+    background-image: radial-gradient(400px 350px at 95% 0%, rgba(120, 80, 255, 0.18), transparent 70%),
+                      radial-gradient(600px 500px at 5% 95%, rgba(120, 80, 255, 0.14), transparent 70%);
+  }
+
   .gradient-sweep {
     display: block;
     background-size: 200% auto;

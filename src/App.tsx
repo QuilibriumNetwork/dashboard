@@ -37,7 +37,7 @@ export default function App() {
     <ThemeProvider>
       <PeerFavoritesProvider>
         <ScrollToTop />
-        <div className="min-h-screen flex flex-col">
+        <div className="min-h-screen flex flex-col bg-beige dark:bg-page">
           <SimpleNavbar />
           <main className="flex-grow">
             <Routes>

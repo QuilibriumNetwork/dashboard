@@ -1068,10 +1068,7 @@ export default function Explorer() {
   return (
     <PageLayout title="Quilibrium Explorer">
         <div className="relative mx-auto max-w-6xl px-6">
-          <section id="global-frame" className="relative overflow-hidden rounded-3xl border border-subtle bg-surface p-10 text-burgundy shadow-xl backdrop-blur-lg dark:text-white">
-            <div className="pointer-events-none absolute -right-10 -top-10 h-44 w-44 rounded-full bg-pink/40 blur-3xl dark:bg-pink/30" />
-            <div className="pointer-events-none absolute left-6 top-8 h-24 w-24 rounded-full bg-light-purple/80 blur-2xl dark:bg-purple/40" />
-
+          <section id="global-frame" className="section-glow-a relative overflow-hidden rounded-3xl border border-subtle bg-surface p-10 text-burgundy shadow-xl backdrop-blur-lg dark:text-white">
             <div className="relative space-y-6">
               <div className="flex flex-wrap items-start justify-between gap-3">
                 <div className="flex flex-col gap-2">
@@ -1175,10 +1172,7 @@ export default function Explorer() {
             </div>
           </section>
 
-          <section id="frame-feed" className="mt-14 relative overflow-hidden rounded-3xl border border-subtle bg-surface p-10 text-burgundy shadow-xl backdrop-blur-lg dark:text-white">
-            <div className="pointer-events-none absolute -right-10 -top-10 h-44 w-44 rounded-full bg-pink/40 blur-3xl dark:bg-pink/30" />
-            <div className="pointer-events-none absolute left-6 top-8 h-24 w-24 rounded-full bg-light-purple/80 blur-2xl dark:bg-purple/40" />
-
+          <section id="frame-feed" className="section-glow-b mt-14 relative overflow-hidden rounded-3xl border border-subtle bg-surface p-10 text-burgundy shadow-xl backdrop-blur-lg dark:text-white">
             <div className="relative space-y-6">
               <div className="flex flex-wrap items-center justify-between gap-4">
                 <h2 className="text-lg md:text-3xl font-semibold uppercase tracking-label text-primary">
@@ -1312,10 +1306,7 @@ export default function Explorer() {
             </div>
           </section> */}
 
-          <section id="peer-directory" className="mt-14 relative overflow-hidden rounded-3xl border border-subtle bg-surface p-10 text-burgundy shadow-xl backdrop-blur-lg dark:text-white">
-            <div className="pointer-events-none absolute -right-10 -top-10 h-44 w-44 rounded-full bg-pink/40 blur-3xl dark:bg-pink/30" />
-            <div className="pointer-events-none absolute left-6 top-8 h-24 w-24 rounded-full bg-light-purple/80 blur-2xl dark:bg-purple/40" />
-
+          <section id="peer-directory" className="section-glow-c mt-14 relative overflow-hidden rounded-3xl border border-subtle bg-surface p-10 text-burgundy shadow-xl backdrop-blur-lg dark:text-white">
             <div className="relative space-y-6">
               <div className="flex flex-wrap items-start justify-between gap-3">
                 <div className="flex flex-col gap-2">
@@ -1358,10 +1349,7 @@ export default function Explorer() {
             </div>
           </section>
 
-          <section id="prover-shards" className="mt-14 relative overflow-hidden rounded-3xl border border-subtle bg-surface p-10 text-burgundy shadow-xl backdrop-blur-lg dark:text-white">
-            <div className="pointer-events-none absolute -right-10 -top-10 h-44 w-44 rounded-full bg-pink/40 blur-3xl dark:bg-pink/30" />
-            <div className="pointer-events-none absolute left-6 top-8 h-24 w-24 rounded-full bg-light-purple/80 blur-2xl dark:bg-purple/40" />
-
+          <section id="prover-shards" className="section-glow-a mt-14 relative overflow-hidden rounded-3xl border border-subtle bg-surface p-10 text-burgundy shadow-xl backdrop-blur-lg dark:text-white">
             <div className="relative space-y-6">
               <div className="flex flex-wrap items-start justify-between gap-3">
                 <h2 className="text-lg md:text-3xl font-semibold uppercase tracking-label text-primary">
@@ -1464,10 +1452,7 @@ export default function Explorer() {
             </div>
           </section>
 
-          <section id="consensus-gossip" className="mt-14 relative overflow-hidden rounded-3xl border border-subtle bg-surface p-10 text-burgundy shadow-xl backdrop-blur-lg dark:text-white">
-            <div className="pointer-events-none absolute -right-10 -top-10 h-44 w-44 rounded-full bg-pink/40 blur-3xl dark:bg-pink/30" />
-            <div className="pointer-events-none absolute left-6 top-8 h-24 w-24 rounded-full bg-light-purple/80 blur-2xl dark:bg-purple/40" />
-
+          <section id="consensus-gossip" className="section-glow-b mt-14 relative overflow-hidden rounded-3xl border border-subtle bg-surface p-10 text-burgundy shadow-xl backdrop-blur-lg dark:text-white">
             <div className="relative space-y-6">
               <h2 className="text-lg md:text-3xl font-semibold uppercase tracking-label text-primary">
                 Consensus gossip

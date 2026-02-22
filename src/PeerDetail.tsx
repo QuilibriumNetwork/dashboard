@@ -311,7 +311,7 @@ export default function PeerDetail() {
 
         {peer && (
           <>
-            <section className="mt-6 rounded-3xl border border-subtle bg-surface p-8 text-burgundy shadow-xl dark:text-white">
+            <section className="section-glow-a mt-6 rounded-3xl border border-subtle bg-surface p-8 text-burgundy shadow-xl dark:text-white">
               <div className="flex-1 min-w-0">
                 <h1 className="text-xl md:text-2xl font-mono font-semibold break-all text-primary">
                   <HoverableCopyText text={peer.peer_id}>
@@ -349,7 +349,7 @@ export default function PeerDetail() {
               </div>
             </section>
 
-            <section className="mt-10 rounded-3xl border border-subtle bg-surface p-8 shadow-xl">
+            <section className="section-glow-b mt-10 rounded-3xl border border-subtle bg-surface p-8 shadow-xl">
               <h2 className="text-2xl font-semibold text-primary">
                 Capabilities ({peer.capabilities?.length ?? 0} / {getAllCapabilityIdentifiers().length})
               </h2>
@@ -373,7 +373,7 @@ export default function PeerDetail() {
             </section>
 
             {peer.reachability && peer.reachability.length > 0 && (
-              <section className="mt-10 rounded-3xl border border-subtle bg-surface p-8 shadow-xl">
+              <section className="section-glow-c mt-10 rounded-3xl border border-subtle bg-surface p-8 shadow-xl">
                 <div className="flex flex-wrap items-center justify-between gap-4">
                   <h2 className="text-2xl font-semibold text-primary">Reachability</h2>
                   <div className="text-sm text-muted">
@@ -443,7 +443,7 @@ export default function PeerDetail() {
               </section>
             )}
 
-            <section className="mt-10 rounded-3xl border border-subtle bg-surface p-8 shadow-xl">
+            <section className="section-glow-a mt-10 rounded-3xl border border-subtle bg-surface p-8 shadow-xl">
               <div className="flex items-center justify-between gap-4">
                 <h2 className="text-2xl font-semibold text-primary">Key Registry</h2>
                 {keyRegistry && (
