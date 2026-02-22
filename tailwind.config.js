@@ -40,6 +40,7 @@ module.exports = {
       fontFamily: {
         'inter': ['Inter', 'sans-serif'],
         'at-aero': ['AtAero', 'sans-serif'],
+        'mono': ['GeistMono', 'monospace'],
       },
       boxShadow: {
         box: "0px 8px 8px rgba(0, 0, 0, 0.02)",

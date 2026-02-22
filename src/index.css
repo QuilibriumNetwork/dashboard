@@ -38,6 +38,7 @@
   /* fonts */
   --font-inter-sans: "Inter", sans-serif;
   --font-at-aero: "AtAero", sans-serif;
+  --font-geist-mono: "GeistMono", monospace;
 }
 
 /* These custom theme variables won't be processed by Tailwind
@@ -71,48 +72,24 @@
 
 @font-face {
   font-family: "Inter";
-  src: url("/src/assets/fonts/Inter-Regular.woff2") format("woff2");
-  font-weight: 400;
-  font-style: normal;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: "Inter";
-  src: url("/src/assets/fonts/Inter-Medium.woff2") format("woff2");
-  font-weight: 500;
-  font-style: normal;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: "Inter";
-  src: url("/src/assets/fonts/Inter-Bold.woff2") format("woff2");
-  font-weight: 700;
+  src: url("/src/assets/fonts/InterVariable.woff2") format("woff2");
+  font-weight: 100 900;
   font-style: normal;
   font-display: swap;
 }
 
 @font-face {
   font-family: "AtAero";
-  src: url("/src/assets/fonts/AtAero-Regular.woff2") format("woff2");
-  font-weight: 400;
+  src: url("/src/assets/fonts/AtAeroVARVF.woff2") format("woff2");
+  font-weight: 100 900;
   font-style: normal;
   font-display: swap;
 }
 
 @font-face {
-  font-family: "AtAero";
-  src: url("/src/assets/fonts/AtAero-Medium.woff2") format("woff2");
-  font-weight: 500;
-  font-style: normal;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: "AtAero";
-  src: url("/src/assets/fonts/AtAero-Semibold.woff2") format("woff2");
-  font-weight: 600;
+  font-family: "GeistMono";
+  src: url("/src/assets/fonts/GeistMonoVF.woff2") format("woff2");
+  font-weight: 100 900;
   font-style: normal;
   font-display: swap;
 }
@@ -145,19 +122,19 @@ h6, nav {
 
 @layer base {
   h1 {
-    @apply text-5xl sm:text-6xl lg:text-7xl font-bold text-[color:var(--burgundy)] font-["AtAero-Semibold"] mb-6 dark:text-white;
+    @apply text-5xl sm:text-6xl lg:text-7xl font-bold text-[color:var(--burgundy)] mb-6 dark:text-white;
   }
   h2 {
-    @apply text-3xl sm:text-4xl lg:text-5xl font-semibold text-[color:var(--burgundy)] font-["AtAero-Semibold"] mb-5 dark:text-white;
+    @apply text-3xl sm:text-4xl lg:text-5xl font-semibold text-[color:var(--burgundy)] mb-5 dark:text-white;
   }
   h3 {
-    @apply text-2xl sm:text-3xl lg:text-4xl font-medium text-[color:var(--burgundy)] font-["AtAero-Semibold"] mb-4 dark:text-white;
+    @apply text-2xl sm:text-3xl lg:text-4xl font-medium text-[color:var(--burgundy)] mb-4 dark:text-white;
   }
   h4 {
-    @apply text-xl sm:text-2xl lg:text-3xl font-medium text-[color:var(--burgundy)] font-["AtAero-Semibold"] mb-3 dark:text-white;
+    @apply text-xl sm:text-2xl lg:text-3xl font-medium text-[color:var(--burgundy)] mb-3 dark:text-white;
   }
   h5 {
-    @apply text-lg sm:text-xl lg:text-2xl font-medium text-[color:var(--burgundy)] font-["AtAero-Semibold"] mb-2 dark:text-white;
+    @apply text-lg sm:text-xl lg:text-2xl font-medium text-[color:var(--burgundy)] mb-2 dark:text-white;
   }
 
   strong,
