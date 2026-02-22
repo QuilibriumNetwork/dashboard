@@ -249,53 +249,68 @@ h6, nav {
 /* Scrollbar Styling */
 /* -------------------------------------------------- */
 
-/* Global scrollbar styling for all browsers */
+/* Global scrollbar styling — solid colors for consistency across all scrollbars */
 * {
-  /* Firefox */
   scrollbar-width: thin;
-  scrollbar-color: rgba(64, 0, 27, 0.3) transparent;
+  scrollbar-color: #c0a0aa transparent;
 }
 
-/* Webkit browsers (Chrome, Safari, Edge) */
+/* Page-level scrollbar: wider */
+html {
+  scrollbar-width: auto;
+  scrollbar-color: #c0a0aa transparent;
+}
+
 *::-webkit-scrollbar {
-  width: 10px;
-  height: 10px;
+  width: 8px;
+  height: 8px;
 }
 
-*::-webkit-scrollbar-track {
+html::-webkit-scrollbar {
+  width: 12px;
+  height: 12px;
+}
+
+*::-webkit-scrollbar-track,
+html::-webkit-scrollbar-track {
   background: transparent;
 }
 
-*::-webkit-scrollbar-thumb {
-  background-color: rgba(64, 0, 27, 0.3);
+*::-webkit-scrollbar-thumb,
+html::-webkit-scrollbar-thumb {
+  background-color: #c0a0aa;
   border-radius: 10px;
   border: 2px solid transparent;
   background-clip: padding-box;
-  transition: background-color 0.2s ease;
 }
 
-*::-webkit-scrollbar-thumb:hover {
-  background-color: rgba(64, 0, 27, 0.5);
+*::-webkit-scrollbar-thumb:hover,
+html::-webkit-scrollbar-thumb:hover {
+  background-color: #a07888;
 }
 
-*::-webkit-scrollbar-corner {
+*::-webkit-scrollbar-corner,
+html::-webkit-scrollbar-corner {
   background: transparent;
 }
 
-/* Dark mode scrollbar */
-@media (prefers-color-scheme: dark) {
-  * {
-    /* Firefox dark mode */
-    scrollbar-color: rgba(255, 5, 109, 0.4) transparent;
-  }
+/* Dark mode scrollbar — muted mauve, visible on dark backgrounds */
+html.dark {
+  scrollbar-color: #6b4f5a transparent;
+}
 
-  *::-webkit-scrollbar-thumb {
-    background-color: rgba(255, 5, 109, 0.4);
-  }
+.dark * {
+  scrollbar-color: #6b4f5a transparent;
+}
 
-  *::-webkit-scrollbar-thumb:hover {
-    background-color: rgba(255, 5, 109, 0.6);
-  }
+html.dark::-webkit-scrollbar-thumb,
+.dark *::-webkit-scrollbar-thumb {
+  background-color: #6b4f5a;
+}
+
+html.dark::-webkit-scrollbar-thumb:hover,
+.dark *::-webkit-scrollbar-thumb:hover {
+  background-color: #8a6878;
 }
 
 /* -------------------------------------------------- */
