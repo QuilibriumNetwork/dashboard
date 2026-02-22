@@ -9,6 +9,7 @@ import { getCapabilityLabel, formatCapability, getAllCapabilityIdentifiers } fro
 import Spinner from "@/components/ui/Spinner";
 import Icon from "@/components/ui/Icons";
 import { HoverableCopyText } from "@/components/HoverableCopyText";
+import { Tooltip } from "@/components/ui/Tooltip";
 import { usePeerFavorites } from "@/components/helpers/PeerFavoritesContext";
 
 function DetailCard({
@@ -91,30 +92,20 @@ function CopyKeyRegistryButton({ keyRegistry }: { keyRegistry: KeyRegistry }) {
 }
 
 function LastSeenCard({ label, relativeTime, timestamp }: { label: string; relativeTime: string; timestamp: string | null }) {
-  const [isHovered, setIsHovered] = useState(false);
-
   return (
     <div className="rounded-2xl border border-default bg-surface-raised px-4 py-4 text-burgundy dark:text-white">
       <div className="label-text">{label}</div>
       <div className="mt-2 text-base font-semibold flex items-center gap-2">
         <span>{relativeTime}</span>
         {timestamp && (
-          <span
-            className="relative inline-flex items-center"
-            onMouseEnter={() => setIsHovered(true)}
-            onMouseLeave={() => setIsHovered(false)}
-          >
-            <Icon
-              name="resetclock"
-              className="w-4 h-4 text-muted cursor-help"
-            />
-            {isHovered && (
-              <span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 text-sm sm:text-xs text-white bg-burgundy dark:bg-surface-raised rounded whitespace-nowrap pointer-events-none z-50 shadow-lg">
-                {formatTimestamp(timestamp)}
-                <span className="absolute top-full left-1/2 -translate-x-1/2 -mt-1 border-4 border-transparent border-t-burgundy dark:border-t-surface-raised" />
-              </span>
-            )}
-          </span>
+          <Tooltip content={formatTimestamp(timestamp)}>
+            <span className="inline-flex items-center">
+              <Icon
+                name="resetclock"
+                className="w-4 h-4 text-muted cursor-help"
+              />
+            </span>
+          </Tooltip>
         )}
       </div>
     </div>
@@ -132,15 +123,10 @@ function CapabilityBadge({
   hasCapability: boolean;
   additionalMetadata?: string;
 }) {
-  const [isHovered, setIsHovered] = useState(false);
   const tooltipText = `Protocol ID: ${protocolId}${additionalMetadata ? `\nMetadata: ${additionalMetadata}` : ''}`;
 
   return (
-    <div
-      className="relative"
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
-    >
+    <Tooltip content={tooltipText} className="whitespace-pre-line max-w-xs px-3 py-2">
       <div
         className={`flex items-center justify-center gap-2 px-3 py-2 rounded-lg border text-sm sm:text-xs font-medium transition-all ${
           hasCapability
@@ -161,13 +147,7 @@ function CapabilityBadge({
           )}
         </div>
       </div>
-      {isHovered && (
-        <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-2 text-sm sm:text-xs text-white bg-burgundy dark:bg-surface-raised rounded whitespace-pre-line pointer-events-none z-50 shadow-lg max-w-xs">
-          {tooltipText}
-          <span className="absolute top-full left-1/2 -translate-x-1/2 -mt-1 border-4 border-transparent border-t-burgundy dark:border-t-surface-raised" />
-        </div>
-      )}
-    </div>
+    </Tooltip>
   );
 }
 

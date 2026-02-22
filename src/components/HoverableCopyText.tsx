@@ -1,9 +1,10 @@
 import { useState } from "react";
 import Icon from "@/components/ui/Icons";
+import { Tooltip } from "@/components/ui/Tooltip";
 
 export function HoverableCopyText({ text, children }: { text: string; children: React.ReactNode }) {
-  const [isHovered, setIsHovered] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [hovered, setHovered] = useState(false);
 
   const handleCopy = async (e: React.MouseEvent) => {
     e.preventDefault();
@@ -18,25 +19,21 @@ export function HoverableCopyText({ text, children }: { text: string; children: 
   };
 
   return (
-    <span
-      className="relative inline-flex items-center gap-1.5 group cursor-pointer"
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
-      onClick={handleCopy}
-    >
-      <span className={`group-hover:underline transition-colors ${copied ? 'text-green dark:text-light-green' : ''}`}>
-        {children}
-      </span>
-      <Icon
-        name="emptyclipboard"
-        className={`w-3 h-3 text-muted flex-shrink-0 transition-opacity ${isHovered ? 'opacity-100' : 'opacity-0'}`}
-      />
-      {isHovered && (
-        <span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 px-2 py-1 text-xs text-white bg-burgundy dark:bg-surface-raised rounded whitespace-nowrap pointer-events-none z-50 shadow-lg">
-          {copied ? 'Copied!' : 'Click to copy'}
-          <span className="absolute top-full left-1/2 -translate-x-1/2 -mt-1 border-4 border-transparent border-t-burgundy dark:border-t-surface-raised" />
+    <Tooltip content={copied ? 'Copied!' : 'Click to copy'} delayDuration={0}>
+      <span
+        className="inline-flex items-center gap-1.5 group cursor-pointer"
+        onClick={handleCopy}
+        onMouseEnter={() => setHovered(true)}
+        onMouseLeave={() => setHovered(false)}
+      >
+        <span className={`group-hover:underline transition-colors ${copied ? 'text-green dark:text-light-green' : ''}`}>
+          {children}
         </span>
-      )}
-    </span>
+        <Icon
+          name="emptyclipboard"
+          className={`w-3 h-3 text-muted flex-shrink-0 transition-opacity ${hovered ? 'opacity-100' : 'opacity-0'}`}
+        />
+      </span>
+    </Tooltip>
   );
 }

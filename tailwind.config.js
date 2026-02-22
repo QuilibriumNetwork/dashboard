@@ -70,6 +70,7 @@ module.exports = {
         field:              "var(--color-field-bg)",
         "hover-highlight":  "var(--color-bg-hover-highlight)",
         "active-highlight": "var(--color-bg-active-highlight)",
+        tooltip:            "var(--color-bg-tooltip)",
         // Status subtle backgrounds
         "success-subtle": "var(--color-bg-success-subtle)",
         "warning-subtle": "var(--color-bg-warning-subtle)",
@@ -91,6 +92,7 @@ module.exports = {
         DEFAULT: "var(--color-border-default)",
         subtle:  "var(--color-border-subtle)",
         strong:  "var(--color-border-strong)",
+        tooltip: "var(--color-border-tooltip)",
       },
 
       // Focus ring

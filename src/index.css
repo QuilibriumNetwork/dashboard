@@ -124,6 +124,11 @@
     --color-bg-info-subtle:    #daeeff; /* light-blue */
     --color-bg-brand-subtle:   rgba(64, 0, 27, 0.08); /* burgundy tint */
 
+    /* Tooltip */
+    --color-bg-tooltip:    #6b2e4a;
+    --color-border-tooltip: #6b2e4a;
+    --color-text-tooltip:  #ffffff;
+
     /* Shadow base color — comma-separated for rgba() in shadow scale */
     --shadow-color: 83, 42, 95;
   }
@@ -165,6 +170,11 @@
     --color-bg-danger-subtle:  rgba(248, 113, 113, 0.15);
     --color-bg-info-subtle:    rgba(56, 168, 255, 0.15);
     --color-bg-brand-subtle:   rgba(255, 255, 255, 0.08); /* white tint on dark */
+
+    /* Tooltip */
+    --color-bg-tooltip:     #d4c4df;
+    --color-border-tooltip: #d4c4df;
+    --color-text-tooltip:   #1a0f27;
 
     /* Shadow */
     --shadow-color: 0, 0, 0;
@@ -242,6 +252,11 @@ h6, nav {
 
   code {
     @apply break-all;
+  }
+
+  /* Slightly dim monospace text in dark mode so it's not blazing white */
+  html.dark .font-mono {
+    color: rgba(255, 255, 255, 0.88);
   }
 }
 
