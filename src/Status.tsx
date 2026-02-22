@@ -473,7 +473,7 @@ export default function Explorer() {
                 </p>
               </div>
 
-              <div className="flex flex-col gap-4 rounded-2xl border border-subtle bg-surface-raised p-6 text-sm shadow-md dark:text-white">
+              <div className="flex flex-col gap-4 rounded-2xl border border-default bg-surface-raised p-6 text-sm dark:text-white">
                 <div className="label-text">
                   Prover
                 </div>
@@ -491,7 +491,7 @@ export default function Explorer() {
               {stats.map((stat) => (
                 <div
                   key={stat.label}
-                  className="rounded-2xl border border-subtle bg-white px-4 py-5 shadow-md dark:bg-surface-raised"
+                  className="rounded-2xl border border-default bg-white px-4 py-5 dark:bg-surface-raised"
                 >
                   <div className="label-text">
                     {stat.label}
@@ -529,19 +529,19 @@ export default function Explorer() {
                     <Tag label={`${frame.shardsTouched} shards`} variant="secondary" />
                   </div>
                   <div className="mt-4 grid gap-4 text-sm sm:grid-cols-3">
-                    <div className="rounded-2xl border border-subtle bg-white px-4 py-3 text-burgundy shadow-sm dark:bg-surface-raised dark:text-white">
+                    <div className="rounded-2xl border border-default bg-white px-4 py-3 text-burgundy dark:bg-surface-raised dark:text-white">
                       <div className="label-text">
                         Prover
                       </div>
                       <div className="text-base font-semibold">{frame.prover}</div>
                     </div>
-                    <div className="rounded-2xl border border-subtle bg-white px-4 py-3 text-burgundy shadow-sm dark:bg-surface-raised dark:text-white">
+                    <div className="rounded-2xl border border-default bg-white px-4 py-3 text-burgundy dark:bg-surface-raised dark:text-white">
                       <div className="label-text">
                         Selector
                       </div>
                       <div className="text-base font-semibold">{formatBytesLike(frame.selector)}</div>
                     </div>
-                    <div className="rounded-2xl border border-subtle bg-white px-4 py-3 text-burgundy shadow-sm dark:bg-surface-raised dark:text-white">
+                    <div className="rounded-2xl border border-default bg-white px-4 py-3 text-burgundy dark:bg-surface-raised dark:text-white">
                       <div className="label-text">
                         Finalized
                       </div>
@@ -598,14 +598,14 @@ export default function Explorer() {
                       </div>
                       <p className="text-sm text-secondary">{shard.description}</p>
                       <div className="grid gap-4 text-sm sm:grid-cols-2">
-                        <div className="rounded-2xl border border-subtle bg-white px-4 py-3 text-burgundy shadow-sm dark:bg-surface-raised dark:text-white">
+                        <div className="rounded-2xl border border-default bg-white px-4 py-3 text-burgundy dark:bg-surface-raised dark:text-white">
                           <div className="label-text">
                             Frame · Selector
                           </div>
                           <div className="text-base font-semibold">#{shard.frameNumber.toLocaleString()}</div>
                           <div className="text-sm sm:text-xs text-muted">{formatBytesLike(shard.selector)}</div>
                         </div>
-                        <div className="rounded-2xl border border-subtle bg-white px-4 py-3 text-burgundy shadow-sm dark:bg-surface-raised dark:text-white">
+                        <div className="rounded-2xl border border-default bg-white px-4 py-3 text-burgundy dark:bg-surface-raised dark:text-white">
                           <div className="label-text">
                             Requests root · State roots
                           </div>
@@ -642,14 +642,14 @@ export default function Explorer() {
                       </div>
                       <p className="text-sm text-secondary">{shard.description}</p>
                       <div className="grid gap-4 text-sm sm:grid-cols-2">
-                        <div className="rounded-2xl border border-subtle bg-white px-4 py-3 text-burgundy shadow-sm dark:bg-surface-raised dark:text-white">
+                        <div className="rounded-2xl border border-default bg-white px-4 py-3 text-burgundy dark:bg-surface-raised dark:text-white">
                           <div className="label-text">
                             Frame · Selector
                           </div>
                           <div className="text-base font-semibold">#{shard.frameNumber.toLocaleString()}</div>
                           <div className="text-sm sm:text-xs text-muted">{formatBytesLike(shard.selector)}</div>
                         </div>
-                        <div className="rounded-2xl border border-subtle bg-white px-4 py-3 text-burgundy shadow-sm dark:bg-surface-raised dark:text-white">
+                        <div className="rounded-2xl border border-default bg-white px-4 py-3 text-burgundy dark:bg-surface-raised dark:text-white">
                           <div className="label-text">
                             Requests root · State roots
                           </div>
@@ -677,7 +677,7 @@ export default function Explorer() {
                 {requestFlows.map((flow) => (
                   <div
                     key={flow.title}
-                    className="rounded-2xl border border-subtle bg-white px-5 py-4 shadow-md dark:bg-surface-raised"
+                    className="rounded-2xl border border-default bg-white px-5 py-4 dark:bg-surface-raised"
                   >
                     <div className="flex flex-wrap items-center gap-3">
                       <h3 className="text-lg font-semibold text-primary">{flow.title}</h3>
@@ -704,7 +704,7 @@ export default function Explorer() {
                 {frameTimeline.slice(0, 3).map((frame) => (
                   <div
                     key={`bundle-${frame.frameNumber}`}
-                    className="rounded-2xl border border-subtle bg-white px-4 py-4 text-sm shadow-md dark:bg-surface-raised"
+                    className="rounded-2xl border border-default bg-white px-4 py-4 text-sm dark:bg-surface-raised"
                   >
                     <div className="text-base font-semibold text-primary">
                       Bundle · Frame {frame.frameNumber.toLocaleString()}
@@ -731,7 +731,7 @@ export default function Explorer() {
                 {behaviorFlags.map((flag) => (
                   <div
                     key={flag.identifier}
-                    className="rounded-2xl border border-subtle bg-white px-4 py-4 text-sm text-burgundy shadow-md dark:bg-surface-raised dark:text-white"
+                    className="rounded-2xl border border-default bg-white px-4 py-4 text-sm text-burgundy dark:bg-surface-raised dark:text-white"
                   >
                     <div className="label-text">
                       {flag.identifier}
@@ -752,7 +752,7 @@ export default function Explorer() {
                 {mintInsights.map((insight) => (
                   <div
                     key={insight.title}
-                    className="rounded-2xl border border-subtle bg-white px-4 py-4 text-sm text-burgundy shadow-md dark:bg-surface-raised dark:text-white"
+                    className="rounded-2xl border border-default bg-white px-4 py-4 text-sm text-burgundy dark:bg-surface-raised dark:text-white"
                   >
                     <div className="text-base font-semibold">{insight.title}</div>
                     <div className="label-text">

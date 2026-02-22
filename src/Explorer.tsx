@@ -221,7 +221,7 @@ function FrameDataCard({ frameNumber, requests, prover, selector, timestamp, onN
   return (
     <div
       onClick={onNavigate}
-      className="rounded-2xl border border-subtle bg-white px-4 py-4 text-sm text-burgundy shadow-sm dark:bg-surface-raised dark:text-white cursor-pointer transition hover:bg-hover-highlight"
+      className="rounded-2xl border border-default bg-white px-4 py-4 text-sm text-burgundy dark:bg-surface-raised dark:text-white cursor-pointer transition hover:bg-hover-highlight"
     >
       <div className="mb-3 font-semibold text-base text-primary">
         Frame #{frameNumber.toLocaleString()}
@@ -345,7 +345,7 @@ function FrameDataRow({ frameNumber, requests, prover, selector, timestamp, onNa
 
 function PeerCard({ peer }: { peer: ReturnType<typeof formatPeerRows>[number] }) {
   return (
-    <div className="rounded-2xl border border-subtle bg-surface-raised p-4 text-sm text-burgundy shadow-sm dark:text-white">
+    <div className="rounded-2xl border border-default bg-surface-raised p-4 text-sm text-burgundy dark:text-white">
       <div className="label-text">Peer</div>
       <div className="mt-1 font-mono text-sm sm:text-xs">
         <HoverableCopyText text={peer.peerId}>{peer.peerId}</HoverableCopyText>
@@ -391,7 +391,7 @@ function ShardSummaryCard({ summary }: { summary: ProverShardSummary }) {
 
   return (
     <Link to={`/provers/shards/${summary.filter}`} className="block">
-      <div className="rounded-2xl border border-subtle bg-surface-raised p-4 text-sm text-burgundy shadow-sm dark:text-white transition hover:bg-hover-highlight">
+      <div className="rounded-2xl border border-default bg-surface-raised p-4 text-sm text-burgundy dark:text-white transition hover:bg-hover-highlight">
         <div className="label-text">Shard filter</div>
         <div className="mt-1 font-mono text-sm sm:text-xs break-all">
           <HoverableCopyText text={summary.filter}>{truncateFilter(summary.filter)}</HoverableCopyText>
@@ -471,7 +471,7 @@ function CollapsibleMessage({
   }, [message.data]);
 
   return (
-    <div className="rounded-2xl border border-subtle bg-white px-4 py-4 text-sm text-burgundy shadow-sm dark:bg-surface-raised dark:text-white">
+    <div className="rounded-2xl border border-default bg-white px-4 py-4 text-sm text-burgundy dark:bg-surface-raised dark:text-white">
       <div className="label-text">
         {formatTimestamp(message.timestamp)}
       </div>
@@ -1100,7 +1100,7 @@ export default function Explorer() {
 
               {/* Add this new section */}
               <div className="grid gap-6 md:grid-cols-3">
-                <div className="rounded-2xl border border-subtle bg-surface-raised p-6 shadow-md dark:text-white">
+                <div className="rounded-2xl border border-default bg-surface-raised p-6 dark:text-white">
                   <div className="label-text">Frame Number</div>
                   <div className="mt-2 text-3xl font-semibold text-primary">
                     {latestHeader?.frameNumber?.toLocaleString() ?? "–"}
@@ -1109,7 +1109,7 @@ export default function Explorer() {
                     Difficulty {latestHeader?.difficulty ?? "–"}
                   </div>
                 </div>
-                <div className="rounded-2xl border border-subtle bg-surface-raised p-6 shadow-md dark:text-white">
+                <div className="rounded-2xl border border-default bg-surface-raised p-6 dark:text-white">
                   <div className="label-text">Prover</div>
                   {latestHeader?.prover && (() => {
                     const displayValue = formatBase64Bytes(latestHeader.prover);
@@ -1126,7 +1126,7 @@ export default function Explorer() {
                     );
                   })()}
                 </div>
-                <div className="rounded-2xl border border-subtle bg-surface-raised p-6 shadow-md dark:text-white">
+                <div className="rounded-2xl border border-default bg-surface-raised p-6 dark:text-white">
                   <div className="label-text">Peers</div>
                   <div className="mt-2 text-3xl font-semibold text-primary">
                     {formattedPeerCount}
@@ -1137,7 +1137,7 @@ export default function Explorer() {
                 </div>
               </div>
               <div className="grid gap-4 text-sm md:grid-cols-2">
-                <div className="rounded-2xl border border-subtle bg-white px-4 py-4 text-burgundy shadow-sm dark:bg-surface-raised dark:text-white">
+                <div className="rounded-2xl border border-default bg-white px-4 py-4 text-burgundy dark:bg-surface-raised dark:text-white">
                   <div className="label-text">Requests root</div>
                   {latestHeader?.requestsRoot && (() => {
                     const displayValue = formatBase64Bytes(latestHeader.requestsRoot);
@@ -1154,7 +1154,7 @@ export default function Explorer() {
                     );
                   })()}
                 </div>
-                <div className="rounded-2xl border border-subtle bg-white px-4 py-4 text-burgundy shadow-sm dark:bg-surface-raised dark:text-white">
+                <div className="rounded-2xl border border-default bg-white px-4 py-4 text-burgundy dark:bg-surface-raised dark:text-white">
                   <div className="label-text">Parent selector</div>
                   {latestHeader?.parentSelector && (() => {
                     const displayValue = formatBase64Bytes(latestHeader.parentSelector);
@@ -1288,13 +1288,13 @@ export default function Explorer() {
                     <Tag label={`Frame ${frame.header.frameNumber.toLocaleString()}`} />
                   </div>
                   <div className="grid gap-4 text-sm sm:grid-cols-2">
-                    <div className="rounded-2xl border border-subtle bg-white px-4 py-3 text-burgundy shadow-sm dark:bg-surface-raised dark:text-white">
+                    <div className="rounded-2xl border border-default bg-white px-4 py-3 text-burgundy dark:bg-surface-raised dark:text-white">
                       <div className="label-text">
                         Prover
                       </div>
                       <div className="text-base font-semibold font-mono">{formatBase64Bytes(frame.header.prover)}</div>
                     </div>
-                    <div className="rounded-2xl border border-subtle bg-white px-4 py-3 text-burgundy shadow-sm dark:bg-surface-raised dark:text-white">
+                    <div className="rounded-2xl border border-default bg-white px-4 py-3 text-burgundy dark:bg-surface-raised dark:text-white">
                       <div className="label-text">
                         Selector
                       </div>

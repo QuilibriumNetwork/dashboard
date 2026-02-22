@@ -21,7 +21,7 @@ function PeerCard({ peer, onNavigate }: PeerCardProps & { onNavigate: () => void
   return (
     <div
       onClick={onNavigate}
-      className="rounded-2xl border border-subtle bg-surface-raised p-4 text-sm text-burgundy shadow-sm dark:text-white cursor-pointer transition hover:bg-hover-highlight"
+      className="rounded-2xl border border-default bg-surface-raised p-4 text-sm text-burgundy dark:text-white cursor-pointer transition hover:bg-hover-highlight"
     >
       <div className="label-text">Peer</div>
       <div className="mt-1 font-mono text-sm sm:text-xs">

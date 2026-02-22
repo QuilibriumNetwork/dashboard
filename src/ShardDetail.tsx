@@ -183,7 +183,7 @@ export default function ShardDetail() {
               </div>
             </div>
 
-            <div className="rounded-2xl border border-subtle bg-white/70 px-4 py-3 text-sm sm:text-xs text-secondary shadow-xs dark:bg-surface-raised/80">
+            <div className="rounded-2xl border border-default bg-white/70 px-4 py-3 text-sm sm:text-xs text-secondary dark:bg-surface-raised/80">
               <strong>Seniority note:</strong> provers with existing seniority that have not confirmed a join yet will report a seniority of 0 until a confirmation occurs.
             </div>
 

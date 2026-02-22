@@ -45,7 +45,7 @@ export function FrameFeedFilters({
     filters.maxRequests;
 
   return (
-    <div className="rounded-2xl border border-subtle bg-surface-raised shadow-sm">
+    <div className="rounded-2xl border border-default bg-surface-raised">
       <button
         onClick={() => setFiltersExpanded(!filtersExpanded)}
         className="w-full flex items-center justify-between px-6 py-4 text-left transition-colors hover:bg-light-grey/30 dark:hover:bg-white/5"

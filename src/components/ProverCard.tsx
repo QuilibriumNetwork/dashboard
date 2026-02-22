@@ -19,7 +19,7 @@ function formatDisplayAddress(address: string) {
 export function ProverCard({ prover }: ProverCardProps) {
   const displayAddress = formatDisplayAddress(prover.address);
   return (
-    <div className="rounded-2xl border border-subtle bg-surface-raised p-4 text-sm text-burgundy shadow-sm dark:text-white">
+    <div className="rounded-2xl border border-default bg-surface-raised p-4 text-sm text-burgundy dark:text-white">
       <div className="label-text">Address</div>
       <div className="mt-1 font-mono text-sm sm:text-xs">
         <HoverableCopyText text={prover.address}>{displayAddress}</HoverableCopyText>

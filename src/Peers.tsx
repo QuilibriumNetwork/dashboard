@@ -40,7 +40,7 @@ function PeerCard({ peer, onNavigate, isFavorite }: PeerCardProps & { onNavigate
   return (
     <div
       onClick={onNavigate}
-      className="rounded-2xl border border-subtle bg-surface-raised p-4 text-sm text-burgundy shadow-sm dark:text-white cursor-pointer transition hover:bg-hover-highlight"
+      className="rounded-2xl border border-default bg-surface-raised p-4 text-sm text-burgundy dark:text-white cursor-pointer transition hover:bg-hover-highlight"
     >
       <div className="flex items-center justify-between mb-1">
         <div className="label-text">Peer</div>

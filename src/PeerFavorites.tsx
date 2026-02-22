@@ -32,7 +32,7 @@ function FavoritePeerItem({ favorite, peerRecord, peerRow, onDelete, onNavigate,
   const hasLabel = Boolean(favorite.label);
 
   return (
-    <div className="rounded-2xl border border-subtle bg-surface-raised p-5 text-sm text-burgundy shadow-sm dark:text-white">
+    <div className="rounded-2xl border border-default bg-surface-raised p-5 text-sm text-burgundy dark:text-white">
       <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
         <div className="flex-1 min-w-0">
           {hasLabel ? (
@@ -548,7 +548,7 @@ export default function PeerFavorites() {
 
         {/* Import/Export Messages */}
         {(importError || importSuccess !== null) && (
-          <div className="mb-4 rounded-lg border border-default bg-surface p-4 text-sm shadow-sm">
+          <div className="mb-4 rounded-lg border border-default bg-surface p-4 text-sm">
             {importSuccess !== null && (
               <div className="text-success font-semibold">
                 Successfully imported {importSuccess} peer{importSuccess !== 1 ? "s" : ""}.

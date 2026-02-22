@@ -218,7 +218,7 @@ export function PeerDirectoryExport({
   const hasAnyOptionSelected = Object.values(exportOptions).some((v) => v === true);
 
   return (
-    <div className="rounded-2xl border border-subtle bg-surface-raised shadow-sm">
+    <div className="rounded-2xl border border-default bg-surface-raised">
       <button
         onClick={() => setExportExpanded(!exportExpanded)}
         className="w-full flex items-center justify-between px-6 py-4 text-left transition-colors hover:bg-light-grey/30 dark:hover:bg-white/5"

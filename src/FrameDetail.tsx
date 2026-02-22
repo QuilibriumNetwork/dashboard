@@ -221,7 +221,7 @@ export default function FrameDetail() {
           {frame?.requests && frame.requests.length > 0 ? (
             <div className="mt-6 space-y-5">
               {frame.requests.map((bundle, bundleIndex) => (
-                <div key={bundleIndex} className="rounded-2xl border border-subtle bg-white/90 p-5 shadow-sm dark:bg-surface-raised/95">
+                <div key={bundleIndex} className="rounded-2xl border border-default bg-white/90 p-5 dark:bg-surface-raised/95">
                   <div className="flex flex-wrap items-center justify-between gap-3">
                     <div className="label-text">
                       Bundle {bundleIndex + 1}
@@ -287,7 +287,7 @@ function DetailCard({
   );
 
   return (
-    <div className="rounded-2xl border border-subtle bg-light-grey px-4 py-4 text-burgundy shadow-sm dark:bg-surface-raised/70 dark:text-white">
+    <div className="rounded-2xl border border-default bg-surface-raised px-4 py-4 text-burgundy dark:text-white">
       <div className="label-text">{label}</div>
       {displayValue}
     </div>
@@ -301,7 +301,7 @@ function RequestCard({ index, request }: { index: number; request: FrameRequest 
   const displayPayload = typeof payload === "object" && payload !== null ? payload : request;
 
   return (
-    <div className="rounded-2xl border border-subtle bg-white/90 p-4 text-sm text-burgundy shadow-xs dark:bg-surface dark:text-white">
+    <div className="rounded-2xl border border-default bg-white/90 p-4 text-sm text-burgundy dark:bg-surface dark:text-white">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="font-semibold">Request {index + 1}: {formatTypeName(typeKey)}</div>
         {timestamp && (

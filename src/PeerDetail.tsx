@@ -35,7 +35,7 @@ function DetailCard({
   );
 
   return (
-    <div className="rounded-2xl border border-subtle bg-light-grey px-4 py-4 text-burgundy shadow-sm dark:bg-surface-raised/70 dark:text-white">
+    <div className="rounded-2xl border border-default bg-surface-raised px-4 py-4 text-burgundy dark:text-white">
       <div className="label-text">{label}</div>
       {displayValue}
     </div>
@@ -94,7 +94,7 @@ function LastSeenCard({ label, relativeTime, timestamp }: { label: string; relat
   const [isHovered, setIsHovered] = useState(false);
 
   return (
-    <div className="rounded-2xl border border-subtle bg-light-grey px-4 py-4 text-burgundy shadow-sm dark:bg-surface-raised/70 dark:text-white">
+    <div className="rounded-2xl border border-default bg-surface-raised px-4 py-4 text-burgundy dark:text-white">
       <div className="label-text">{label}</div>
       <div className="mt-2 text-base font-semibold flex items-center gap-2">
         <span>{relativeTime}</span>
@@ -384,7 +384,7 @@ export default function PeerDetail() {
                   {peer.reachability.map((reach, index) => (
                     <div
                       key={index}
-                      className="rounded-2xl border border-subtle bg-white/90 p-5 shadow-sm dark:bg-surface-raised"
+                      className="rounded-2xl border border-default bg-white/90 p-5 dark:bg-surface-raised"
                     >
                       <div className="label-text">
                         Record {index + 1}
@@ -462,7 +462,7 @@ export default function PeerDetail() {
               )}
               {keyRegistry && !keyRegistryLoading && (
                 <div className="mt-6 space-y-6">
-                  <div className="rounded-2xl border border-subtle bg-white/90 p-5 shadow-sm dark:bg-surface-raised">
+                  <div className="rounded-2xl border border-default bg-white/90 p-5 dark:bg-surface-raised">
                     <div className="label-text mb-4">
                       Identity Key
                     </div>
@@ -473,7 +473,7 @@ export default function PeerDetail() {
                     </div>
                   </div>
 
-                  <div className="rounded-2xl border border-subtle bg-white/90 p-5 shadow-sm dark:bg-surface-raised">
+                  <div className="rounded-2xl border border-default bg-white/90 p-5 dark:bg-surface-raised">
                     <div className="label-text mb-4">
                       Prover Key
                     </div>
@@ -485,7 +485,7 @@ export default function PeerDetail() {
                   </div>
 
                   <div className="grid gap-4 md:grid-cols-2">
-                    <div className="rounded-2xl border border-subtle bg-white/90 p-5 shadow-sm dark:bg-surface-raised">
+                    <div className="rounded-2xl border border-default bg-white/90 p-5 dark:bg-surface-raised">
                       <div className="label-text mb-4">
                         Identity to Prover Signature
                       </div>
@@ -496,7 +496,7 @@ export default function PeerDetail() {
                       </div>
                     </div>
 
-                    <div className="rounded-2xl border border-subtle bg-white/90 p-5 shadow-sm dark:bg-surface-raised">
+                    <div className="rounded-2xl border border-default bg-white/90 p-5 dark:bg-surface-raised">
                       <div className="label-text mb-4">
                         Prover to Identity Signature
                       </div>
@@ -509,7 +509,7 @@ export default function PeerDetail() {
                   </div>
 
                   {Object.keys(keyRegistry.keysByPurpose).length > 0 && (
-                    <div className="rounded-2xl border border-subtle bg-white/90 p-5 shadow-sm dark:bg-surface-raised">
+                    <div className="rounded-2xl border border-default bg-white/90 p-5 dark:bg-surface-raised">
                       <div className="label-text mb-4">
                         Keys by Purpose ({Object.keys(keyRegistry.keysByPurpose).length})
                       </div>
@@ -600,7 +600,7 @@ export default function PeerDetail() {
                   )}
 
                   {keyRegistry.lastUpdated && keyRegistry.lastUpdated !== "0" && (
-                    <div className="rounded-2xl border border-subtle bg-white/90 p-5 shadow-sm dark:bg-surface-raised">
+                    <div className="rounded-2xl border border-default bg-white/90 p-5 dark:bg-surface-raised">
                       <div className="label-text mb-2">
                         Last Updated
                       </div>
