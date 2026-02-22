@@ -32,12 +32,12 @@ export function SimpleNavbar() {
 
   return (
     <>
-      <nav className={`sticky top-0 border-b border-burgundy/10 bg-white/95 backdrop-blur dark:border-white/10 dark:bg-[#160c21]/90 overflow-visible ${isMobileMenuOpen ? 'z-[80]' : 'z-50'}`}>
+      <nav className={`sticky top-0 border-b border-subtle bg-surface backdrop-blur overflow-visible ${isMobileMenuOpen ? 'z-[80]' : 'z-50'}`}>
         <div className="container mx-auto px-4 md:px-4 pr-6 md:pr-4">
           <div className="flex h-16 items-center justify-between gap-4">
             <Link to="/" className="flex items-center space-x-3 flex-shrink-0">
               <div className="flex flex-col">
-                <span className="text-xl font-bold text-burgundy dark:text-white">
+                <span className="text-xl font-bold text-primary">
                   Quilibrium Dashboard
                 </span>
               </div>
@@ -46,7 +46,7 @@ export function SimpleNavbar() {
             {/* Desktop Navigation */}
             <div className="hidden md:flex items-center gap-5 flex-1 justify-end min-w-0">
               <HeaderSearch />
-              <span className="items-center gap-2 rounded-full border border-green/20 bg-light-green/70 px-4 py-1 text-[0.65rem] font-semibold uppercase tracking-[0.35em] text-green shadow-[0_20px_40px_-28px_rgba(34,169,65,0.5)] inline-flex dark:border-green/30 dark:bg-green/15 dark:text-green">
+              <span className="items-center gap-2 rounded-full border border-green/20 bg-light-green/70 px-4 py-1 text-xs font-semibold uppercase tracking-label text-green shadow-status inline-flex dark:border-green/30 dark:bg-green/15 dark:text-green">
                 <span className="relative inline-flex h-2 w-2">
                   <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-green/70 opacity-75 dark:bg-green/60" />
                   <span className="relative inline-flex h-2 w-2 rounded-full bg-green" />
@@ -95,7 +95,7 @@ export function SimpleNavbar() {
             {/* Mobile Hamburger/Close Button */}
             <button
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              className="md:hidden flex items-center justify-center h-10 w-10 text-burgundy dark:text-white hover:bg-burgundy/10 dark:hover:bg-white/10 rounded transition-colors relative z-[80]"
+              className="md:hidden flex items-center justify-center h-11 w-11 text-primary hover:bg-active-highlight rounded transition-colors relative z-[80]"
               aria-label="Toggle menu"
               aria-expanded={isMobileMenuOpen}
             >
@@ -119,12 +119,12 @@ export function SimpleNavbar() {
             style={{ width: '100vw', maxWidth: '100vw' }}
           />
           {/* Menu Drawer */}
-          <div className="md:hidden fixed top-0 left-0 right-0 bottom-0 w-screen bg-white/95 backdrop-blur dark:bg-[#160c21]/95 z-[70] overflow-y-auto"
+          <div className="md:hidden fixed top-0 left-0 right-0 bottom-0 w-screen bg-surface backdrop-blur z-[70] overflow-y-auto"
             style={{ width: '100vw', maxWidth: '100vw' }}
           >
             <div className="w-full px-4 pt-20 pb-6 space-y-4">
               {/* Status Badge */}
-              <div className="flex items-center gap-2 rounded-full border border-green/20 bg-light-green/70 px-4 py-2 text-[0.65rem] font-semibold uppercase tracking-[0.35em] text-green shadow-[0_20px_40px_-28px_rgba(34,169,65,0.5)] w-fit dark:border-green/30 dark:bg-green/15 dark:text-green">
+              <div className="flex items-center gap-2 rounded-full border border-green/20 bg-light-green/70 px-4 py-2 text-xs font-semibold uppercase tracking-label text-green shadow-status w-fit dark:border-green/30 dark:bg-green/15 dark:text-green">
                 <span className="relative inline-flex h-2 w-2">
                   <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-green/70 opacity-75 dark:bg-green/60" />
                   <span className="relative inline-flex h-2 w-2 rounded-full bg-green" />
@@ -182,9 +182,9 @@ export function SimpleNavbar() {
             </div>
 
             {/* Theme Toggle */}
-            <div className="pt-4 border-t border-burgundy/10 dark:border-white/10">
+            <div className="pt-4 border-t border-subtle">
               <div className="flex items-center justify-between">
-                <span className="text-sm font-semibold text-burgundy dark:text-white">Theme</span>
+                <span className="text-sm font-semibold text-primary">Theme</span>
                 <ThemeToggle />
               </div>
             </div>

@@ -1,10 +1,10 @@
 export function SimpleFooter() {
   return (
-    <footer className="mt-20 bg-burgundy py-12 text-white dark:bg-[#0f0715]">
+    <footer className="mt-20 bg-burgundy py-12 text-white dark:bg-page">
       <div className="container mx-auto px-4">
         <div className="grid gap-8 md:grid-cols-3">
           <div>
-            <h3 className="text-lg font-bold">Quilibrium Explorer</h3>
+            <h3 className="text-lg font-bold !text-white mb-0">Quilibrium Explorer</h3>
             <p className="mt-3 text-white/70 dark:text-white/60">
               Live health monitoring for the Quilibrium network, applications, and
               ecosystem services.
@@ -15,7 +15,7 @@ export function SimpleFooter() {
           </div>
 
           <div>
-            <h4 className="font-semibold">Connect</h4>
+            <h4 className="text-base font-semibold !text-white mb-0">Connect</h4>
             <ul className="mt-4 space-y-2 text-white/70 dark:text-white/60">
               <li>
                 <a

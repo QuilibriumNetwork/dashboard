@@ -114,8 +114,8 @@ export default function ShardDetail() {
 
   const badgeStyles = {
     safe: "bg-green/10 text-green dark:bg-green/20 dark:text-light-green",
-    warn: "bg-yellow-200/40 text-amber-800 dark:bg-yellow-100/20 dark:text-yellow-100",
-    risk: "bg-red/20 text-red-900 dark:bg-red/30 dark:text-red-200",
+    warn: "bg-warning-subtle text-warning",
+    risk: "bg-danger-subtle text-danger",
   };
 
   const coverageClass = coverage ? badgeStyles[coverage.tone] : "";
@@ -136,20 +136,20 @@ export default function ShardDetail() {
   };
 
   return (
-    <div className="relative min-h-screen bg-beige pb-24 pt-16 dark:bg-[#100418]">
+    <div className="relative min-h-screen bg-beige pb-24 pt-16 dark:bg-page">
       <div className="pointer-events-none absolute -left-16 top-10 h-72 w-72 rounded-full bg-light-purple/60 blur-3xl dark:bg-purple/40" />
       <div className="pointer-events-none absolute -right-24 top-32 h-80 w-80 rounded-full bg-light-blue/70 blur-3xl dark:bg-blue/40 overflow-hidden" />
       <div className="pointer-events-none absolute left-1/2 top-[420px] h-80 w-80 -translate-x-1/2 rounded-full bg-light-green/60 blur-3xl dark:bg-green/30" />
 
       <div className="relative mx-auto max-w-5xl px-6">
-        <section className="relative overflow-hidden rounded-3xl border border-burgundy/10 bg-white/95 p-10 text-burgundy shadow-[0_35px_80px_-50px_rgba(57,31,91,0.45)] backdrop-blur-lg dark:border-white/10 dark:bg-[#1a0f27]/95 dark:text-white dark:shadow-[0_40px_90px_-55px_rgba(8,4,20,0.7)]">
+        <section className="relative overflow-hidden rounded-3xl border border-subtle bg-surface p-10 text-burgundy shadow-xl backdrop-blur-lg dark:text-white">
           <div className="pointer-events-none absolute -right-10 -top-10 h-44 w-44 rounded-full bg-pink/40 blur-3xl dark:bg-pink/30" />
           <div className="pointer-events-none absolute left-6 top-8 h-24 w-24 rounded-full bg-light-purple/80 blur-2xl dark:bg-purple/40" />
 
           <div className="relative space-y-6">
             <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
               <div>
-                <p className="text-xs font-semibold uppercase tracking-[0.35em] text-burgundy/60 dark:text-white/60">
+                <p className="label-text">
                   Shard filter
                 </p>
                 <div className="mt-1 font-mono text-sm break-all">
@@ -160,30 +160,30 @@ export default function ShardDetail() {
                   )}
                 </div>
               </div>
-              <Link to="/" className="text-xs font-semibold uppercase tracking-[0.3em] text-burgundy/70 hover:text-burgundy dark:text-white/70 dark:hover:text-white transition-colors">
+              <Link to="/" className="text-sm sm:text-xs font-semibold uppercase tracking-label text-secondary hover:text-burgundy dark:hover:text-white transition-colors">
                 ← Back to explorer
               </Link>
             </div>
 
             {coverage && (
-              <div className={`inline-flex flex-col rounded-2xl px-4 py-3 text-xs font-semibold uppercase tracking-[0.3em] ${coverageClass}`}>
+              <div className={`inline-flex flex-col rounded-2xl px-4 py-3 text-sm sm:text-xs font-semibold uppercase tracking-label ${coverageClass}`}>
                 <span>{coverage.label}</span>
-                <span className="mt-1 text-[0.6rem] normal-case tracking-normal text-burgundy/80 dark:text-white/80">
+                <span className="mt-1 text-xs normal-case tracking-normal text-secondary">
                   {coverage.description}
                 </span>
               </div>
             )}
 
-            <div className="flex flex-wrap gap-4 text-sm text-burgundy/70 dark:text-white/70">
+            <div className="flex flex-wrap gap-4 text-sm text-secondary">
               <div>
-                Total provers: <span className="font-semibold text-burgundy dark:text-white">{provers.length.toLocaleString()}</span>
+                Total provers: <span className="font-semibold text-primary">{provers.length.toLocaleString()}</span>
               </div>
               <div>
-                Active provers: <span className="font-semibold text-burgundy dark:text-white">{activeCount.toLocaleString()}</span>
+                Active provers: <span className="font-semibold text-primary">{activeCount.toLocaleString()}</span>
               </div>
             </div>
 
-            <div className="rounded-2xl border border-burgundy/10 bg-white/70 px-4 py-3 text-xs text-burgundy/80 shadow-[0_10px_35px_-30px_rgba(64,0,27,0.7)] dark:border-white/10 dark:bg-[#211430]/80 dark:text-white/70">
+            <div className="rounded-2xl border border-subtle bg-white/70 px-4 py-3 text-sm sm:text-xs text-secondary shadow-xs dark:bg-surface-raised/80">
               <strong>Seniority note:</strong> provers with existing seniority that have not confirmed a join yet will report a seniority of 0 until a confirmation occurs.
             </div>
 
@@ -192,11 +192,11 @@ export default function ShardDetail() {
                 <Spinner size="40" />
               </div>
             ) : error ? (
-              <div className="rounded-2xl border border-red-200 bg-red-50/70 p-6 text-sm text-red-900 dark:border-red-400/40 dark:bg-red-400/10 dark:text-red-200">
+              <div className="rounded-2xl border border-danger/20 bg-danger-subtle p-6 text-sm text-danger">
                 {error}
               </div>
             ) : provers.length === 0 ? (
-              <div className="rounded-2xl border border-burgundy/10 bg-white/60 p-6 text-sm text-burgundy/70 dark:border-white/10 dark:bg-[#211430]/70 dark:text-white/70">
+              <div className="rounded-2xl border border-subtle bg-white/60 p-6 text-sm text-secondary dark:bg-surface-raised/70">
                 No provers have been reported for this shard filter.
               </div>
             ) : (
@@ -204,12 +204,12 @@ export default function ShardDetail() {
                 {groupedProvers.map(({ status, entries }) => (
                   <div key={status}>
                     <div className="flex flex-wrap items-center justify-between gap-3">
-                      <h3 className="text-base font-semibold uppercase tracking-[0.3em] text-burgundy dark:text-white">
+                      <h3 className="text-base font-semibold uppercase tracking-label text-primary">
                         {status} ({entries.length})
                       </h3>
                       <button
                         onClick={() => toggleStatus(status)}
-                        className="text-xs font-semibold uppercase tracking-[0.3em] text-burgundy/70 hover:text-burgundy dark:text-white/70 dark:hover:text-white transition-colors"
+                        className="text-sm sm:text-xs font-semibold uppercase tracking-label text-secondary hover:text-burgundy dark:hover:text-white transition-colors"
                       >
                         {expandedStatuses.has(status) ? "Collapse" : "Expand"}
                       </button>
@@ -218,8 +218,8 @@ export default function ShardDetail() {
                       <>
                         <div className="mt-4 overflow-x-auto md:hidden">
                           <div className="max-h-[500px] overflow-y-auto">
-                            <table className="min-w-full divide-y divide-burgundy/10 text-left text-sm text-burgundy dark:divide-white/10 dark:text-white">
-                              <thead className="sticky top-0 z-10 bg-white/95 dark:bg-[#1a0f27]/95 text-xs font-semibold uppercase tracking-[0.3em] text-burgundy/60 dark:text-white/60">
+                            <table className="min-w-full divide-y divide-subtle text-left text-sm text-primary">
+                              <thead className="sticky top-0 z-10 bg-surface label-text">
                                 <tr>
                                   <th className="py-3 px-4">Address</th>
                                   <th className="py-3 px-4">Public key</th>
@@ -228,22 +228,22 @@ export default function ShardDetail() {
                                   <th className="py-3 px-4">Delegate</th>
                                 </tr>
                               </thead>
-                              <tbody className="divide-y divide-burgundy/10 dark:divide-white/10">
+                              <tbody className="divide-y divide-subtle">
                                 {entries.map((prover) => (
                                   <tr key={prover.id}>
-                                    <td className="py-3 px-4 font-mono text-xs break-all align-top">
+                                    <td className="py-3 px-4 font-mono text-sm sm:text-xs break-all align-top">
                                       <HoverableCopyText text={prover.address}>{prover.address}</HoverableCopyText>
                                     </td>
-                                    <td className="py-3 px-4 font-mono text-xs break-all align-top">
+                                    <td className="py-3 px-4 font-mono text-sm sm:text-xs break-all align-top">
                                       {prover.publicKey ? (
                                         <HoverableCopyText text={prover.publicKey}>{prover.publicKey}</HoverableCopyText>
                                       ) : (
                                         "–"
                                       )}
                                     </td>
-                                    <td className="py-3 px-4 text-xs align-top">{prover.seniorityLabel}</td>
-                                    <td className="py-3 px-4 text-xs align-top">{prover.storageLabel}</td>
-                                    <td className="py-3 px-4 text-xs break-all align-top">
+                                    <td className="py-3 px-4 text-sm sm:text-xs align-top">{prover.seniorityLabel}</td>
+                                    <td className="py-3 px-4 text-sm sm:text-xs align-top">{prover.storageLabel}</td>
+                                    <td className="py-3 px-4 text-sm sm:text-xs break-all align-top">
                                       {prover.delegate ? (
                                         <HoverableCopyText text={prover.delegate}>{prover.delegate}</HoverableCopyText>
                                       ) : (

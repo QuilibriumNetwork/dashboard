@@ -87,7 +87,7 @@ function truncateFilter(filter: string) {
 
 function Tag({ label }: { label: string }) {
   return (
-    <span className="inline-flex rounded-full border border-burgundy/20 bg-light-grey px-4 py-1.5 text-sm md:px-3 md:py-1 md:text-xs font-semibold uppercase tracking-[0.3em] text-burgundy/70 dark:border-white/15 dark:bg-[#261732] dark:text-white/70">
+    <span className="inline-flex rounded-full border border-default bg-light-grey px-4 py-1.5 text-sm md:px-3 md:py-1 md:text-xs font-semibold uppercase tracking-label text-secondary dark:bg-surface-subtle">
       {label}
     </span>
   );
@@ -110,16 +110,16 @@ function CopyButton({ text, className = "", showText = false }: { text: string; 
   return (
     <button
       onClick={handleCopy}
-      className={`inline-flex items-center gap-1.5 ml-2 px-2 py-1 rounded transition-colors hover:bg-burgundy/10 dark:hover:bg-white/10 ${showText ? '' : 'border border-burgundy/20 dark:border-white/20'} ${className}`}
+      className={`inline-flex items-center gap-1.5 ml-2 px-2 py-1 rounded transition-colors hover:bg-active-highlight ${showText ? '' : 'border border-default'} ${className}`}
       title={copied ? "Copied!" : "Copy to clipboard"}
       aria-label="Copy to clipboard"
     >
       {copied ? (
-        <span className="text-xs text-green dark:text-light-green">Copied</span>
+        <span className="text-sm sm:text-xs text-green dark:text-light-green">Copied</span>
       ) : (
         <>
-          {showText && <span className="text-xs text-burgundy/70 dark:text-white/70">Copy to Clipboard</span>}
-          <Icon name="emptyclipboard" className="w-4 h-4 text-burgundy/60 dark:text-white/60" />
+          {showText && <span className="text-sm sm:text-xs text-secondary">Copy to Clipboard</span>}
+          <Icon name="emptyclipboard" className="w-4 h-4 text-muted" />
         </>
       )}
     </button>
@@ -147,7 +147,7 @@ function CopyFrameDataButton({ frame }: { frame: GlobalFrame | null }) {
   return (
     <button
       onClick={handleCopy}
-      className="flex items-center gap-2 px-2 py-1 text-sm font-semibold uppercase tracking-[0.2em] text-burgundy/70 hover:text-burgundy dark:text-white/70 transition-colors bg-transparent hover:bg-transparent"
+      className="flex items-center gap-2 px-2 py-1 text-sm action-text bg-transparent hover:bg-transparent"
     >
       <Icon name="emptyclipboard" className="w-4 h-4 flex-shrink-0" />
       <span>{copied ? 'Copied!' : 'Copy data'}</span>
@@ -188,7 +188,7 @@ function CopyFilterLinkButton({ filters }: { filters: PeerFilterState }) {
   return (
     <button
       onClick={handleCopy}
-      className="text-xs font-semibold text-burgundy/70 hover:text-burgundy dark:text-white/70 dark:hover:text-white transition-colors flex items-center gap-1.5"
+      className="text-sm sm:text-xs font-semibold text-secondary hover:text-primary transition-colors flex items-center gap-1.5"
       title={copied ? "Link copied!" : "Copy filter link"}
       aria-label="Copy filter link"
     >
@@ -221,14 +221,14 @@ function FrameDataCard({ frameNumber, requests, prover, selector, timestamp, onN
   return (
     <div
       onClick={onNavigate}
-      className="rounded-2xl border border-burgundy/10 bg-white px-4 py-4 text-sm text-burgundy shadow-[0_20px_55px_-45px_rgba(64,0,27,0.5)] dark:border-white/10 dark:bg-[#211430] dark:text-white cursor-pointer transition hover:bg-light-grey/60 dark:hover:bg-white/5"
+      className="rounded-2xl border border-subtle bg-white px-4 py-4 text-sm text-burgundy shadow-sm dark:bg-surface-raised dark:text-white cursor-pointer transition hover:bg-hover-highlight"
     >
-      <div className="mb-3 font-semibold text-base text-burgundy dark:text-white">
+      <div className="mb-3 font-semibold text-base text-primary">
         Frame #{frameNumber.toLocaleString()}
       </div>
-      <div className="space-y-2 text-xs">
+      <div className="space-y-2 text-sm sm:text-xs">
         <div>
-          <span className="text-burgundy/60 dark:text-white/60">Prover: </span>
+          <span className="text-muted">Prover: </span>
           <span className="font-mono break-all">
             {(() => {
               const displayValue = formatBase64Bytes(prover);
@@ -245,7 +245,7 @@ function FrameDataCard({ frameNumber, requests, prover, selector, timestamp, onN
           </span>
         </div>
         <div>
-          <span className="text-burgundy/60 dark:text-white/60">Selector: </span>
+          <span className="text-muted">Selector: </span>
           <span className="font-mono break-all">
             {(() => {
               const displayValue = formatBase64Bytes(selector);
@@ -263,20 +263,20 @@ function FrameDataCard({ frameNumber, requests, prover, selector, timestamp, onN
         </div>
         <div className="flex items-center justify-between pt-2">
           <div>
-            <span className="text-burgundy/60 dark:text-white/60">Requests: </span>
+            <span className="text-muted">Requests: </span>
             <span>{requests}</span>
           </div>
-          <div className="text-burgundy/60 dark:text-white/60 text-right">
+          <div className="text-muted text-right">
             {formatTimestamp(timestamp)}
           </div>
         </div>
-        <div className="pt-3 border-t border-burgundy/10 dark:border-white/10">
+        <div className="pt-3 border-t border-subtle">
           <button
             onClick={(e) => {
               e.stopPropagation();
               onNavigate();
             }}
-            className="flex items-center gap-2 text-xs font-semibold text-burgundy/70 hover:text-burgundy dark:text-white/70 dark:hover:text-white transition-colors"
+            className="flex items-center gap-2 text-sm sm:text-xs font-semibold text-secondary hover:text-primary transition-colors"
           >
             <span>View frame details</span>
             <Arrow className="w-4 h-4" />
@@ -291,10 +291,10 @@ function FrameDataCard({ frameNumber, requests, prover, selector, timestamp, onN
 function FrameDataRow({ frameNumber, requests, prover, selector, timestamp, onNavigate }: FrameDataProps) {
   return (
     <tr
-      className="text-sm cursor-pointer transition hover:bg-light-grey/60 dark:hover:bg-white/5"
+      className="text-sm cursor-pointer transition hover:bg-hover-highlight"
       onClick={onNavigate}
     >
-      <td className="py-4 pr-6 font-semibold text-burgundy dark:text-white">
+      <td className="py-4 pr-6 font-semibold text-primary">
         #{frameNumber.toLocaleString()}
       </td>
       <td className="py-4 pr-6">{requests}</td>
@@ -333,7 +333,7 @@ function FrameDataRow({ frameNumber, requests, prover, selector, timestamp, onNa
             e.stopPropagation();
             onNavigate();
           }}
-          className="flex items-center gap-2 text-xs font-semibold text-burgundy/70 hover:text-burgundy dark:text-white/70 dark:hover:text-white transition-colors"
+          className="flex items-center gap-2 text-sm sm:text-xs font-semibold text-secondary hover:text-primary transition-colors"
         >
           <span>View frame details</span>
           <Arrow className="w-4 h-4" />
@@ -345,22 +345,22 @@ function FrameDataRow({ frameNumber, requests, prover, selector, timestamp, onNa
 
 function PeerCard({ peer }: { peer: ReturnType<typeof formatPeerRows>[number] }) {
   return (
-    <div className="rounded-2xl border border-burgundy/10 bg-white/95 p-4 text-sm text-burgundy shadow-[0_20px_55px_-45px_rgba(64,0,27,0.5)] dark:border-white/10 dark:bg-[#211430]/95 dark:text-white">
-      <div className="text-xs font-semibold uppercase tracking-[0.3em] text-burgundy/60 dark:text-white/60">Peer</div>
-      <div className="mt-1 font-mono text-xs">
+    <div className="rounded-2xl border border-subtle bg-surface-raised p-4 text-sm text-burgundy shadow-sm dark:text-white">
+      <div className="label-text">Peer</div>
+      <div className="mt-1 font-mono text-sm sm:text-xs">
         <HoverableCopyText text={peer.peerId}>{peer.peerId}</HoverableCopyText>
       </div>
-      <div className="mt-2 text-xs text-burgundy/70 dark:text-white/70">Version {peer.version}</div>
-      <div className="mt-3 text-xs">
-        <div className="text-[0.65rem] uppercase tracking-[0.3em] text-burgundy/50 dark:text-white/50">Pubsub</div>
+      <div className="mt-2 text-sm sm:text-xs text-secondary">Version {peer.version}</div>
+      <div className="mt-3 text-sm sm:text-xs">
+        <div className="sub-label-text">Pubsub</div>
         {peer.pubsub.length ? peer.pubsub.map((addr) => (
           <div key={addr} className="break-all">
             <HoverableCopyText text={addr}>{addr}</HoverableCopyText>
           </div>
         )) : "–"}
       </div>
-      <div className="mt-3 text-xs">
-        <div className="text-[0.65rem] uppercase tracking-[0.3em] text-burgundy/50 dark:text-white/50">Stream</div>
+      <div className="mt-3 text-sm sm:text-xs">
+        <div className="sub-label-text">Stream</div>
         {peer.stream.length ? peer.stream.map((addr) => (
           <div key={addr} className="break-all">
             <HoverableCopyText text={addr}>{addr}</HoverableCopyText>
@@ -373,8 +373,8 @@ function PeerCard({ peer }: { peer: ReturnType<typeof formatPeerRows>[number] })
 
 const coverageBadgeClasses: Record<string, string> = {
   safe: "bg-green/10 text-green dark:bg-green/20 dark:text-light-green",
-  warn: "bg-yellow-200/40 text-amber-800 dark:bg-yellow-100/20 dark:text-yellow-100",
-  risk: "bg-red/20 text-red-900 dark:bg-red/30 dark:text-red-200",
+  warn: "bg-warning-subtle text-warning",
+  risk: "bg-danger-subtle text-danger",
 };
 
 function ShardSummaryCard({ summary }: { summary: ProverShardSummary }) {
@@ -391,26 +391,26 @@ function ShardSummaryCard({ summary }: { summary: ProverShardSummary }) {
 
   return (
     <Link to={`/provers/shards/${summary.filter}`} className="block">
-      <div className="rounded-2xl border border-burgundy/10 bg-white/95 p-4 text-sm text-burgundy shadow-[0_20px_55px_-45px_rgba(64,0,27,0.5)] dark:border-white/10 dark:bg-[#211430]/95 dark:text-white transition hover:bg-light-grey/60 dark:hover:bg-white/5">
-        <div className="text-xs font-semibold uppercase tracking-[0.3em] text-burgundy/60 dark:text-white/60">Shard filter</div>
-        <div className="mt-1 font-mono text-xs break-all">
+      <div className="rounded-2xl border border-subtle bg-surface-raised p-4 text-sm text-burgundy shadow-sm dark:text-white transition hover:bg-hover-highlight">
+        <div className="label-text">Shard filter</div>
+        <div className="mt-1 font-mono text-sm sm:text-xs break-all">
           <HoverableCopyText text={summary.filter}>{truncateFilter(summary.filter)}</HoverableCopyText>
         </div>
         <div className="mt-3 flex items-center gap-2">
-          <span className="text-sm text-burgundy/60 dark:text-white/60">Total provers:</span>
-          <span className="font-semibold text-burgundy dark:text-white">{total.toLocaleString()}</span>
-          <span className={`text-[0.65rem] font-semibold uppercase tracking-[0.3em] rounded-full px-3 py-1 ${badgeClass}`}>
+          <span className="text-sm text-muted">Total provers:</span>
+          <span className="font-semibold text-primary">{total.toLocaleString()}</span>
+          <span className={`text-xs font-semibold uppercase tracking-label rounded-full px-3 py-1 ${badgeClass}`}>
             {tone === "safe" ? "healthy" : tone === "warn" ? "warning" : "risk"}
           </span>
         </div>
-        <div className="mt-3 text-xs text-burgundy/70 dark:text-white/70 space-y-1">
+        <div className="mt-3 text-sm sm:text-xs text-secondary space-y-1">
           {orderedStatuses.map((status) => {
             const value = counts[status];
             if (value === undefined) return null;
             return (
               <div key={status} className="flex justify-between">
                 <span className="capitalize">{status}</span>
-                <span className="font-semibold text-burgundy dark:text-white">{value.toLocaleString()}</span>
+                <span className="font-semibold text-primary">{value.toLocaleString()}</span>
               </div>
             );
           })}
@@ -471,11 +471,11 @@ function CollapsibleMessage({
   }, [message.data]);
 
   return (
-    <div className="rounded-2xl border border-burgundy/10 bg-white px-4 py-4 text-sm text-burgundy shadow-[0_20px_55px_-45px_rgba(64,0,27,0.5)] dark:border-white/10 dark:bg-[#211430] dark:text-white">
-      <div className="text-xs font-semibold uppercase tracking-[0.3em] text-burgundy/60 dark:text-white/60">
+    <div className="rounded-2xl border border-subtle bg-white px-4 py-4 text-sm text-burgundy shadow-sm dark:bg-surface-raised dark:text-white">
+      <div className="label-text">
         {formatTimestamp(message.timestamp)}
       </div>
-      <div className="mt-1 font-mono text-xs text-burgundy/70 dark:text-white/70 break-words">
+      <div className="mt-1 font-mono text-sm sm:text-xs text-secondary break-words">
         <span className="flex items-center flex-wrap gap-1">
           <span>from </span>
           <HoverableCopyText text={message.from}>
@@ -490,20 +490,20 @@ function CollapsibleMessage({
       {/* Hidden element to measure full height - positioned off-screen */}
       <div
         ref={measureRef}
-        className="mt-2 font-mono text-xs text-burgundy dark:text-white break-all whitespace-pre-wrap absolute left-[-9999px] top-[-9999px]"
+        className="mt-2 font-mono text-sm sm:text-xs text-primary break-all whitespace-pre-wrap absolute left-[-9999px] top-[-9999px]"
         aria-hidden="true"
       >
         {message.data}
       </div>
       <div className="relative mt-2">
         <div className="flex items-start justify-between mb-1">
-          <div className="text-[0.7rem] font-semibold uppercase tracking-[0.35em] text-burgundy/60 dark:text-white/60">Data</div>
+          <div className="label-text">Data</div>
           <CopyButton text={message.data} showText={true} className="mb-1" />
         </div>
         <div className="relative">
           <div
             ref={contentRef}
-            className={`font-mono text-xs text-burgundy dark:text-white break-all whitespace-pre-wrap transition-all ${
+            className={`font-mono text-sm sm:text-xs text-primary break-all whitespace-pre-wrap transition-all ${
               !isExpanded ? 'overflow-hidden' : ''
             }`}
             style={{
@@ -513,10 +513,10 @@ function CollapsibleMessage({
             {message.data}
           </div>
           {!isExpanded && hasOverflow && (
-            <div className="absolute bottom-0 left-0 right-0 h-14 bg-gradient-to-t from-white via-white/70 to-transparent dark:from-[#211430] dark:via-[#211430]/70 dark:to-transparent">
+            <div className="absolute bottom-0 left-0 right-0 h-14 bg-gradient-to-t from-white via-white/70 to-transparent dark:from-surface-raised dark:via-surface-raised/70 dark:to-transparent">
               <button
                 onClick={onToggle}
-                className="absolute bottom-2 left-1/2 -translate-x-1/2 flex items-center gap-1.5 px-3 py-1 text-xs font-medium text-burgundy/80 hover:text-burgundy dark:text-white/80 dark:hover:text-white bg-burgundy/10 hover:bg-burgundy/20 dark:bg-white/10 dark:hover:bg-white/20 rounded-full backdrop-blur-sm transition-all border border-burgundy/20 hover:border-burgundy/30 dark:border-white/20 dark:hover:border-white/30"
+                className="absolute bottom-2 left-1/2 -translate-x-1/2 flex items-center gap-1.5 px-3 py-1 text-sm sm:text-xs font-medium text-secondary hover:text-primary bg-burgundy/10 hover:bg-burgundy/20 dark:bg-white/10 dark:hover:bg-white/20 rounded-full backdrop-blur-sm transition-all border border-default hover:border-strong"
               >
                 <ChevronDown className="size-3 transition-transform" />
                 <span>Expand</span>
@@ -528,7 +528,7 @@ function CollapsibleMessage({
       {isExpanded && hasOverflow && (
         <button
           onClick={onToggle}
-          className="mt-3 flex items-center gap-1 text-xs font-semibold text-burgundy/70 hover:text-burgundy dark:text-white/70 dark:hover:text-white transition-colors"
+          className="mt-3 flex items-center gap-1 text-sm sm:text-xs font-semibold text-secondary hover:text-primary transition-colors"
         >
           Collapse
           <ChevronDown
@@ -1068,26 +1068,26 @@ export default function Explorer() {
   return (
     <PageLayout title="Quilibrium Explorer">
         <div className="relative mx-auto max-w-6xl px-6">
-          <section id="global-frame" className="relative overflow-hidden rounded-3xl border border-burgundy/10 bg-white/95 p-10 text-burgundy shadow-[0_35px_80px_-50px_rgba(57,31,91,0.45)] backdrop-blur-lg dark:border-white/10 dark:bg-[#1a0f27]/95 dark:text-white dark:shadow-[0_40px_90px_-55px_rgba(8,4,20,0.7)]">
+          <section id="global-frame" className="relative overflow-hidden rounded-3xl border border-subtle bg-surface p-10 text-burgundy shadow-xl backdrop-blur-lg dark:text-white">
             <div className="pointer-events-none absolute -right-10 -top-10 h-44 w-44 rounded-full bg-pink/40 blur-3xl dark:bg-pink/30" />
             <div className="pointer-events-none absolute left-6 top-8 h-24 w-24 rounded-full bg-light-purple/80 blur-2xl dark:bg-purple/40" />
 
             <div className="relative space-y-6">
               <div className="flex flex-wrap items-start justify-between gap-3">
                 <div className="flex flex-col gap-2">
-                  <h2 className="text-lg md:text-3xl font-semibold uppercase tracking-[0.35em] text-burgundy dark:text-white">
+                  <h2 className="text-lg md:text-3xl font-semibold uppercase tracking-label text-primary">
                     Global frame
                   </h2>
-                  <span className="text-xs font-semibold uppercase tracking-[0.35em] text-burgundy/70 dark:text-white/70">
+                  <span className="text-sm sm:text-xs font-semibold uppercase tracking-label text-secondary">
                     Rank #{latestHeader?.rank.toLocaleString() ?? "–"}
                   </span>
                 </div>
                 <div className="flex items-center gap-4">
-                  <div className="text-sm text-burgundy/70 dark:text-white/70">
+                  <div className="text-sm text-secondary">
                     {loading ? (
                       "Refreshing explorer data…"
                     ) : latestHeader?.timestamp ? (
-                      <span className="text-[0.7rem] tracking-[0.2em] text-burgundy/60 dark:text-white/60">
+                      <span className="text-xs tracking-label text-muted">
                         {formatTimestamp(latestHeader.timestamp)} ({formatRelative(latestHeader.timestamp)})
                       </span>
                     ) : null}
@@ -1100,17 +1100,17 @@ export default function Explorer() {
 
               {/* Add this new section */}
               <div className="grid gap-6 md:grid-cols-3">
-                <div className="rounded-2xl border border-burgundy/10 bg-white/95 p-6 shadow-[0_26px_70px_-55px_rgba(64,0,27,0.5)] dark:border-white/10 dark:bg-[#211430]/95 dark:text-white">
-                  <div className="text-xs font-semibold uppercase tracking-[0.3em] text-burgundy/60 dark:text-white/60">Frame Number</div>
-                  <div className="mt-2 text-3xl font-semibold text-burgundy dark:text-white">
+                <div className="rounded-2xl border border-subtle bg-surface-raised p-6 shadow-md dark:text-white">
+                  <div className="label-text">Frame Number</div>
+                  <div className="mt-2 text-3xl font-semibold text-primary">
                     {latestHeader?.frameNumber?.toLocaleString() ?? "–"}
                   </div>
-                  <div className="text-sm text-burgundy/70 dark:text-white/70">
+                  <div className="text-sm text-secondary">
                     Difficulty {latestHeader?.difficulty ?? "–"}
                   </div>
                 </div>
-                <div className="rounded-2xl border border-burgundy/10 bg-white/95 p-6 shadow-[0_26px_70px_-55px_rgba(64,0,27,0.5)] dark:border-white/10 dark:bg-[#211430]/95 dark:text-white">
-                  <div className="text-xs font-semibold uppercase tracking-[0.3em] text-burgundy/60 dark:text-white/60">Prover</div>
+                <div className="rounded-2xl border border-subtle bg-surface-raised p-6 shadow-md dark:text-white">
+                  <div className="label-text">Prover</div>
                   {latestHeader?.prover && (() => {
                     const displayValue = formatBase64Bytes(latestHeader.prover);
                     const copyValue = base64ToHex(latestHeader.prover);
@@ -1118,7 +1118,7 @@ export default function Explorer() {
                       ? `0x${copyValue}`
                       : copyValue ?? latestHeader.prover;
                     return (
-                      <div className="mt-2 text-2xl font-semibold text-burgundy dark:text-white font-mono">
+                      <div className="mt-2 text-2xl font-semibold text-primary font-mono">
                         <HoverableCopyText text={finalCopyValue}>
                           {displayValue}
                         </HoverableCopyText>
@@ -1126,19 +1126,19 @@ export default function Explorer() {
                     );
                   })()}
                 </div>
-                <div className="rounded-2xl border border-burgundy/10 bg-white/95 p-6 shadow-[0_26px_70px_-55px_rgba(64,0,27,0.5)] dark:border-white/10 dark:bg-[#211430]/95 dark:text-white">
-                  <div className="text-xs font-semibold uppercase tracking-[0.3em] text-burgundy/60 dark:text-white/60">Peers</div>
-                  <div className="mt-2 text-3xl font-semibold text-burgundy dark:text-white">
+                <div className="rounded-2xl border border-subtle bg-surface-raised p-6 shadow-md dark:text-white">
+                  <div className="label-text">Peers</div>
+                  <div className="mt-2 text-3xl font-semibold text-primary">
                     {formattedPeerCount}
                   </div>
-                  <div className="text-sm text-burgundy/70 dark:text-white/70">
+                  <div className="text-sm text-secondary">
                     Active nodes reporting reachability
                   </div>
                 </div>
               </div>
               <div className="grid gap-4 text-sm md:grid-cols-2">
-                <div className="rounded-2xl border border-burgundy/10 bg-white px-4 py-4 text-burgundy shadow-[0_20px_55px_-45px_rgba(64,0,27,0.5)] dark:border-white/10 dark:bg-[#211430] dark:text-white">
-                  <div className="text-[0.7rem] font-semibold uppercase tracking-[0.35em] text-burgundy/60 dark:text-white/60">Requests root</div>
+                <div className="rounded-2xl border border-subtle bg-white px-4 py-4 text-burgundy shadow-sm dark:bg-surface-raised dark:text-white">
+                  <div className="label-text">Requests root</div>
                   {latestHeader?.requestsRoot && (() => {
                     const displayValue = formatBase64Bytes(latestHeader.requestsRoot);
                     const copyValue = base64ToHex(latestHeader.requestsRoot);
@@ -1154,8 +1154,8 @@ export default function Explorer() {
                     );
                   })()}
                 </div>
-                <div className="rounded-2xl border border-burgundy/10 bg-white px-4 py-4 text-burgundy shadow-[0_20px_55px_-45px_rgba(64,0,27,0.5)] dark:border-white/10 dark:bg-[#211430] dark:text-white">
-                  <div className="text-[0.7rem] font-semibold uppercase tracking-[0.35em] text-burgundy/60 dark:text-white/60">Parent selector</div>
+                <div className="rounded-2xl border border-subtle bg-white px-4 py-4 text-burgundy shadow-sm dark:bg-surface-raised dark:text-white">
+                  <div className="label-text">Parent selector</div>
                   {latestHeader?.parentSelector && (() => {
                     const displayValue = formatBase64Bytes(latestHeader.parentSelector);
                     const copyValue = base64ToHex(latestHeader.parentSelector);
@@ -1175,18 +1175,18 @@ export default function Explorer() {
             </div>
           </section>
 
-          <section id="frame-feed" className="mt-14 relative overflow-hidden rounded-3xl border border-burgundy/10 bg-white/95 p-10 text-burgundy shadow-[0_35px_80px_-50px_rgba(57,31,91,0.45)] backdrop-blur-lg dark:border-white/10 dark:bg-[#1a0f27]/95 dark:text-white dark:shadow-[0_40px_90px_-55px_rgba(8,4,20,0.7)]">
+          <section id="frame-feed" className="mt-14 relative overflow-hidden rounded-3xl border border-subtle bg-surface p-10 text-burgundy shadow-xl backdrop-blur-lg dark:text-white">
             <div className="pointer-events-none absolute -right-10 -top-10 h-44 w-44 rounded-full bg-pink/40 blur-3xl dark:bg-pink/30" />
             <div className="pointer-events-none absolute left-6 top-8 h-24 w-24 rounded-full bg-light-purple/80 blur-2xl dark:bg-purple/40" />
 
             <div className="relative space-y-6">
               <div className="flex flex-wrap items-center justify-between gap-4">
-                <h2 className="text-lg md:text-3xl font-semibold uppercase tracking-[0.35em] text-burgundy dark:text-white">
+                <h2 className="text-lg md:text-3xl font-semibold uppercase tracking-label text-primary">
                   Frame feed
                 </h2>
                 <Link
                   to="/frames-analytics"
-                  className="text-xs font-semibold uppercase tracking-[0.3em] text-burgundy/70 hover:text-burgundy dark:text-white/70 dark:hover:text-white transition-colors flex items-center gap-2"
+                  className="text-sm sm:text-xs action-text flex items-center gap-2"
                 >
                   <span>View Analytics</span>
                   <Arrow className="w-4 h-4" />
@@ -1196,7 +1196,7 @@ export default function Explorer() {
               {/* Add this new section */}
               <div className="flex flex-col gap-3">
                 <div className="flex flex-wrap items-center gap-3">
-                  <span className="text-xs font-semibold uppercase tracking-[0.3em] text-burgundy/60 dark:text-white/60">
+                  <span className="label-text">
                     Showing statistics from the last
                   </span>
                   <select
@@ -1207,13 +1207,13 @@ export default function Explorer() {
                         setFrameCount(newCount);
                       }
                     }}
-                    className="text-xs font-semibold uppercase tracking-[0.3em] text-burgundy dark:text-white bg-white dark:bg-[#1a0f27] border border-burgundy/20 dark:border-white/20 rounded-lg px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-burgundy/30 dark:focus:ring-white/30 transition-colors cursor-pointer"
+                    className="text-sm sm:text-xs font-semibold uppercase tracking-label text-primary bg-white dark:bg-surface border border-default rounded-lg px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-brand/30 transition-colors cursor-pointer"
                   >
                     <option value={10}>10</option>
                     <option value={25}>25</option>
                     <option value={50}>50</option>
                   </select>
-                  <span className="text-xs font-semibold uppercase tracking-[0.3em] text-burgundy/60 dark:text-white/60">
+                  <span className="label-text">
                     frames
                   </span>
                 </div>
@@ -1246,8 +1246,8 @@ export default function Explorer() {
               {/* Desktop Table Layout */}
               <div className="hidden md:block overflow-x-auto">
                 <div className="max-h-[520px] overflow-y-auto">
-                  <table className="min-w-full divide-y divide-burgundy/10 text-left text-sm text-burgundy dark:divide-white/10 dark:text-white">
-                    <thead className="sticky top-0 z-10 bg-white/95 dark:bg-[#1a0f27]/95 text-xs font-semibold uppercase tracking-[0.3em] text-burgundy/60 dark:text-white/60">
+                  <table className="min-w-full divide-y divide-subtle text-left text-sm text-primary">
+                    <thead className="sticky top-0 z-10 bg-surface label-text">
                       <tr>
                         <th className="py-3 pr-6">Frame</th>
                         <th className="py-3 pr-6">Requests</th>
@@ -1257,7 +1257,7 @@ export default function Explorer() {
                         <th className="py-3 pr-6"></th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-burgundy/10 dark:divide-white/10">
+                    <tbody className="divide-y divide-subtle">
                       {filteredFrameRows.map((row) => (
                         <FrameDataRow
                           key={row.frameNumber}
@@ -1277,52 +1277,52 @@ export default function Explorer() {
           </section>
 {/*
           <section className="mt-14 space-y-6">
-            <h2 className="text-3xl font-semibold text-burgundy dark:text-white">Recent frames</h2>
+            <h2 className="text-3xl font-semibold text-primary">Recent frames</h2>
             <div className="grid gap-6 lg:grid-cols-2">
               {frameFeed.slice(0, 4).map((frame) => (
                 <div
                   key={frame.header.frameNumber}
-                  className="flex flex-col gap-5 rounded-3xl border border-burgundy/10 bg-white/95 p-6 shadow-[0_34px_80px_-55px_rgba(57,31,91,0.4)] backdrop-blur dark:border-white/10 dark:bg-[#1a0f27]/95 dark:shadow-[0_40px_90px_-55px_rgba(0,0,0,0.65)]"
+                  className="flex flex-col gap-5 rounded-3xl border border-subtle bg-surface p-6 shadow-xl backdrop-blur"
                 >
                   <div className="flex flex-wrap items-center gap-3">
                     <Tag label={`Frame ${frame.header.frameNumber.toLocaleString()}`} />
                   </div>
                   <div className="grid gap-4 text-sm sm:grid-cols-2">
-                    <div className="rounded-2xl border border-burgundy/10 bg-white px-4 py-3 text-burgundy shadow-[0_20px_55px_-45px_rgba(64,0,27,0.5)] dark:border-white/10 dark:bg-[#211430] dark:text-white">
-                      <div className="text-[0.7rem] font-semibold uppercase tracking-[0.35em] text-burgundy/60 dark:text-white/60">
+                    <div className="rounded-2xl border border-subtle bg-white px-4 py-3 text-burgundy shadow-sm dark:bg-surface-raised dark:text-white">
+                      <div className="label-text">
                         Prover
                       </div>
                       <div className="text-base font-semibold font-mono">{formatBase64Bytes(frame.header.prover)}</div>
                     </div>
-                    <div className="rounded-2xl border border-burgundy/10 bg-white px-4 py-3 text-burgundy shadow-[0_20px_55px_-45px_rgba(64,0,27,0.5)] dark:border-white/10 dark:bg-[#211430] dark:text-white">
-                      <div className="text-[0.7rem] font-semibold uppercase tracking-[0.35em] text-burgundy/60 dark:text-white/60">
+                    <div className="rounded-2xl border border-subtle bg-white px-4 py-3 text-burgundy shadow-sm dark:bg-surface-raised dark:text-white">
+                      <div className="label-text">
                         Selector
                       </div>
                       <div className="text-base font-semibold font-mono">{formatBase64Bytes(frame.header.parentSelector)}</div>
                     </div>
                   </div>
-                  <div className="rounded-2xl border border-burgundy/10 bg-light-grey px-4 py-3 text-sm text-burgundy/80 shadow-[inset_0_1px_0_rgba(255,255,255,0.6)] dark:border-white/10 dark:bg-[#211430]/60 dark:text-white/80">
-                    <div className="text-xs font-semibold uppercase tracking-[0.3em] text-burgundy/60 dark:text-white/60">
+                  <div className="rounded-2xl border border-subtle bg-light-grey px-4 py-3 text-sm text-burgundy/80 shadow-[inset_0_1px_0_rgba(255,255,255,0.6)] dark:bg-surface-raised/60 dark:text-white/80">
+                    <div className="label-text">
                       Requests recorded
                     </div>
-                    <div className="font-mono text-xs">{frame.requests.length}</div>
+                    <div className="font-mono text-sm sm:text-xs">{frame.requests.length}</div>
                   </div>
                 </div>
               ))}
             </div>
           </section> */}
 
-          <section id="peer-directory" className="mt-14 relative overflow-hidden rounded-3xl border border-burgundy/10 bg-white/95 p-10 text-burgundy shadow-[0_35px_80px_-50px_rgba(57,31,91,0.45)] backdrop-blur-lg dark:border-white/10 dark:bg-[#1a0f27]/95 dark:text-white dark:shadow-[0_40px_90px_-55px_rgba(8,4,20,0.7)]">
+          <section id="peer-directory" className="mt-14 relative overflow-hidden rounded-3xl border border-subtle bg-surface p-10 text-burgundy shadow-xl backdrop-blur-lg dark:text-white">
             <div className="pointer-events-none absolute -right-10 -top-10 h-44 w-44 rounded-full bg-pink/40 blur-3xl dark:bg-pink/30" />
             <div className="pointer-events-none absolute left-6 top-8 h-24 w-24 rounded-full bg-light-purple/80 blur-2xl dark:bg-purple/40" />
 
             <div className="relative space-y-6">
               <div className="flex flex-wrap items-start justify-between gap-3">
                 <div className="flex flex-col gap-2">
-                  <h2 className="text-lg md:text-3xl font-semibold uppercase tracking-[0.35em] text-burgundy dark:text-white">
+                  <h2 className="text-lg md:text-3xl font-semibold uppercase tracking-label text-primary">
                     Peer directory
                   </h2>
-                  <div className="text-xs font-semibold uppercase tracking-[0.35em] text-burgundy/70 dark:text-white/70">
+                  <div className="text-sm sm:text-xs font-semibold uppercase tracking-label text-secondary">
                     {formattedPeerCount} peers
                   </div>
                   <CopyFilterLinkButton filters={filters} />
@@ -1330,7 +1330,7 @@ export default function Explorer() {
                 <div className="flex flex-col items-end gap-2">
                   <Link
                     to="/peers"
-                    className="text-xs font-semibold uppercase tracking-[0.3em] text-burgundy/70 hover:text-burgundy dark:text-white/70 dark:hover:text-white transition-colors"
+                    className="text-sm sm:text-xs action-text"
                   >
                     View Peers →
                   </Link>
@@ -1358,32 +1358,32 @@ export default function Explorer() {
             </div>
           </section>
 
-          <section id="prover-shards" className="mt-14 relative overflow-hidden rounded-3xl border border-burgundy/10 bg-white/95 p-10 text-burgundy shadow-[0_35px_80px_-50px_rgba(57,31,91,0.45)] backdrop-blur-lg dark:border-white/10 dark:bg-[#1a0f27]/95 dark:text-white dark:shadow-[0_40px_90px_-55px_rgba(8,4,20,0.7)]">
+          <section id="prover-shards" className="mt-14 relative overflow-hidden rounded-3xl border border-subtle bg-surface p-10 text-burgundy shadow-xl backdrop-blur-lg dark:text-white">
             <div className="pointer-events-none absolute -right-10 -top-10 h-44 w-44 rounded-full bg-pink/40 blur-3xl dark:bg-pink/30" />
             <div className="pointer-events-none absolute left-6 top-8 h-24 w-24 rounded-full bg-light-purple/80 blur-2xl dark:bg-purple/40" />
 
             <div className="relative space-y-6">
               <div className="flex flex-wrap items-start justify-between gap-3">
-                <h2 className="text-lg md:text-3xl font-semibold uppercase tracking-[0.35em] text-burgundy dark:text-white">
+                <h2 className="text-lg md:text-3xl font-semibold uppercase tracking-label text-primary">
                   Shard coverage
                 </h2>
-                <div className="text-xs font-semibold uppercase tracking-[0.3em] text-burgundy/70 dark:text-white/70">
+                <div className="text-sm sm:text-xs font-semibold uppercase tracking-label text-secondary">
                   {shardRows.length.toLocaleString()}/4096 Shards
                 </div>
               </div>
               {shardRows.length > 0 && (
-                <div className="flex flex-wrap gap-4 text-sm text-burgundy/70 dark:text-white/70">
+                <div className="flex flex-wrap gap-4 text-sm text-secondary">
                   <div>
                     Halt risk (&lt; 3 active):
-                    <span className="ml-1 font-semibold text-red-700 dark:text-red-300">{shardCoverageStats.risk.toLocaleString()}</span>
+                    <span className="ml-1 font-semibold text-danger">{shardCoverageStats.risk.toLocaleString()}</span>
                   </div>
                   <div>
                     Needs coverage (&lt; 6 active):
-                    <span className="ml-1 font-semibold text-amber-700 dark:text-yellow-200">{shardCoverageStats.warn.toLocaleString()}</span>
+                    <span className="ml-1 font-semibold text-warning">{shardCoverageStats.warn.toLocaleString()}</span>
                   </div>
                   <div>
                     Healthy (≥ 6 active):
-                    <span className="ml-1 font-semibold text-green-700 dark:text-green-300">
+                    <span className="ml-1 font-semibold text-success">
                       {(shardRows.length - shardCoverageStats.risk - shardCoverageStats.warn).toLocaleString()}
                     </span>
                   </div>
@@ -1391,7 +1391,7 @@ export default function Explorer() {
               )}
 
               {shardRows.length === 0 ? (
-                <p className="text-sm text-burgundy/70 dark:text-white/70">
+                <p className="text-sm text-secondary">
                   No shard filters reported yet.
                 </p>
               ) : (
@@ -1403,8 +1403,8 @@ export default function Explorer() {
                   </div>
                   <div className="hidden md:block overflow-x-auto">
                     <div className="max-h-[420px] overflow-y-auto">
-                      <table className="min-w-full divide-y divide-burgundy/10 text-left text-sm text-burgundy dark:divide-white/10 dark:text-white">
-                        <thead className="sticky top-0 z-10 bg-white/95 dark:bg-[#1a0f27]/95 text-xs font-semibold uppercase tracking-[0.3em] text-burgundy/60 dark:text-white/60">
+                      <table className="min-w-full divide-y divide-subtle text-left text-sm text-primary">
+                        <thead className="sticky top-0 z-10 bg-surface label-text">
                           <tr>
                             <th className="py-3 px-4">Filter</th>
                             <th className="py-3 px-4">Active</th>
@@ -1415,7 +1415,7 @@ export default function Explorer() {
                             <th className="py-3 px-4">Total</th>
                           </tr>
                         </thead>
-                        <tbody className="divide-y divide-burgundy/10 dark:divide-white/10">
+                        <tbody className="divide-y divide-subtle">
                           {shardRows.map((summary) => {
                             const activeCount = getShardStatusCount(summary, "active");
                             const joiningCount = getShardStatusCount(summary, "joining");
@@ -1431,8 +1431,8 @@ export default function Explorer() {
                             }
                             const otherCount = Math.max(0, total - totalStatusCount);
                             const rowToneClasses = {
-                              risk: "bg-red-50 dark:bg-red-400/10",
-                              warn: "bg-yellow-50 dark:bg-yellow-100/10",
+                              risk: "bg-danger-subtle",
+                              warn: "bg-warning-subtle",
                               safe: "",
                             } as const;
                             const rowClass = rowToneClasses[tone] ?? "";
@@ -1440,18 +1440,18 @@ export default function Explorer() {
                             return (
                               <tr
                                 key={summary.filter}
-                                className={`${rowClass} cursor-pointer hover:bg-light-grey/60 dark:hover:bg-white/5`}
+                                className={`${rowClass} cursor-pointer hover:bg-hover-highlight`}
                                 onClick={() => navigate(`/provers/shards/${summary.filter}`)}
                               >
-                                <td className="py-3 px-4 font-mono text-xs break-all align-top">
+                                <td className="py-3 px-4 font-mono text-sm sm:text-xs break-all align-top">
                                   <HoverableCopyText text={summary.filter}>{truncateFilter(summary.filter)}</HoverableCopyText>
                                 </td>
-                                <td className="py-3 px-4 text-xs align-top font-semibold">{activeCount.toLocaleString()}</td>
+                                <td className="py-3 px-4 text-sm sm:text-xs align-top font-semibold">{activeCount.toLocaleString()}</td>
                                 {statusCounts.map(({ status, value }) => (
-                                  <td key={status} className="py-3 px-4 text-xs align-top">{value.toLocaleString()}</td>
+                                  <td key={status} className="py-3 px-4 text-sm sm:text-xs align-top">{value.toLocaleString()}</td>
                                 ))}
-                                <td className="py-3 px-4 text-xs align-top">{otherCount.toLocaleString()}</td>
-                                <td className="py-3 px-4 text-xs align-top font-semibold">{total.toLocaleString()}</td>
+                                <td className="py-3 px-4 text-sm sm:text-xs align-top">{otherCount.toLocaleString()}</td>
+                                <td className="py-3 px-4 text-sm sm:text-xs align-top font-semibold">{total.toLocaleString()}</td>
                               </tr>
                             );
                           })}
@@ -1464,12 +1464,12 @@ export default function Explorer() {
             </div>
           </section>
 
-          <section id="consensus-gossip" className="mt-14 relative overflow-hidden rounded-3xl border border-burgundy/10 bg-white/95 p-10 text-burgundy shadow-[0_35px_80px_-50px_rgba(57,31,91,0.45)] backdrop-blur-lg dark:border-white/10 dark:bg-[#1a0f27]/95 dark:text-white dark:shadow-[0_40px_90px_-55px_rgba(8,4,20,0.7)]">
+          <section id="consensus-gossip" className="mt-14 relative overflow-hidden rounded-3xl border border-subtle bg-surface p-10 text-burgundy shadow-xl backdrop-blur-lg dark:text-white">
             <div className="pointer-events-none absolute -right-10 -top-10 h-44 w-44 rounded-full bg-pink/40 blur-3xl dark:bg-pink/30" />
             <div className="pointer-events-none absolute left-6 top-8 h-24 w-24 rounded-full bg-light-purple/80 blur-2xl dark:bg-purple/40" />
 
             <div className="relative space-y-6">
-              <h2 className="text-lg md:text-3xl font-semibold uppercase tracking-[0.35em] text-burgundy dark:text-white">
+              <h2 className="text-lg md:text-3xl font-semibold uppercase tracking-label text-primary">
                 Consensus gossip
               </h2>
               <div className="space-y-4">

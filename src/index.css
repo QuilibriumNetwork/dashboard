@@ -3,6 +3,27 @@
 @tailwind utilities;
 
 /* -------------------------------------------------- */
+/* Reusable component utilities                        */
+/* -------------------------------------------------- */
+
+@layer components {
+  /* Uppercase label used for field names, table headers, section sub-headings */
+  .label-text {
+    @apply text-sm sm:text-xs font-semibold uppercase tracking-label text-muted;
+  }
+
+  /* Interactive action link / nav button (back links, filter toggles, dialog buttons) */
+  .action-text {
+    @apply font-semibold uppercase tracking-label text-secondary hover:text-primary transition-colors;
+  }
+
+  /* Lightweight secondary label (protocol names, item counters, data tree keys) */
+  .sub-label-text {
+    @apply text-xs uppercase tracking-label text-muted;
+  }
+}
+
+/* -------------------------------------------------- */
 /* CSS Variables (Palette + Utilities) */
 /* -------------------------------------------------- */
 
@@ -63,6 +84,90 @@
     --color-light-purple: var(--light-purple);
     --color-light-green: var(--light-green);
     --color-light-orange: var(--light-orange);
+
+    /* ---- Semantic tokens (light) ---- */
+
+    /* Backgrounds */
+    --color-bg-page:             #f0e9e4; /* beige */
+    --color-bg-surface:          #f8f8f8; /* light-grey — body/default bg */
+    --color-bg-surface-raised:   255 255 255;
+    --color-bg-surface-subtle:   #f4f0f8;
+    --color-bg-surface-inset:    #f3f0ed;
+    --color-bg-overlay:          #ffffff;
+    --color-bg-hover-highlight:  rgba(64, 0, 27, 0.06);
+    --color-bg-active-highlight: rgba(64, 0, 27, 0.1);
+    --color-field-bg:            #ffffff;
+
+    /* Text — primary as space-separated RGB for opacity support */
+    --color-text-primary:   64 0 27;
+    --color-text-secondary: rgba(64, 0, 27, 0.8);
+    --color-text-muted:     rgba(64, 0, 27, 0.6);
+    --color-text-faint:     rgba(64, 0, 27, 0.4);
+
+    /* Borders */
+    --color-border-default: rgba(64, 0, 27, 0.15);
+    --color-border-subtle:  rgba(64, 0, 27, 0.07);
+    --color-border-strong:  rgba(64, 0, 27, 0.3);
+
+    /* Shared semantic colors — space-separated RGB for opacity support */
+    --color-brand:   64 0 27;     /* burgundy — app brand color */
+    --color-accent:  255 5 109;   /* pink */
+    --color-success: 34 169 65;   /* green */
+    --color-warning: 255 96 0;    /* orange */
+    --color-danger:  220 38 38;   /* red-600 equivalent */
+    --color-info:    2 135 242;   /* blue */
+
+    /* Status subtle backgrounds */
+    --color-bg-success-subtle: #dbf4dc; /* light-green */
+    --color-bg-warning-subtle: #ffe8df; /* light-orange */
+    --color-bg-danger-subtle:  #ffe6f0; /* light-pink */
+    --color-bg-info-subtle:    #daeeff; /* light-blue */
+    --color-bg-brand-subtle:   rgba(64, 0, 27, 0.08); /* burgundy tint */
+
+    /* Shadow base color — comma-separated for rgba() in shadow scale */
+    --shadow-color: 83, 42, 95;
+  }
+
+  html.dark {
+    /* Backgrounds */
+    --color-bg-page:             #100418;
+    --color-bg-surface:          #1a0f27;
+    --color-bg-surface-raised:   33 20 48;
+    --color-bg-surface-subtle:   #261732;
+    --color-bg-surface-inset:    #120918;
+    --color-bg-overlay:          #1a0f27;
+    --color-bg-hover-highlight:  rgba(255, 255, 255, 0.05);
+    --color-bg-active-highlight: rgba(255, 255, 255, 0.1);
+    --color-field-bg:            #1a0f27;
+
+    /* Text */
+    --color-text-primary:   255 255 255;
+    --color-text-secondary: rgba(255, 255, 255, 0.8);
+    --color-text-muted:     rgba(255, 255, 255, 0.6);
+    --color-text-faint:     rgba(255, 255, 255, 0.4);
+
+    /* Borders */
+    --color-border-default: rgba(255, 255, 255, 0.15);
+    --color-border-subtle:  rgba(255, 255, 255, 0.07);
+    --color-border-strong:  rgba(255, 255, 255, 0.3);
+
+    /* Shared semantic colors — brightened for dark backgrounds */
+    --color-brand:   255 255 255; /* white on dark — brand inverts for dark mode */
+    --color-accent:  255 60 130;  /* brighter pink */
+    --color-success: 74 222 100;  /* brighter green */
+    --color-warning: 255 140 50;  /* brighter orange */
+    --color-danger:  248 113 113; /* brighter red */
+    --color-info:    56 168 255;  /* brighter blue */
+
+    /* Status subtle backgrounds */
+    --color-bg-success-subtle: rgba(74, 222, 100, 0.15);
+    --color-bg-warning-subtle: rgba(255, 140, 50, 0.15);
+    --color-bg-danger-subtle:  rgba(248, 113, 113, 0.15);
+    --color-bg-info-subtle:    rgba(56, 168, 255, 0.15);
+    --color-bg-brand-subtle:   rgba(255, 255, 255, 0.08); /* white tint on dark */
+
+    /* Shadow */
+    --shadow-color: 0, 0, 0;
   }
 }
 
@@ -99,16 +204,9 @@ html {
 }
 
 body {
-  background: var(--light-grey);
-  color: var(--burgundy);
+  background: var(--color-bg-surface);
+  color: rgb(var(--color-text-primary));
   font-family: var(--font-inter-sans);
-}
-
-@media (prefers-color-scheme: dark) {
-  body {
-    background: #0b0513;
-    color: var(--white);
-  }
 }
 
 h1,
@@ -122,19 +220,19 @@ h6, nav {
 
 @layer base {
   h1 {
-    @apply text-5xl sm:text-6xl lg:text-7xl font-bold text-[color:var(--burgundy)] mb-6 dark:text-white;
+    @apply text-5xl sm:text-6xl lg:text-7xl font-bold text-burgundy mb-6 dark:text-white;
   }
   h2 {
-    @apply text-3xl sm:text-4xl lg:text-5xl font-semibold text-[color:var(--burgundy)] mb-5 dark:text-white;
+    @apply text-3xl sm:text-4xl lg:text-5xl font-semibold text-burgundy mb-5 dark:text-white;
   }
   h3 {
-    @apply text-2xl sm:text-3xl lg:text-4xl font-medium text-[color:var(--burgundy)] mb-4 dark:text-white;
+    @apply text-2xl sm:text-3xl lg:text-4xl font-medium text-burgundy mb-4 dark:text-white;
   }
   h4 {
-    @apply text-xl sm:text-2xl lg:text-3xl font-medium text-[color:var(--burgundy)] mb-3 dark:text-white;
+    @apply text-xl sm:text-2xl lg:text-3xl font-medium text-burgundy mb-3 dark:text-white;
   }
   h5 {
-    @apply text-lg sm:text-xl lg:text-2xl font-medium text-[color:var(--burgundy)] mb-2 dark:text-white;
+    @apply text-lg sm:text-xl lg:text-2xl font-medium text-burgundy mb-2 dark:text-white;
   }
 
   strong,
@@ -301,8 +399,11 @@ h6, nav {
     }
   }
 
-  .drop-shadow-box {
-    box-shadow: 0px 8px 8px rgba(0, 0, 0, 0.02);
+  @media (prefers-reduced-motion: reduce) {
+    .gradient-sweep,
+    .gradient-sweep--dark {
+      animation: none;
+    }
   }
 
   @keyframes spinner-animation {
@@ -394,12 +495,12 @@ h6, nav {
   }
 
   .code-block {
-    @apply w-full max-w-full rounded-lg bg-gray-100 border border-gray-300 text-sm p-4 font-mono break-words overflow-x-auto;
+    @apply w-full max-w-full rounded-lg bg-surface-inset border text-sm p-4 font-mono break-words overflow-x-auto;
   }
 
   /*mainly used in Bridge.tsx*/
   .input-base {
-    @apply w-full border border-slate-600/30 px-4 py-2 text-sm mb-4 rounded-xl focus:outline-none focus:ring-4 focus:ring-pink/20 focus:ring-offset-0 transition-colors;
+    @apply w-full border px-4 py-2 text-sm mb-4 rounded-xl focus:outline-none focus:ring-4 focus:ring-pink/20 focus:ring-offset-0 transition-colors;
   }
 
   /* Number input spinner styling */

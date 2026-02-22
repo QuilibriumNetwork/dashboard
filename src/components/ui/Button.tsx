@@ -32,7 +32,7 @@ const buttonVariants = cva(base, {
         "bg-[#F6E2B3] text-[#B67900] border-2 border-[#F6E2B3] hover:bg-transparent hover:text-[#B67900] hover:border-[#B67900] transition-all duration-300 ease-[var(--default-transition-timing-function)]",
 
       danger:
-        "bg-red-100 text-red-600 border-2 border-red-100 hover:bg-transparent hover:text-red-600 hover:border-red-600 transition-all duration-300 ease-[var(--default-transition-timing-function)]",
+        "bg-danger-subtle text-danger border-2 border-danger/20 hover:bg-transparent hover:text-danger hover:border-danger transition-all duration-300 ease-[var(--default-transition-timing-function)]",
 
       success:
         "bg-light-green text-green border-2 border-light-green hover:bg-transparent hover:text-green hover:border-green transition-all duration-300 ease-[var(--default-transition-timing-function)]",
@@ -57,7 +57,7 @@ const buttonVariants = cva(base, {
       default: "",
       small: "px-4 py-2 text-sm rounded-md",
       large: "px-8 py-5 text-lg",
-      xs: "px-3 py-1 text-xs rounded",
+      xs: "px-3 py-1 text-sm sm:text-xs rounded",
     },
   },
   defaultVariants: {

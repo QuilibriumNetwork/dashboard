@@ -35,7 +35,7 @@ function CopyFrameDataButton() {
   return (
     <button
       onClick={handleCopy}
-      className="flex items-center gap-2 px-2 py-1 text-sm font-semibold uppercase tracking-[0.2em] text-burgundy/70 hover:text-burgundy dark:text-white/70 transition-colors bg-transparent hover:bg-transparent"
+      className="flex items-center gap-2 px-2 py-1 text-sm action-text bg-transparent hover:bg-transparent"
     >
       <Icon name="emptyclipboard" className="w-4 h-4 flex-shrink-0" />
       <span>{copied ? 'Copied!' : 'Copy data'}</span>
@@ -70,11 +70,11 @@ function HoverableCopyText({ text, children }: { text: string; children: React.R
       </span>
       {isHovered && (
         <>
-          <span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 px-2 py-1 text-xs text-white bg-gray-900 dark:bg-gray-700 rounded whitespace-nowrap pointer-events-none z-10 shadow-lg">
+          <span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 px-2 py-1 text-sm sm:text-xs text-white bg-burgundy dark:bg-surface-raised rounded whitespace-nowrap pointer-events-none z-10 shadow-lg">
             {copied ? 'Copied!' : 'Click to copy'}
-            <span className="absolute top-full left-1/2 -translate-x-1/2 -mt-1 border-4 border-transparent border-t-gray-900 dark:border-t-gray-700" />
+            <span className="absolute top-full left-1/2 -translate-x-1/2 -mt-1 border-4 border-transparent border-t-burgundy dark:border-t-surface-raised" />
           </span>
-          <Icon name="emptyclipboard" className="w-3 h-3 text-burgundy/60 dark:text-white/60 flex-shrink-0" />
+          <Icon name="emptyclipboard" className="w-3 h-3 text-muted flex-shrink-0" />
         </>
       )}
     </span>
@@ -152,7 +152,7 @@ export default function FrameDetail() {
         )}
 
         <div className="flex items-center justify-between gap-4">
-          <Link to="/" className="text-sm font-semibold uppercase tracking-[0.3em] text-burgundy/70 hover:text-burgundy dark:text-white/70">
+          <Link to="/" className="text-sm action-text">
             ← Back
           </Link>
           {frame && (
@@ -166,23 +166,23 @@ export default function FrameDetail() {
           </div>
         )}
 
-        <section className="mt-6 rounded-3xl border border-burgundy/10 bg-white/95 p-8 text-burgundy shadow-[0_35px_80px_-50px_rgba(57,31,91,0.45)] dark:border-white/10 dark:bg-[#1a0f27]/95 dark:text-white">
+        <section className="mt-6 rounded-3xl border border-subtle bg-surface p-8 text-burgundy shadow-xl dark:text-white">
           <div className="-mt-2">
             <h1 className="text-3xl font-semibold">Frame #{header?.frameNumber.toLocaleString() ?? frameNumber}</h1>
             {header && (
-              <div className="mt-2 text-xs uppercase tracking-[0.3em] text-burgundy/60 dark:text-white/60">
+              <div className="mt-2 text-sm sm:sub-label-text">
                 {formatTimestamp(header.timestamp)} {formatRelative(header.timestamp) && `(${formatRelative(header.timestamp)})`}
               </div>
             )}
           </div>
           <div className="mt-6 grid gap-6 md:grid-cols-2">
-            <div className="rounded-2xl border border-burgundy/10 bg-white/90 p-5 dark:border-white/10 dark:bg-[#211430]">
-              <div className="text-xs font-semibold uppercase tracking-[0.3em] text-burgundy/60 dark:text-white/60">Rank</div>
+            <div className="rounded-2xl border border-subtle bg-white/90 p-5 dark:bg-surface-raised">
+              <div className="label-text">Rank</div>
               <div className="mt-2 text-2xl font-semibold">{header?.rank.toLocaleString() ?? "–"}</div>
-              <div className="text-sm text-burgundy/70 dark:text-white/70">Difficulty {header?.difficulty ?? "–"}</div>
+              <div className="text-sm text-secondary">Difficulty {header?.difficulty ?? "–"}</div>
             </div>
-            <div className="rounded-2xl border border-burgundy/10 bg-white/90 p-5 dark:border-white/10 dark:bg-[#211430]">
-              <div className="text-xs font-semibold uppercase tracking-[0.3em] text-burgundy/60 dark:text-white/60">Prover</div>
+            <div className="rounded-2xl border border-subtle bg-white/90 p-5 dark:bg-surface-raised">
+              <div className="label-text">Prover</div>
               {header?.prover && (() => {
                 const displayValue = formatBase64Bytes(header.prover);
                 const copyValue = base64ToHex(header.prover);
@@ -211,26 +211,26 @@ export default function FrameDetail() {
           </div>
         </section>
 
-        <section className="mt-10 rounded-3xl border border-burgundy/10 bg-white/95 p-8 shadow-[0_34px_80px_-55px_rgba(57,31,91,0.4)] dark:border-white/10 dark:bg-[#1a0f27]/95">
+        <section className="mt-10 rounded-3xl border border-subtle bg-surface p-8 shadow-xl">
           <div className="flex flex-wrap items-center justify-between gap-4">
-            <h2 className="text-2xl font-semibold text-burgundy dark:text-white">Request breakdown</h2>
-            <div className="text-sm text-burgundy/60 dark:text-white/60">
+            <h2 className="text-2xl font-semibold text-primary">Request breakdown</h2>
+            <div className="text-sm text-muted">
               {totalRequests} request{totalRequests === 1 ? "" : "s"}
             </div>
           </div>
           {frame?.requests && frame.requests.length > 0 ? (
             <div className="mt-6 space-y-5">
               {frame.requests.map((bundle, bundleIndex) => (
-                <div key={bundleIndex} className="rounded-2xl border border-burgundy/10 bg-white/90 p-5 shadow-[0_20px_55px_-45px_rgba(64,0,27,0.5)] dark:border-white/10 dark:bg-[#211430]/95">
+                <div key={bundleIndex} className="rounded-2xl border border-subtle bg-white/90 p-5 shadow-sm dark:bg-surface-raised/95">
                   <div className="flex flex-wrap items-center justify-between gap-3">
-                    <div className="text-sm font-semibold uppercase tracking-[0.25em] text-burgundy/60 dark:text-white/60">
+                    <div className="label-text">
                       Bundle {bundleIndex + 1}
                     </div>
-                    <div className="text-xs text-burgundy/60 dark:text-white/60">
+                    <div className="text-sm sm:text-xs text-muted">
                       {formatTimestamp(bundle.timestamp)}
                     </div>
                   </div>
-                  <div className="mt-3 text-sm text-burgundy/70 dark:text-white/70">
+                  <div className="mt-3 text-sm text-secondary">
                     {bundle.requests?.length ?? 0} request{(bundle.requests?.length ?? 0) === 1 ? "" : "s"}
                   </div>
                   {bundle.requests && bundle.requests.length > 0 && (
@@ -248,7 +248,7 @@ export default function FrameDetail() {
               ))}
             </div>
           ) : (
-            <div className="mt-6 text-sm text-burgundy/60 dark:text-white/60">No requests recorded for this frame.</div>
+            <div className="mt-6 text-sm text-muted">No requests recorded for this frame.</div>
           )}
         </section>
       </div>
@@ -287,8 +287,8 @@ function DetailCard({
   );
 
   return (
-    <div className="rounded-2xl border border-burgundy/10 bg-light-grey px-4 py-4 text-burgundy shadow-[0_20px_55px_-45px_rgba(64,0,27,0.5)] dark:border-white/10 dark:bg-[#211430]/70 dark:text-white">
-      <div className="text-[0.7rem] font-semibold uppercase tracking-[0.3em] text-burgundy/60 dark:text-white/60">{label}</div>
+    <div className="rounded-2xl border border-subtle bg-light-grey px-4 py-4 text-burgundy shadow-sm dark:bg-surface-raised/70 dark:text-white">
+      <div className="label-text">{label}</div>
       {displayValue}
     </div>
   );
@@ -301,14 +301,14 @@ function RequestCard({ index, request }: { index: number; request: FrameRequest 
   const displayPayload = typeof payload === "object" && payload !== null ? payload : request;
 
   return (
-    <div className="rounded-2xl border border-burgundy/10 bg-white/90 p-4 text-sm text-burgundy shadow-[0_18px_40px_-35px_rgba(64,0,27,0.5)] dark:border-white/10 dark:bg-[#1f142b] dark:text-white">
+    <div className="rounded-2xl border border-subtle bg-white/90 p-4 text-sm text-burgundy shadow-xs dark:bg-surface dark:text-white">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="font-semibold">Request {index + 1}: {formatTypeName(typeKey)}</div>
         {timestamp && (
-          <div className="text-xs text-burgundy/60 dark:text-white/60">{timestamp}</div>
+          <div className="text-sm sm:text-xs text-muted">{timestamp}</div>
         )}
       </div>
-      <div className="mt-3 rounded-xl bg-gray-100 p-4 text-xs text-burgundy/80 dark:bg-[#120918] dark:text-white/80">
+      <div className="mt-3 rounded-xl bg-surface-inset p-4 text-sm sm:text-xs text-secondary">
         <ValueTree value={displayPayload} />
       </div>
     </div>
@@ -341,22 +341,22 @@ function CollapsibleValue({
     <div>
       <button
         onClick={toggleExpanded}
-        className="flex w-full items-center gap-2 text-left text-[0.7rem] uppercase tracking-[0.2em] text-burgundy/50 hover:text-burgundy/70 dark:text-white/50 dark:hover:text-white/70 transition-colors"
+        className="flex w-full items-center gap-2 text-left sub-label-text hover:text-secondary transition-colors"
       >
         <ChevronDown
           className={`size-3 transition-transform flex-shrink-0 ${isExpanded ? 'rotate-180' : ''}`}
         />
         <span>{label}</span>
       </button>
-      <div className="mt-1 border-l border-burgundy/20 dark:border-white/20 pl-3 relative">
+      <div className="mt-1 border-l border-default pl-3 relative">
         <div className={isExpanded ? '' : 'max-h-[4.5rem] overflow-hidden'}>
           <ValueTree value={value} />
         </div>
         {!isExpanded && (
-          <div className="absolute bottom-0 left-0 right-0 h-14 bg-gradient-to-t from-gray-100 via-gray-100/70 to-transparent dark:from-[#120918] dark:via-[#120918]/70">
+          <div className="absolute bottom-0 left-0 right-0 h-14 bg-gradient-to-t from-beige/60 via-beige/30 to-transparent dark:from-[#120918] dark:via-[#120918]/70">
             <button
               onClick={toggleExpanded}
-              className="absolute bottom-2 left-1/2 -translate-x-1/2 flex items-center gap-1.5 px-3 py-1 text-xs font-medium text-burgundy/80 hover:text-burgundy bg-burgundy/10 hover:bg-burgundy/20 dark:text-white/80 dark:hover:text-white dark:bg-white/10 dark:hover:bg-white/20 rounded-full backdrop-blur-sm transition-all border border-burgundy/20 hover:border-burgundy/30 dark:border-white/20 dark:hover:border-white/30"
+              className="absolute bottom-2 left-1/2 -translate-x-1/2 flex items-center gap-1.5 px-3 py-1 text-sm sm:text-xs font-medium text-secondary hover:text-burgundy bg-burgundy/10 hover:bg-burgundy/20 dark:hover:text-white dark:bg-white/10 dark:hover:bg-white/20 rounded-full backdrop-blur-sm transition-all border border-default hover:border-strong"
             >
               <ChevronDown className="size-3 transition-transform" />
               <span>Expand</span>
@@ -383,19 +383,19 @@ function CollapsibleList({
     <div>
       <button
         onClick={toggleExpanded}
-        className="flex w-full items-center gap-2 text-left text-[0.7rem] uppercase tracking-[0.2em] text-burgundy/50 hover:text-burgundy/70 dark:text-white/50 dark:hover:text-white/70 transition-colors"
+        className="flex w-full items-center gap-2 text-left sub-label-text hover:text-secondary transition-colors"
       >
         <ChevronDown
           className={`size-3 transition-transform flex-shrink-0 ${isExpanded ? 'rotate-180' : ''}`}
         />
         <span>{label}</span>
       </button>
-      <div className="mt-1 border-l border-burgundy/20 dark:border-white/20 pl-3 relative">
+      <div className="mt-1 border-l border-default pl-3 relative">
         <ol className="space-y-2">
           {displayItems.map((item, idx) => (
             <li key={idx}>
-              <div className="text-[0.7rem] uppercase tracking-[0.2em] text-burgundy/50 dark:text-white/50">Item {idx + 1}</div>
-              <div className="mt-1 border-l border-burgundy/20 dark:border-white/20 pl-3">
+              <div className="sub-label-text">Item {idx + 1}</div>
+              <div className="mt-1 border-l border-default pl-3">
                 <ValueTree value={item} parentKey={label} />
               </div>
             </li>
@@ -403,10 +403,10 @@ function CollapsibleList({
         </ol>
         {!isExpanded && items.length > 3 && (
           <>
-            <div className="absolute bottom-0 left-0 right-0 h-14 bg-gradient-to-t from-gray-100 via-gray-100/70 to-transparent dark:from-[#120918] dark:via-[#120918]/70 pointer-events-none" />
+            <div className="absolute bottom-0 left-0 right-0 h-14 bg-gradient-to-t from-beige/60 via-beige/30 to-transparent dark:from-[#120918] dark:via-[#120918]/70 pointer-events-none" />
             <button
               onClick={toggleExpanded}
-              className="absolute bottom-2 left-1/2 -translate-x-1/2 flex items-center gap-1.5 px-3 py-1 text-xs font-medium text-burgundy/80 hover:text-burgundy bg-burgundy/10 hover:bg-burgundy/20 dark:text-white/80 dark:hover:text-white dark:bg-white/10 dark:hover:bg-white/20 rounded-full backdrop-blur-sm transition-all border border-burgundy/20 hover:border-burgundy/30 dark:border-white/20 dark:hover:border-white/30 z-10"
+              className="absolute bottom-2 left-1/2 -translate-x-1/2 flex items-center gap-1.5 px-3 py-1 text-sm sm:text-xs font-medium text-secondary hover:text-burgundy bg-burgundy/10 hover:bg-burgundy/20 dark:hover:text-white dark:bg-white/10 dark:hover:bg-white/20 rounded-full backdrop-blur-sm transition-all border border-default hover:border-strong z-10"
             >
               <ChevronDown className="size-3 transition-transform" />
               <span>Expand</span>
@@ -420,17 +420,17 @@ function CollapsibleList({
 
 function ValueTree({ value, parentKey }: { value: unknown; parentKey?: string }) {
   if (value == null) {
-    return <div className="break-all font-mono text-burgundy/60 dark:text-white/60">–</div>;
+    return <div className="break-all font-mono text-muted">–</div>;
   }
   if (typeof value === "string") {
-    return <div className="break-all font-mono text-burgundy dark:text-white">{formatMaybeBytes(value)}</div>;
+    return <div className="break-all font-mono text-primary">{formatMaybeBytes(value)}</div>;
   }
   if (typeof value === "number" || typeof value === "boolean") {
-    return <div className="break-all font-mono text-burgundy dark:text-white">{String(value)}</div>;
+    return <div className="break-all font-mono text-primary">{String(value)}</div>;
   }
   if (Array.isArray(value)) {
     if (value.length === 0) {
-      return <div className="break-all font-mono text-burgundy/60 dark:text-white/60">Empty array</div>;
+      return <div className="break-all font-mono text-muted">Empty array</div>;
     }
     const isFiltersArray = parentKey && (
       parentKey.toLowerCase() === "filters" ||
@@ -445,8 +445,8 @@ function ValueTree({ value, parentKey }: { value: unknown; parentKey?: string })
       <ol className="space-y-2">
         {value.map((item, idx) => (
           <li key={idx}>
-            <div className="text-[0.7rem] uppercase tracking-[0.2em] text-burgundy/50 dark:text-white/50">Item {idx + 1}</div>
-            <div className="mt-1 border-l border-burgundy/20 dark:border-white/20 pl-3">
+            <div className="sub-label-text">Item {idx + 1}</div>
+            <div className="mt-1 border-l border-default pl-3">
               <ValueTree value={item} parentKey={parentKey} />
             </div>
           </li>
@@ -457,7 +457,7 @@ function ValueTree({ value, parentKey }: { value: unknown; parentKey?: string })
   if (typeof value === "object") {
     const entries = Object.entries(value as Record<string, unknown>);
     if (!entries.length) {
-      return <div className="break-all font-mono text-burgundy/60 dark:text-white/60">Empty object</div>;
+      return <div className="break-all font-mono text-muted">Empty object</div>;
     }
     return (
       <dl className="space-y-2">
@@ -481,8 +481,8 @@ function ValueTree({ value, parentKey }: { value: unknown; parentKey?: string })
                 <CollapsibleList label={`${formattedKey} (${entryValue.length})`} items={entryValue} />
               ) : (
                 <>
-                  <dt className="text-[0.7rem] uppercase tracking-[0.2em] text-burgundy/50 dark:text-white/50">{formattedKey}</dt>
-                  <dd className="mt-1 border-l border-burgundy/20 dark:border-white/20 pl-3">
+                  <dt className="sub-label-text">{formattedKey}</dt>
+                  <dd className="mt-1 border-l border-default pl-3">
                     <ValueTree value={entryValue} parentKey={key} />
                   </dd>
                 </>
@@ -493,7 +493,7 @@ function ValueTree({ value, parentKey }: { value: unknown; parentKey?: string })
       </dl>
     );
   }
-  return <div className="break-all font-mono text-burgundy dark:text-white">{String(value)}</div>;
+  return <div className="break-all font-mono text-primary">{String(value)}</div>;
 }
 
 function formatMaybeBytes(value: string) {

@@ -8,7 +8,7 @@ interface PageLayoutProps {
 
 export function PageLayout({ title, children }: PageLayoutProps) {
   return (
-    <div className="relative min-h-screen bg-beige pb-24 pt-16 dark:bg-[#100418]">
+    <div className="relative min-h-screen bg-beige pb-24 pt-16 dark:bg-page">
       <Helmet>
         <title>{title}</title>
       </Helmet>

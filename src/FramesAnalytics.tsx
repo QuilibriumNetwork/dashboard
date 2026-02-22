@@ -1182,20 +1182,20 @@ export default function FramesAnalytics() {
         <div className="flex items-center justify-between gap-4 mb-6">
           <Link
             to="/"
-            className="text-sm font-semibold uppercase tracking-[0.3em] text-burgundy/70 hover:text-burgundy dark:text-white/70"
+            className="text-sm action-text"
           >
             ← Back
           </Link>
           <div className="flex items-center gap-4">
             {storageUsage && (
-              <div className="text-xs text-burgundy/60 dark:text-white/60">
+              <div className="text-sm sm:text-xs text-muted">
                 Cache: {formatStorageSize(storageUsage.sizeBytes)} ({storageUsage.frameCount.toLocaleString()} frames)
               </div>
             )}
             {storageUsage && storageUsage.frameCount > 10 && (
               <button
                 onClick={() => setShowClearModal(true)}
-                className="text-xs font-semibold uppercase tracking-[0.3em] text-burgundy/70 hover:text-burgundy dark:text-white/70 dark:hover:text-white transition-colors"
+                className="text-sm sm:text-xs action-text"
               >
                 Clear Frame Data
               </button>
@@ -1203,7 +1203,7 @@ export default function FramesAnalytics() {
           </div>
           <div className="flex flex-col gap-2">
             <div className="flex items-center gap-3">
-              <span className="text-xs font-semibold uppercase tracking-[0.3em] text-burgundy/60 dark:text-white/60">
+              <span className="label-text">
                 Analyze last
               </span>
               <div className="flex items-center gap-2">
@@ -1221,27 +1221,27 @@ export default function FramesAnalytics() {
                       }}
                       disabled={loading || calculatingAnalytics}
                       title={loading ? "Loading frames..." : calculatingAnalytics ? "Calculating analytics..." : ""}
-                      className={`text-xs font-semibold uppercase tracking-[0.3em] transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${
+                      className={`text-sm sm:text-xs font-semibold uppercase tracking-label transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${
                         frameCount === count
-                          ? "text-burgundy dark:text-white font-bold"
-                          : "text-burgundy/60 dark:text-white/60 hover:text-burgundy dark:hover:text-white"
+                          ? "text-primary font-bold"
+                          : "text-muted hover:text-burgundy dark:hover:text-white"
                       }`}
                     >
                       {count.toLocaleString()}
                     </button>
                     {index < FRAME_COUNT_OPTIONS.length - 1 && (
-                      <span className="mx-1 text-burgundy/40 dark:text-white/40">|</span>
+                      <span className="mx-1 text-faint">|</span>
                     )}
                   </span>
                 ))}
               </div>
-              <span className="text-xs font-semibold uppercase tracking-[0.3em] text-burgundy/60 dark:text-white/60">
+              <span className="label-text">
                 frames
               </span>
             </div>
             {(showProgressBar || calculatingAnalytics) && (
               <div className="flex items-center gap-3 w-full max-w-2xl">
-                <span className="text-xs font-semibold uppercase tracking-[0.3em] text-burgundy/60 dark:text-white/60 whitespace-nowrap">
+                <span className="label-text whitespace-nowrap">
                   {progress.phase === "analytics" || calculatingAnalytics
                     ? "Calculating analytics"
                     : "Downloading frames"}
@@ -1254,7 +1254,7 @@ export default function FramesAnalytics() {
                     }}
                   />
                 </div>
-                <div className="text-xs text-burgundy/60 dark:text-white/60 min-w-[3rem] text-right whitespace-nowrap">
+                <div className="text-sm sm:text-xs text-muted min-w-[3rem] text-right whitespace-nowrap">
                   {progress.current} / {progress.total}
                 </div>
               </div>
@@ -1284,20 +1284,20 @@ export default function FramesAnalytics() {
         )}
 
         {/* Statistics Cards */}
-        <section className="mb-10 rounded-3xl border border-burgundy/10 bg-white/95 p-8 text-burgundy shadow-[0_35px_80px_-50px_rgba(57,31,91,0.45)] dark:border-white/10 dark:bg-[#1a0f27]/95 dark:text-white">
+        <section className="mb-10 rounded-3xl border border-subtle bg-surface p-8 text-burgundy shadow-xl dark:text-white">
           <h2 className="mb-6 text-2xl font-semibold">Statistics</h2>
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
             <div className="flex flex-col gap-3">
-              <div className="rounded-2xl border border-burgundy/10 bg-white/90 p-4 dark:border-white/10 dark:bg-[#211430] flex-1">
-                <div className="text-xs font-semibold uppercase tracking-[0.3em] text-burgundy/60 dark:text-white/60">
+              <div className="rounded-2xl border border-subtle bg-white/90 p-4 dark:bg-surface-raised flex-1">
+                <div className="label-text">
                   Total Frames
                 </div>
                 <div className="mt-2 text-2xl font-semibold">
                   {stats.totalFrames.toLocaleString()}
                 </div>
               </div>
-              <div className="rounded-2xl border border-burgundy/10 bg-white/90 p-4 dark:border-white/10 dark:bg-[#211430] flex-1">
-                <div className="text-xs font-semibold uppercase tracking-[0.3em] text-burgundy/60 dark:text-white/60">
+              <div className="rounded-2xl border border-subtle bg-white/90 p-4 dark:bg-surface-raised flex-1">
+                <div className="label-text">
                   Total Requests
                 </div>
                 <div className="mt-2 text-2xl font-semibold">
@@ -1305,63 +1305,63 @@ export default function FramesAnalytics() {
                 </div>
               </div>
             </div>
-            <div className="rounded-2xl border border-burgundy/10 bg-white/90 p-5 dark:border-white/10 dark:bg-[#211430]">
-              <div className="text-xs font-semibold uppercase tracking-[0.3em] text-burgundy/60 dark:text-white/60">
+            <div className="rounded-2xl border border-subtle bg-white/90 p-5 dark:bg-surface-raised">
+              <div className="label-text">
                 Requests Per Frame
               </div>
               <div className="mt-2 space-y-1 text-sm">
                 <div className="flex justify-between">
-                  <span className="text-burgundy/70 dark:text-white/70">Min:</span>
+                  <span className="text-secondary">Min:</span>
                   <span className="font-semibold">{stats.minRequestsPerFrame.toLocaleString()}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-burgundy/70 dark:text-white/70">Median:</span>
+                  <span className="text-secondary">Median:</span>
                   <span className="font-semibold">{stats.medianRequestsPerFrame.toLocaleString()}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-burgundy/70 dark:text-white/70">Max:</span>
+                  <span className="text-secondary">Max:</span>
                   <span className="font-semibold">{stats.maxRequestsPerFrame.toLocaleString()}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-burgundy/70 dark:text-white/70">Avg:</span>
+                  <span className="text-secondary">Avg:</span>
                   <span className="font-semibold">{stats.avgRequestsPerFrame.toFixed(2)}</span>
                 </div>
               </div>
             </div>
-            <div className="rounded-2xl border border-burgundy/10 bg-white/90 p-4 dark:border-white/10 dark:bg-[#211430]">
-              <div className="text-xs font-semibold uppercase tracking-[0.3em] text-burgundy/60 dark:text-white/60">
+            <div className="rounded-2xl border border-subtle bg-white/90 p-4 dark:bg-surface-raised">
+              <div className="label-text">
                 Unique Provers
               </div>
               <div className="mt-2 text-2xl font-semibold">
                 {stats.uniqueProvers.toLocaleString()}
               </div>
-              <div className="mt-1 text-xs text-burgundy/70 dark:text-white/70">
+              <div className="mt-1 text-sm sm:text-xs text-secondary">
                 {stats.uniqueSelectors.toLocaleString()} selectors
               </div>
             </div>
-            <div className="rounded-2xl border border-burgundy/10 bg-white/90 p-5 dark:border-white/10 dark:bg-[#211430]">
-              <div className="text-xs font-semibold uppercase tracking-[0.3em] text-burgundy/60 dark:text-white/60">
+            <div className="rounded-2xl border border-subtle bg-white/90 p-5 dark:bg-surface-raised">
+              <div className="label-text">
                 Frame Spacing (Percentiles)
               </div>
               <div className="mt-2 space-y-1 text-sm">
                 <div className="flex justify-between">
-                  <span className="text-burgundy/70 dark:text-white/70">P50:</span>
+                  <span className="text-secondary">P50:</span>
                   <span className="font-semibold">{formatSpacing(stats.p50)}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-burgundy/70 dark:text-white/70">P75:</span>
+                  <span className="text-secondary">P75:</span>
                   <span className="font-semibold">{formatSpacing(stats.p75)}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-burgundy/70 dark:text-white/70">P90:</span>
+                  <span className="text-secondary">P90:</span>
                   <span className="font-semibold">{formatSpacing(stats.p90)}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-burgundy/70 dark:text-white/70">P95:</span>
+                  <span className="text-secondary">P95:</span>
                   <span className="font-semibold">{formatSpacing(stats.p95)}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-burgundy/70 dark:text-white/70">P99:</span>
+                  <span className="text-secondary">P99:</span>
                   <span className="font-semibold">{formatSpacing(stats.p99)}</span>
                 </div>
               </div>
@@ -1370,7 +1370,7 @@ export default function FramesAnalytics() {
         </section>
 
         {/* Requests Per Frame Chart */}
-        <section className="mb-10 rounded-3xl border border-burgundy/10 bg-white/95 p-8 shadow-[0_35px_80px_-50px_rgba(57,31,91,0.45)] dark:border-white/10 dark:bg-[#1a0f27]/95 dark:text-white">
+        <section className="mb-10 rounded-3xl border border-subtle bg-surface p-8 shadow-xl dark:text-white">
           <h2 className="mb-6 text-2xl font-semibold">Requests Per Frame</h2>
           <ResponsiveContainer width="100%" height={400}>
             <LineChart data={analyticsData}>
@@ -1414,7 +1414,7 @@ export default function FramesAnalytics() {
         </section>
 
         {/* Prover Distribution Pie Chart */}
-        <section className="mb-10 rounded-3xl border border-burgundy/10 bg-white/95 p-8 shadow-[0_35px_80px_-50px_rgba(57,31,91,0.45)] dark:border-white/10 dark:bg-[#1a0f27]/95 dark:text-white">
+        <section className="mb-10 rounded-3xl border border-subtle bg-surface p-8 shadow-xl dark:text-white">
           <h2 className="mb-6 text-2xl font-semibold">
             Prover Distribution (Top 10 by Frame Count)
           </h2>
@@ -1492,7 +1492,7 @@ export default function FramesAnalytics() {
                     <AccordionItem
                       key={entry.prover}
                       value={entry.prover}
-                      className="border border-burgundy/10 dark:border-white/10 rounded-lg transition-all p-2 mb-2"
+                      className="border border-subtle rounded-lg transition-all p-2 mb-2"
                       style={{
                         borderColor: borderColor,
                       }}
@@ -1507,7 +1507,7 @@ export default function FramesAnalytics() {
                             style={{ backgroundColor: borderColor }}
                           />
                           <div className="flex-1">
-                            <div className="text-sm font-semibold text-burgundy dark:text-white">
+                            <div className="text-sm font-semibold text-primary">
                               {qm ? (
                                 <HoverableCopyText text={qm}>
                                   <span className="font-mono break-all">{qm}</span>
@@ -1516,24 +1516,24 @@ export default function FramesAnalytics() {
                                 <span className="font-mono break-all">{entry.prover}</span>
                               )}
                             </div>
-                            <div className="text-xs text-burgundy/60 dark:text-white/60 mt-1">
+                            <div className="text-sm sm:text-xs text-muted mt-1">
                               {entry.percentage.toFixed(2)}% • {entry.count.toLocaleString()} frames
                             </div>
                           </div>
                         </div>
                       </AccordionTrigger>
                       <AccordionContent>
-                        <div className="pt-2 pb-4 px-4 space-y-2 text-xs">
+                        <div className="pt-2 pb-4 px-4 space-y-2 text-sm sm:text-xs">
                           <div className="flex justify-between">
-                            <span className="text-burgundy/70 dark:text-white/70">Frames processed:</span>
+                            <span className="text-secondary">Frames processed:</span>
                             <span className="font-semibold">{entry.count.toLocaleString()}/{stats.totalFrames.toLocaleString()} ({entry.percentage.toFixed(2)}%)</span>
                           </div>
                           <div className="flex justify-between">
-                            <span className="text-burgundy/70 dark:text-white/70">Last frame processed:</span>
+                            <span className="text-secondary">Last frame processed:</span>
                             <span className="font-semibold">{entry.lastFrameNumber.toLocaleString()}</span>
                           </div>
                           <div className="flex justify-between">
-                            <span className="text-burgundy/70 dark:text-white/70">Last frame processed timestamp:</span>
+                            <span className="text-secondary">Last frame processed timestamp:</span>
                             <span className="font-semibold">{formatTimestamp(String(entry.lastTimestamp))}</span>
                           </div>
                         </div>
@@ -1548,7 +1548,7 @@ export default function FramesAnalytics() {
 
         {/* Frames Per Prover Per Hour */}
         {framesPerProverPerHour.chartData.length > 0 && (
-          <section className="mb-10 rounded-3xl border border-burgundy/10 bg-white/95 p-8 shadow-[0_35px_80px_-50px_rgba(57,31,91,0.45)] dark:border-white/10 dark:bg-[#1a0f27]/95 dark:text-white">
+          <section className="mb-10 rounded-3xl border border-subtle bg-surface p-8 shadow-xl dark:text-white">
             <h2 className="mb-6 text-2xl font-semibold">
               Frames Per Prover Over Time (Top 10 Provers)
             </h2>
@@ -1646,7 +1646,7 @@ export default function FramesAnalytics() {
                           const qm = framesPerProverQmMap.get(entry.value);
                           const displayText = qm ? (qm.length > 20 ? `${qm.slice(0, 10)}...${qm.slice(-6)}` : qm) : (entry.value.length > 20 ? `${entry.value.slice(0, 10)}...${entry.value.slice(-6)}` : entry.value);
                           return (
-                            <div key={index} className="flex items-center gap-2 text-xs">
+                            <div key={index} className="flex items-center gap-2 text-sm sm:text-xs">
                               <div
                                 style={{
                                   width: "12px",
@@ -1714,7 +1714,7 @@ export default function FramesAnalytics() {
 
         {/* Frame Spacing Over Time */}
         {frameSpacingOverTime.length > 0 && (
-          <section className="mb-10 rounded-3xl border border-burgundy/10 bg-white/95 p-8 shadow-[0_35px_80px_-50px_rgba(57,31,91,0.45)] dark:border-white/10 dark:bg-[#1a0f27]/95 dark:text-white">
+          <section className="mb-10 rounded-3xl border border-subtle bg-surface p-8 shadow-xl dark:text-white">
             <h2 className="mb-6 text-2xl font-semibold">Average Time Between Frames Over Time</h2>
             <ResponsiveContainer width="100%" height={400}>
               <LineChart data={frameSpacingOverTime} margin={{ left: 50, right: 20 }}>
@@ -1784,28 +1784,28 @@ export default function FramesAnalytics() {
       >
         <div className="space-y-4">
           {storageUsage && (
-            <div className="text-sm text-burgundy dark:text-white">
+            <div className="text-sm text-primary">
               <p className="mb-2">
                 Current cache: <strong>{formatStorageSize(storageUsage.sizeBytes)}</strong> ({storageUsage.frameCount.toLocaleString()} frames)
               </p>
             </div>
           )}
           <div className="space-y-2">
-            <p className="text-sm font-semibold uppercase tracking-[0.3em] text-burgundy/60 dark:text-white/60 mb-4">
+            <p className="label-text mb-4">
               Select how many frames to keep:
             </p>
             <div className="space-y-2">
               <button
                 onClick={() => handleDeleteFrames(10)}
                 disabled={isClearing || !!(storageUsage && storageUsage.frameCount <= 10)}
-                className="w-full text-left px-4 py-3 rounded-lg border border-burgundy/20 dark:border-white/20 bg-white dark:bg-[#1a0f27] text-burgundy dark:text-white hover:bg-burgundy/10 dark:hover:bg-white/10 hover:border-burgundy/30 dark:hover:border-white/30 focus:outline-none focus:ring-2 focus:ring-burgundy/30 dark:focus:ring-white/30 transition-colors disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-white disabled:dark:hover:bg-[#1a0f27] disabled:hover:border-burgundy/20 disabled:dark:hover:border-white/20"
+                className="w-full text-left px-4 py-3 rounded-lg border border-default bg-white dark:bg-overlay text-primary hover:bg-active-highlight hover:border-strong focus:outline-none focus:ring-2 focus:ring-brand/30 transition-colors disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-white disabled:dark:hover:bg-[#1a0f27] disabled:hover:border-default"
               >
                 Delete All Frames
-                <span className="ml-2 text-xs text-burgundy/60 dark:text-white/60">
+                <span className="ml-2 text-sm sm:text-xs text-muted">
                   (saves last 10)
                 </span>
                 {storageUsage && storageUsage.frameCount <= 10 && (
-                  <span className="ml-2 text-xs text-burgundy/60 dark:text-white/60">
+                  <span className="ml-2 text-sm sm:text-xs text-muted">
                     (Must keep at least 10 frames)
                   </span>
                 )}
@@ -1817,11 +1817,11 @@ export default function FramesAnalytics() {
                     key={count}
                     onClick={() => handleDeleteFrames(count)}
                     disabled={isClearing || !canDelete}
-                    className="w-full text-left px-4 py-3 rounded-lg border border-burgundy/20 dark:border-white/20 bg-white dark:bg-[#1a0f27] text-burgundy dark:text-white hover:bg-burgundy/10 dark:hover:bg-white/10 hover:border-burgundy/30 dark:hover:border-white/30 focus:outline-none focus:ring-2 focus:ring-burgundy/30 dark:focus:ring-white/30 transition-colors disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-white disabled:dark:hover:bg-[#1a0f27] disabled:hover:border-burgundy/20 disabled:dark:hover:border-white/20"
+                    className="w-full text-left px-4 py-3 rounded-lg border border-default bg-white dark:bg-overlay text-primary hover:bg-active-highlight hover:border-strong focus:outline-none focus:ring-2 focus:ring-brand/30 transition-colors disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-white disabled:dark:hover:bg-[#1a0f27] disabled:hover:border-default"
                   >
                     Keep Last {count.toLocaleString()} Frames
                     {!canDelete && storageUsage && (
-                      <span className="ml-2 text-xs text-burgundy/60 dark:text-white/60">
+                      <span className="ml-2 text-sm sm:text-xs text-muted">
                         ({storageUsage.frameCount} frames available)
                       </span>
                     )}
@@ -1831,7 +1831,7 @@ export default function FramesAnalytics() {
             </div>
           </div>
           {isClearing && (
-            <div className="flex items-center gap-2 text-sm text-burgundy/60 dark:text-white/60">
+            <div className="flex items-center gap-2 text-sm text-muted">
               <Spinner size="16" />
               <span>Clearing frames...</span>
             </div>

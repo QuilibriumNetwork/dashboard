@@ -122,12 +122,12 @@ function Tag({
     secondary:
       "bg-light-green/40 text-green border border-green/30 dark:bg-green/15 dark:text-green dark:border-green/25",
     neutral:
-      "bg-slate-200/80 text-slate border border-slate-400/20 dark:bg-slate-700/30 dark:text-white dark:border-slate-500/25",
+      "bg-beige/80 text-burgundy/70 border border-burgundy/15 dark:bg-white/10 dark:text-white dark:border-white/15",
   };
 
   return (
     <span
-      className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-[0.25em] ${palettes[variant]}`}
+      className={`inline-flex items-center rounded-full px-3 py-1 text-sm sm:text-xs font-semibold uppercase tracking-label ${palettes[variant]}`}
     >
       {label}
     </span>
@@ -446,16 +446,16 @@ export default function Explorer() {
     <>
       <PageLayout title="Quilibrium Explorer">
         <div className="relative mx-auto max-w-6xl px-6">
-          <section className="relative overflow-hidden rounded-3xl border border-burgundy/10 bg-white/95 p-10 text-burgundy shadow-[0_35px_80px_-50px_rgba(57,31,91,0.45)] backdrop-blur-lg dark:border-white/10 dark:bg-[#1a0f27]/95 dark:text-white dark:shadow-[0_40px_90px_-55px_rgba(8,4,20,0.7)]">
+          <section className="relative overflow-hidden rounded-3xl border border-subtle bg-surface p-10 text-burgundy shadow-xl backdrop-blur-lg dark:text-white">
             <div className="pointer-events-none absolute -right-10 -top-10 h-44 w-44 rounded-full bg-pink/40 blur-3xl dark:bg-pink/30" />
             <div className="pointer-events-none absolute left-6 top-8 h-24 w-24 rounded-full bg-light-purple/80 blur-2xl dark:bg-purple/40" />
 
             <div className="relative flex flex-col gap-10 lg:flex-row lg:items-center lg:justify-between">
               <div className="flex-1 space-y-6">
-                <div className="inline-flex flex-wrap items-center gap-3 rounded-full border border-burgundy/15 bg-light-grey px-4 py-2 text-xs font-semibold uppercase tracking-[0.35em] text-burgundy/70 dark:border-white/10 dark:bg-[#261732] dark:text-white/70">
+                <div className="inline-flex flex-wrap items-center gap-3 rounded-full border border-burgundy/15 bg-light-grey px-4 py-2 text-sm sm:text-xs font-semibold uppercase tracking-label text-burgundy/70 dark:bg-surface-subtle dark:text-white/70">
                   Quilibrium network explorer
                   <span
-                    className="flex items-center gap-1 text-[0.7rem] tracking-normal text-burgundy/60 dark:text-white/60"
+                    className="flex items-center gap-1 text-xs tracking-normal text-muted"
                     title={formatAbsoluteTime(globalFrame.timestamp)}
                   >
                     <span className="relative inline-flex h-2.5 w-2.5">
@@ -468,20 +468,20 @@ export default function Explorer() {
                 <h1 className="text-4xl font-semibold text-burgundy lg:text-5xl dark:text-white">
                   Frames, provers, and shard flow at a glance
                 </h1>
-                <p className="max-w-2xl text-base leading-relaxed text-burgundy/70 dark:text-white/70">
+                <p className="max-w-2xl text-base leading-relaxed text-secondary">
                   {globalFrame.summary}
                 </p>
               </div>
 
-              <div className="flex flex-col gap-4 rounded-2xl border border-burgundy/10 bg-white/95 p-6 text-sm shadow-[0_26px_70px_-55px_rgba(64,0,27,0.5)] dark:border-white/10 dark:bg-[#211430]/95 dark:text-white dark:shadow-[0_26px_70px_-55px_rgba(0,0,0,0.65)]">
-                <div className="text-xs font-semibold uppercase tracking-[0.3em] text-burgundy/60 dark:text-white/60">
+              <div className="flex flex-col gap-4 rounded-2xl border border-subtle bg-surface-raised p-6 text-sm shadow-md dark:text-white">
+                <div className="label-text">
                   Prover
                 </div>
-                <div className="text-xl font-semibold text-burgundy dark:text-white">{globalFrame.prover}</div>
-                <div className="text-xs font-semibold uppercase tracking-[0.3em] text-burgundy/60 dark:text-white/60">
+                <div className="text-xl font-semibold text-primary">{globalFrame.prover}</div>
+                <div className="label-text">
                   Requests root
                 </div>
-                <div className="text-xl font-semibold text-burgundy dark:text-white">
+                <div className="text-xl font-semibold text-primary">
                   {formatBytesLike(globalFrame.requestsRoot)}
                 </div>
               </div>
@@ -491,16 +491,16 @@ export default function Explorer() {
               {stats.map((stat) => (
                 <div
                   key={stat.label}
-                  className="rounded-2xl border border-burgundy/10 bg-white px-4 py-5 shadow-[0_26px_70px_-55px_rgba(64,0,27,0.5)] dark:border-white/10 dark:bg-[#211430] dark:shadow-[0_26px_70px_-55px_rgba(0,0,0,0.65)]"
+                  className="rounded-2xl border border-subtle bg-white px-4 py-5 shadow-md dark:bg-surface-raised"
                 >
-                  <div className="text-xs font-semibold uppercase tracking-[0.3em] text-burgundy/60 dark:text-white/60">
+                  <div className="label-text">
                     {stat.label}
                   </div>
-                  <div className="mt-2 text-xl font-semibold text-burgundy dark:text-white">
+                  <div className="mt-2 text-xl font-semibold text-primary">
                     {stat.value}
                   </div>
                   {stat.description && (
-                    <p className="text-sm text-burgundy/70 dark:text-white/70">{stat.description}</p>
+                    <p className="text-sm text-secondary">{stat.description}</p>
                   )}
                 </div>
               ))}
@@ -510,8 +510,8 @@ export default function Explorer() {
           <section className="mt-14 space-y-6">
             <div className="flex items-center justify-between gap-4">
               <div>
-                <h2 className="text-3xl font-semibold text-burgundy dark:text-white">Frame feed</h2>
-                <p className="text-sm text-burgundy/70 dark:text-white/70">
+                <h2 className="text-3xl font-semibold text-primary">Frame feed</h2>
+                <p className="text-sm text-secondary">
                   Chronological stream of recently finalized global frames, including which shards were touched.
                 </p>
               </div>
@@ -521,7 +521,7 @@ export default function Explorer() {
               {frameTimeline.map((frame) => (
                 <div
                   key={frame.frameNumber}
-                  className="rounded-3xl border border-burgundy/10 bg-white/95 p-6 shadow-[0_34px_80px_-55px_rgba(57,31,91,0.4)] backdrop-blur dark:border-white/10 dark:bg-[#1a0f27]/95 dark:shadow-[0_40px_90px_-55px_rgba(0,0,0,0.65)]"
+                  className="rounded-3xl border border-subtle bg-surface p-6 shadow-xl backdrop-blur"
                 >
                   <div className="flex flex-wrap items-center gap-3">
                     <Tag label={`Frame ${frame.frameNumber.toLocaleString()}`} variant="primary" />
@@ -529,20 +529,20 @@ export default function Explorer() {
                     <Tag label={`${frame.shardsTouched} shards`} variant="secondary" />
                   </div>
                   <div className="mt-4 grid gap-4 text-sm sm:grid-cols-3">
-                    <div className="rounded-2xl border border-burgundy/10 bg-white px-4 py-3 text-burgundy shadow-[0_20px_55px_-45px_rgba(64,0,27,0.5)] dark:border-white/10 dark:bg-[#211430] dark:text-white">
-                      <div className="text-[0.7rem] font-semibold uppercase tracking-[0.35em] text-burgundy/60 dark:text-white/60">
+                    <div className="rounded-2xl border border-subtle bg-white px-4 py-3 text-burgundy shadow-sm dark:bg-surface-raised dark:text-white">
+                      <div className="label-text">
                         Prover
                       </div>
                       <div className="text-base font-semibold">{frame.prover}</div>
                     </div>
-                    <div className="rounded-2xl border border-burgundy/10 bg-white px-4 py-3 text-burgundy shadow-[0_20px_55px_-45px_rgba(64,0,27,0.5)] dark:border-white/10 dark:bg-[#211430] dark:text-white">
-                      <div className="text-[0.7rem] font-semibold uppercase tracking-[0.35em] text-burgundy/60 dark:text-white/60">
+                    <div className="rounded-2xl border border-subtle bg-white px-4 py-3 text-burgundy shadow-sm dark:bg-surface-raised dark:text-white">
+                      <div className="label-text">
                         Selector
                       </div>
                       <div className="text-base font-semibold">{formatBytesLike(frame.selector)}</div>
                     </div>
-                    <div className="rounded-2xl border border-burgundy/10 bg-white px-4 py-3 text-burgundy shadow-[0_20px_55px_-45px_rgba(64,0,27,0.5)] dark:border-white/10 dark:bg-[#211430] dark:text-white">
-                      <div className="text-[0.7rem] font-semibold uppercase tracking-[0.35em] text-burgundy/60 dark:text-white/60">
+                    <div className="rounded-2xl border border-subtle bg-white px-4 py-3 text-burgundy shadow-sm dark:bg-surface-raised dark:text-white">
+                      <div className="label-text">
                         Finalized
                       </div>
                       <div className="text-base font-semibold">
@@ -554,12 +554,12 @@ export default function Explorer() {
                     {frame.highlights.map((highlight) => (
                       <div
                         key={`${frame.frameNumber}-${highlight.label}`}
-                        className="rounded-2xl border border-burgundy/10 bg-light-grey px-4 py-3 text-burgundy/80 shadow-[inset_0_1px_0_rgba(255,255,255,0.6)] dark:border-white/10 dark:bg-[#211430]/60 dark:text-white/70"
+                        className="rounded-2xl border border-subtle bg-light-grey px-4 py-3 text-burgundy/80 shadow-[inset_0_1px_0_rgba(255,255,255,0.6)] dark:bg-surface-raised/60 dark:text-white/70"
                       >
-                        <div className="text-[0.7rem] font-semibold uppercase tracking-[0.35em] text-burgundy/60 dark:text-white/60">
+                        <div className="label-text">
                           {highlight.label}
                         </div>
-                        <div className="text-base font-semibold text-burgundy dark:text-white">
+                        <div className="text-base font-semibold text-primary">
                           {highlight.value}
                         </div>
                       </div>
@@ -572,8 +572,8 @@ export default function Explorer() {
 
           <section className="mt-14 space-y-10">
             <div>
-              <h2 className="text-3xl font-semibold text-burgundy dark:text-white">Shard directories</h2>
-              <p className="text-sm text-burgundy/70 dark:text-white/70">
+              <h2 className="text-3xl font-semibold text-primary">Shard directories</h2>
+              <p className="text-sm text-secondary">
                 Global frames reference 256 commitments; each shard replays the same frame number but filters to the domains listed below.
               </p>
             </div>
@@ -581,8 +581,8 @@ export default function Explorer() {
             {intrinsicShardCards.length > 0 && (
               <div className="space-y-4">
                 <div>
-                  <h3 className="text-xl font-semibold text-burgundy dark:text-white">Intrinsic shards</h3>
-                  <p className="text-sm text-burgundy/70 dark:text-white/70">
+                  <h3 className="text-xl font-semibold text-primary">Intrinsic shards</h3>
+                  <p className="text-sm text-secondary">
                     Token, hypergraph, and compute intrinsics define the rules that every application shard honors.
                   </p>
                 </div>
@@ -590,30 +590,30 @@ export default function Explorer() {
                   {intrinsicShardCards.map((shard) => (
                     <div
                       key={shard.domain}
-                      className="relative flex flex-col gap-5 rounded-3xl border border-burgundy/10 bg-white/95 p-6 shadow-[0_34px_80px_-55px_rgba(57,31,91,0.4)] backdrop-blur dark:border-white/10 dark:bg-[#1a0f27]/95 dark:shadow-[0_40px_90px_-55px_rgba(0,0,0,0.65)]"
+                      className="relative flex flex-col gap-5 rounded-3xl border border-subtle bg-surface p-6 shadow-xl backdrop-blur"
                     >
                       <div className="flex flex-wrap items-center gap-3">
                         <Tag label={shard.label} />
                         <Tag label="intrinsic" variant="neutral" />
                       </div>
-                      <p className="text-sm text-burgundy/70 dark:text-white/70">{shard.description}</p>
+                      <p className="text-sm text-secondary">{shard.description}</p>
                       <div className="grid gap-4 text-sm sm:grid-cols-2">
-                        <div className="rounded-2xl border border-burgundy/10 bg-white px-4 py-3 text-burgundy shadow-[0_20px_55px_-45px_rgba(64,0,27,0.5)] dark:border-white/10 dark:bg-[#211430] dark:text-white">
-                          <div className="text-[0.7rem] font-semibold uppercase tracking-[0.35em] text-burgundy/60 dark:text-white/60">
+                        <div className="rounded-2xl border border-subtle bg-white px-4 py-3 text-burgundy shadow-sm dark:bg-surface-raised dark:text-white">
+                          <div className="label-text">
                             Frame · Selector
                           </div>
                           <div className="text-base font-semibold">#{shard.frameNumber.toLocaleString()}</div>
-                          <div className="text-xs text-burgundy/60 dark:text-white/60">{formatBytesLike(shard.selector)}</div>
+                          <div className="text-sm sm:text-xs text-muted">{formatBytesLike(shard.selector)}</div>
                         </div>
-                        <div className="rounded-2xl border border-burgundy/10 bg-white px-4 py-3 text-burgundy shadow-[0_20px_55px_-45px_rgba(64,0,27,0.5)] dark:border-white/10 dark:bg-[#211430] dark:text-white">
-                          <div className="text-[0.7rem] font-semibold uppercase tracking-[0.35em] text-burgundy/60 dark:text-white/60">
+                        <div className="rounded-2xl border border-subtle bg-white px-4 py-3 text-burgundy shadow-sm dark:bg-surface-raised dark:text-white">
+                          <div className="label-text">
                             Requests root · State roots
                           </div>
                           <div className="text-base font-semibold">{formatBytesLike(shard.requestsRoot)}</div>
-                          <div className="text-xs text-burgundy/60 dark:text-white/60">{shard.stateRoots} roots</div>
+                          <div className="text-sm sm:text-xs text-muted">{shard.stateRoots} roots</div>
                         </div>
                       </div>
-                      <div className="rounded-2xl border border-burgundy/10 bg-light-grey px-4 py-3 text-sm text-burgundy/80 shadow-[inset_0_1px_0_rgba(255,255,255,0.6)] dark:border-white/10 dark:bg-[#211430]/60 dark:text-white/80">
+                      <div className="rounded-2xl border border-subtle bg-light-grey px-4 py-3 text-sm text-burgundy/80 shadow-[inset_0_1px_0_rgba(255,255,255,0.6)] dark:bg-surface-raised/60 dark:text-white/80">
                         <span className="font-semibold">Requests:</span> {shard.primaryRequests.join(", ")}
                       </div>
                     </div>
@@ -625,8 +625,8 @@ export default function Explorer() {
             {appShardCards.length > 0 && (
               <div className="space-y-4">
                 <div>
-                  <h3 className="text-xl font-semibold text-burgundy dark:text-white">Application shards</h3>
-                  <p className="text-sm text-burgundy/70 dark:text-white/70">
+                  <h3 className="text-xl font-semibold text-primary">Application shards</h3>
+                  <p className="text-sm text-secondary">
                     Application-specific shards inherit intrinsic rules while anchoring their own request roots.
                   </p>
                 </div>
@@ -634,30 +634,30 @@ export default function Explorer() {
                   {appShardCards.map((shard) => (
                     <div
                       key={shard.domain}
-                      className="relative flex flex-col gap-5 rounded-3xl border border-burgundy/10 bg-white/95 p-6 shadow-[0_34px_80px_-55px_rgba(57,31,91,0.4)] backdrop-blur dark:border-white/10 dark:bg-[#1a0f27]/95 dark:shadow-[0_40px_90px_-55px_rgba(0,0,0,0.65)]"
+                      className="relative flex flex-col gap-5 rounded-3xl border border-subtle bg-surface p-6 shadow-xl backdrop-blur"
                     >
                       <div className="flex flex-wrap items-center gap-3">
                         <Tag label={shard.label} />
                         <Tag label="app shard" variant="neutral" />
                       </div>
-                      <p className="text-sm text-burgundy/70 dark:text-white/70">{shard.description}</p>
+                      <p className="text-sm text-secondary">{shard.description}</p>
                       <div className="grid gap-4 text-sm sm:grid-cols-2">
-                        <div className="rounded-2xl border border-burgundy/10 bg-white px-4 py-3 text-burgundy shadow-[0_20px_55px_-45px_rgba(64,0,27,0.5)] dark:border-white/10 dark:bg-[#211430] dark:text-white">
-                          <div className="text-[0.7rem] font-semibold uppercase tracking-[0.35em] text-burgundy/60 dark:text-white/60">
+                        <div className="rounded-2xl border border-subtle bg-white px-4 py-3 text-burgundy shadow-sm dark:bg-surface-raised dark:text-white">
+                          <div className="label-text">
                             Frame · Selector
                           </div>
                           <div className="text-base font-semibold">#{shard.frameNumber.toLocaleString()}</div>
-                          <div className="text-xs text-burgundy/60 dark:text-white/60">{formatBytesLike(shard.selector)}</div>
+                          <div className="text-sm sm:text-xs text-muted">{formatBytesLike(shard.selector)}</div>
                         </div>
-                        <div className="rounded-2xl border border-burgundy/10 bg-white px-4 py-3 text-burgundy shadow-[0_20px_55px_-45px_rgba(64,0,27,0.5)] dark:border-white/10 dark:bg-[#211430] dark:text-white">
-                          <div className="text-[0.7rem] font-semibold uppercase tracking-[0.35em] text-burgundy/60 dark:text-white/60">
+                        <div className="rounded-2xl border border-subtle bg-white px-4 py-3 text-burgundy shadow-sm dark:bg-surface-raised dark:text-white">
+                          <div className="label-text">
                             Requests root · State roots
                           </div>
                           <div className="text-base font-semibold">{formatBytesLike(shard.requestsRoot)}</div>
-                          <div className="text-xs text-burgundy/60 dark:text-white/60">{shard.stateRoots} roots</div>
+                          <div className="text-sm sm:text-xs text-muted">{shard.stateRoots} roots</div>
                         </div>
                       </div>
-                      <div className="rounded-2xl border border-burgundy/10 bg-light-grey px-4 py-3 text-sm text-burgundy/80 shadow-[inset_0_1px_0_rgba(255,255,255,0.6)] dark:border-white/10 dark:bg-[#211430]/60 dark:text-white/80">
+                      <div className="rounded-2xl border border-subtle bg-light-grey px-4 py-3 text-sm text-burgundy/80 shadow-[inset_0_1px_0_rgba(255,255,255,0.6)] dark:bg-surface-raised/60 dark:text-white/80">
                         <span className="font-semibold">Requests:</span> {shard.primaryRequests.join(", ")}
                       </div>
                     </div>
@@ -668,26 +668,26 @@ export default function Explorer() {
           </section>
 
           <section className="mt-16 grid gap-10 lg:grid-cols-[2fr,1fr]">
-            <div className="rounded-3xl border border-burgundy/10 bg-white/95 p-6 shadow-[0_32px_80px_-55px_rgba(57,31,91,0.45)] dark:border-white/10 dark:bg-[#1a0f27]/95 dark:shadow-[0_36px_90px_-55px_rgba(0,0,0,0.65)]">
-              <h2 className="text-2xl font-semibold text-burgundy dark:text-white">Request routing</h2>
-              <p className="text-sm text-burgundy/70 dark:text-white/70">
+            <div className="rounded-3xl border border-subtle bg-surface p-6 shadow-lg">
+              <h2 className="text-2xl font-semibold text-primary">Request routing</h2>
+              <p className="text-sm text-secondary">
                 MessageRequest bundles carry precise constraints to keep deploys auditable while allowing shards to scale horizontally.
               </p>
               <div className="mt-6 space-y-4">
                 {requestFlows.map((flow) => (
                   <div
                     key={flow.title}
-                    className="rounded-2xl border border-burgundy/10 bg-white px-5 py-4 shadow-[0_26px_70px_-60px_rgba(64,0,27,0.5)] dark:border-white/10 dark:bg-[#211430] dark:shadow-[0_30px_80px_-60px_rgba(0,0,0,0.65)]"
+                    className="rounded-2xl border border-subtle bg-white px-5 py-4 shadow-md dark:bg-surface-raised"
                   >
                     <div className="flex flex-wrap items-center gap-3">
-                      <h3 className="text-lg font-semibold text-burgundy dark:text-white">{flow.title}</h3>
+                      <h3 className="text-lg font-semibold text-primary">{flow.title}</h3>
                       <Tag label={flow.allowedInGlobal ? "Global frame" : "Shard frame"} variant={flow.allowedInGlobal ? "secondary" : "neutral"} />
                     </div>
-                    <p className="text-xs font-semibold uppercase tracking-[0.3em] text-burgundy/60 dark:text-white/60">
+                    <p className="label-text">
                       {flow.role}
                     </p>
-                    <p className="mt-2 text-sm text-burgundy/70 dark:text-white/70">{flow.description}</p>
-                    <div className="mt-2 text-xs font-semibold uppercase tracking-[0.3em] text-burgundy/60 dark:text-white/60">
+                    <p className="mt-2 text-sm text-secondary">{flow.description}</p>
+                    <div className="mt-2 label-text">
                       {flow.bundleNotes}
                     </div>
                   </div>
@@ -695,24 +695,24 @@ export default function Explorer() {
               </div>
             </div>
 
-            <div className="rounded-3xl border border-burgundy/10 bg-white/95 p-6 shadow-[0_32px_80px_-55px_rgba(57,31,91,0.45)] dark:border-white/10 dark:bg-[#1a0f27]/95 dark:shadow-[0_36px_90px_-55px_rgba(0,0,0,0.65)]">
-              <h2 className="text-2xl font-semibold text-burgundy dark:text-white">Frame payload reference</h2>
-              <p className="text-sm text-burgundy/70 dark:text-white/70">
+            <div className="rounded-3xl border border-subtle bg-surface p-6 shadow-lg">
+              <h2 className="text-2xl font-semibold text-primary">Frame payload reference</h2>
+              <p className="text-sm text-secondary">
                 Quick reference for how specific frames combined deploys, shard headers, and intrinsic operations.
               </p>
               <div className="mt-6 space-y-5">
                 {frameTimeline.slice(0, 3).map((frame) => (
                   <div
                     key={`bundle-${frame.frameNumber}`}
-                    className="rounded-2xl border border-burgundy/10 bg-white px-4 py-4 text-sm shadow-[0_26px_70px_-60px_rgba(64,0,27,0.5)] dark:border-white/10 dark:bg-[#211430]"
+                    className="rounded-2xl border border-subtle bg-white px-4 py-4 text-sm shadow-md dark:bg-surface-raised"
                   >
-                    <div className="text-base font-semibold text-burgundy dark:text-white">
+                    <div className="text-base font-semibold text-primary">
                       Bundle · Frame {frame.frameNumber.toLocaleString()}
                     </div>
-                    <div className="text-xs font-semibold uppercase tracking-[0.3em] text-burgundy/60 dark:text-white/60">
+                    <div className="label-text">
                       Selector {formatBytesLike(frame.selector)}
                     </div>
-                    <p className="mt-2 text-burgundy/70 dark:text-white/70">
+                    <p className="mt-2 text-secondary">
                       {frame.requests} requests · {frame.shardsTouched} shards touched
                     </p>
                   </div>
@@ -722,43 +722,43 @@ export default function Explorer() {
           </section>
 
           <section className="mt-16 grid gap-10 lg:grid-cols-2">
-            <div className="rounded-3xl border border-burgundy/10 bg-white/95 p-6 shadow-[0_32px_80px_-55px_rgba(57,31,91,0.45)] dark:border-white/10 dark:bg-[#1a0f27]/95 dark:shadow-[0_36px_90px_-55px_rgba(0,0,0,0.65)]">
-              <h2 className="text-2xl font-semibold text-burgundy dark:text-white">Token intrinsic behavior</h2>
-              <p className="text-sm text-burgundy/70 dark:text-white/70">
+            <div className="rounded-3xl border border-subtle bg-surface p-6 shadow-lg">
+              <h2 className="text-2xl font-semibold text-primary">Token intrinsic behavior</h2>
+              <p className="text-sm text-secondary">
                 Bit flags combine to describe how an issued token behaves at runtime.
               </p>
               <div className="mt-6 grid gap-4 sm:grid-cols-2">
                 {behaviorFlags.map((flag) => (
                   <div
                     key={flag.identifier}
-                    className="rounded-2xl border border-burgundy/10 bg-white px-4 py-4 text-sm text-burgundy shadow-[0_26px_70px_-60px_rgba(64,0,27,0.5)] dark:border-white/10 dark:bg-[#211430] dark:text-white"
+                    className="rounded-2xl border border-subtle bg-white px-4 py-4 text-sm text-burgundy shadow-md dark:bg-surface-raised dark:text-white"
                   >
-                    <div className="text-xs font-semibold uppercase tracking-[0.3em] text-burgundy/60 dark:text-white/60">
+                    <div className="label-text">
                       {flag.identifier}
                     </div>
                     <div className="mt-2 text-base font-semibold">{flag.name}</div>
-                    <p className="text-sm text-burgundy/70 dark:text-white/70">{flag.detail}</p>
+                    <p className="text-sm text-secondary">{flag.detail}</p>
                   </div>
                 ))}
               </div>
             </div>
 
-            <div className="rounded-3xl border border-burgundy/10 bg-white/95 p-6 shadow-[0_32px_80px_-55px_rgba(57,31,91,0.45)] dark:border-white/10 dark:bg-[#1a0f27]/95 dark:shadow-[0_36px_90px_-55px_rgba(0,0,0,0.65)]">
-              <h2 className="text-2xl font-semibold text-burgundy dark:text-white">Mint strategies</h2>
-              <p className="text-sm text-burgundy/70 dark:text-white/70">
+            <div className="rounded-3xl border border-subtle bg-surface p-6 shadow-lg">
+              <h2 className="text-2xl font-semibold text-primary">Mint strategies</h2>
+              <p className="text-sm text-secondary">
                 TokenMintBehavior pairs with ProofBasisType and FeeBasisType to define who controls supply.
               </p>
               <div className="mt-6 space-y-4">
                 {mintInsights.map((insight) => (
                   <div
                     key={insight.title}
-                    className="rounded-2xl border border-burgundy/10 bg-white px-4 py-4 text-sm text-burgundy shadow-[0_26px_70px_-60px_rgba(64,0,27,0.5)] dark:border-white/10 dark:bg-[#211430] dark:text-white"
+                    className="rounded-2xl border border-subtle bg-white px-4 py-4 text-sm text-burgundy shadow-md dark:bg-surface-raised dark:text-white"
                   >
                     <div className="text-base font-semibold">{insight.title}</div>
-                    <div className="text-xs font-semibold uppercase tracking-[0.3em] text-burgundy/60 dark:text-white/60">
+                    <div className="label-text">
                       {insight.mechanics}
                     </div>
-                    <p className="mt-2 text-sm text-burgundy/70 dark:text-white/70">{insight.callout}</p>
+                    <p className="mt-2 text-sm text-secondary">{insight.callout}</p>
                   </div>
                 ))}
               </div>
@@ -766,5 +766,6 @@ export default function Explorer() {
           </section>
         </div>
       </PageLayout>
+    </>
   );
 }
