@@ -20,6 +20,7 @@ import Asterisksquare from "./iconset/Asterisksquare";
 import Bagdollar from "./iconset/Bagdollar";
 import Bellnotification from "./iconset/Bellnotification";
 import Bellsettimer from "./iconset/Bellsettimer";
+import Billdollar1 from "./iconset/Billdollar1";
 import Brightness1 from "./iconset/Brightness1";
 import Browserbuild from "./iconset/Browserbuild";
 import Browsercode2 from "./iconset/Browsercode2";
@@ -44,7 +45,9 @@ import Computerchip1 from "./iconset/Computerchip1";
 import Consellation from "./iconset/Consellation";
 import Contactbook from "./iconset/Contactbook";
 import Copylink from "./iconset/Copylink";
+import Creditcarddisable from "./iconset/Creditcarddisable";
 import Criticalthinking2 from "./iconset/Criticalthinking2";
+import Cursorclick from "./iconset/Cursorclick";
 import Customersupport1 from "./iconset/Customersupport1";
 import Cut from "./iconset/Cut";
 import Databaseserver2 from "./iconset/Databaseserver2";
@@ -54,10 +57,12 @@ import Deletebookmark from "./iconset/Deletebookmark";
 import Deletepdf from "./iconset/Deletepdf";
 import Desktopchat from "./iconset/Desktopchat";
 import Desktopscreensaversleep from "./iconset/Desktopscreensaversleep";
+import Discord from "./iconset/Discord";
 import Dna from "./iconset/Dna";
 import Doublebookmark from "./iconset/Doublebookmark";
 import Doubleheart from "./iconset/Doubleheart";
 import Downloadsquare from "./iconset/Downloadsquare";
+import Downloadstack from "./iconset/Downloadstack";
 import Earth2 from "./iconset/Earth2";
 import Ecohouse from "./iconset/Ecohouse";
 import Emptyclipboard from "./iconset/Emptyclipboard";
@@ -65,6 +70,7 @@ import Emptyrecyclebin1 from "./iconset/Emptyrecyclebin1";
 import Farcaster from "./iconset/Farcaster";
 import Filebookmark from "./iconset/Filebookmark";
 import Filter2 from "./iconset/Filter2";
+import Fingerprint2 from "./iconset/Fingerprint2";
 import Floppydisk from "./iconset/Floppydisk";
 import Forwardemail from "./iconset/Forwardemail";
 import Gameboy from "./iconset/Gameboy";
@@ -92,6 +98,7 @@ import Informationcircle from "./iconset/Informationcircle";
 import Insertcloudlink from "./iconset/Insertcloudlink";
 import Insurancehands from "./iconset/Insurancehands";
 import Invisible2 from "./iconset/Invisible2";
+import Justicescale2 from "./iconset/Justicescale2";
 import Labelfoldertag from "./iconset/Labelfoldertag";
 import Layers1 from "./iconset/Layers1";
 import Leaf from "./iconset/Leaf";
@@ -107,6 +114,7 @@ import Mailsendemailmessage from "./iconset/Mailsendemailmessage";
 import Mailsendenvelope from "./iconset/Mailsendenvelope";
 import Medicalfolder from "./iconset/Medicalfolder";
 import Megaphone2 from "./iconset/Megaphone2";
+import Memescommentreply from "./iconset/Memescommentreply";
 import Microscopeobservationsciene from "./iconset/Microscopeobservationsciene";
 import Modulepuzzle2 from "./iconset/Modulepuzzle2";
 import Module from "./iconset/Module";
@@ -116,9 +124,11 @@ import Newfolder from "./iconset/Newfolder";
 import Newstickynote from "./iconset/Newstickynote";
 import Notificationalarm2 from "./iconset/Notificationalarm2";
 import Notificationalarmsnooze from "./iconset/Notificationalarmsnooze";
+import Octagramshape from "./iconset/Octagramshape";
 import Padlockshield from "./iconset/Padlockshield";
 import Padlocksquare1 from "./iconset/Padlocksquare1";
 import Padlocksquare2 from "./iconset/Padlocksquare2";
+import Partypopper from "./iconset/Partypopper";
 import Pen1 from "./iconset/Pen1";
 import Pentool from "./iconset/Pentool";
 import Picturesfoldermemories from "./iconset/Picturesfoldermemories";
@@ -126,6 +136,7 @@ import Piechart from "./iconset/Piechart";
 import Pin1 from "./iconset/Pin1";
 import Playlist1 from "./iconset/Playlist1";
 import Playlist8 from "./iconset/Playlist8";
+import Qsymbol from "./iconset/Qsymbol";
 import Quorum from "./iconset/Quorum";
 import Recycle1 from "./iconset/Recycle1";
 import Recyclebin2 from "./iconset/Recyclebin2";
@@ -155,10 +166,13 @@ import Stopwatch from "./iconset/Stopwatch";
 import Sun from "./iconset/Sun";
 import Swordattack from "./iconset/Swordattack";
 import Tagfreecircle from "./iconset/Tagfreecircle";
+import Timelapse from "./iconset/Timelapse";
+import Timerzero from "./iconset/Timerzero";
 import Toolbox from "./iconset/Toolbox";
 import Translatetext from "./iconset/Translatetext";
 import Triangleflag from "./iconset/Triangleflag";
 import Useridentifiercard from "./iconset/Useridentifiercard";
+import Userprotection1 from "./iconset/Userprotection1";
 import Usersingleneutralfemale from "./iconset/Usersingleneutralfemale";
 import Usersingleneutralmale from "./iconset/Usersingleneutralmale";
 import Verticalslider2 from "./iconset/Verticalslider2";
@@ -197,6 +211,7 @@ export const icon = {
   bagdollar: Bagdollar,
   bellnotification: Bellnotification,
   bellsettimer: Bellsettimer,
+  billdollar1: Billdollar1,
   brightness1: Brightness1,
   browserbuild: Browserbuild,
   browsercode2: Browsercode2,
@@ -221,7 +236,9 @@ export const icon = {
   consellation: Consellation,
   contactbook: Contactbook,
   copylink: Copylink,
+  creditcarddisable: Creditcarddisable,
   criticalthinking2: Criticalthinking2,
+  cursorclick: Cursorclick,
   customersupport1: Customersupport1,
   cut: Cut,
   databaseserver2: Databaseserver2,
@@ -231,10 +248,12 @@ export const icon = {
   deletepdf: Deletepdf,
   desktopchat: Desktopchat,
   desktopscreensaversleep: Desktopscreensaversleep,
+  discord: Discord,
   dna: Dna,
   doublebookmark: Doublebookmark,
   doubleheart: Doubleheart,
   downloadsquare: Downloadsquare,
+  downloadstack: Downloadstack,
   earth2: Earth2,
   ecohouse: Ecohouse,
   emptyclipboard: Emptyclipboard,
@@ -242,6 +261,7 @@ export const icon = {
   farcaster: Farcaster,
   filebookmark: Filebookmark,
   filter2: Filter2,
+  fingerprint2: Fingerprint2,
   floppydisk: Floppydisk,
   forwardemail: Forwardemail,
   gameboy: Gameboy,
@@ -269,6 +289,7 @@ export const icon = {
   insertcloudlink: Insertcloudlink,
   insurancehands: Insurancehands,
   invisible2: Invisible2,
+  justicescale2: Justicescale2,
   labelfoldertag: Labelfoldertag,
   layers1: Layers1,
   leaf: Leaf,
@@ -284,6 +305,7 @@ export const icon = {
   mailsendenvelope: Mailsendenvelope,
   medicalfolder: Medicalfolder,
   megaphone2: Megaphone2,
+  memescommentreply: Memescommentreply,
   microscopeobservationsciene: Microscopeobservationsciene,
   modulepuzzle2: Modulepuzzle2,
   module: Module,
@@ -293,9 +315,11 @@ export const icon = {
   newstickynote: Newstickynote,
   notificationalarm2: Notificationalarm2,
   notificationalarmsnooze: Notificationalarmsnooze,
+  octagramshape: Octagramshape,
   padlockshield: Padlockshield,
   padlocksquare1: Padlocksquare1,
   padlocksquare2: Padlocksquare2,
+  partypopper: Partypopper,
   pen1: Pen1,
   pentool: Pentool,
   picturesfoldermemories: Picturesfoldermemories,
@@ -303,6 +327,7 @@ export const icon = {
   pin1: Pin1,
   playlist1: Playlist1,
   playlist8: Playlist8,
+  qsymbol: Qsymbol,
   quorum: Quorum,
   recycle1: Recycle1,
   recyclebin2: Recyclebin2,
@@ -332,10 +357,13 @@ export const icon = {
   sun: Sun,
   swordattack: Swordattack,
   tagfreecircle: Tagfreecircle,
+  timelapse: Timelapse,
+  timerzero: Timerzero,
   toolbox: Toolbox,
   translatetext: Translatetext,
   triangleflag: Triangleflag,
   useridentifiercard: Useridentifiercard,
+  userprotection1: Userprotection1,
   usersingleneutralfemale: Usersingleneutralfemale,
   usersingleneutralmale: Usersingleneutralmale,
   verticalslider2: Verticalslider2,
