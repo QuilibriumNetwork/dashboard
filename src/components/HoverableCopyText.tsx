@@ -1,9 +1,8 @@
 import { useState } from "react";
-import Icon from "@/components/ui/Icons";
 
 export function HoverableCopyText({ text, children }: { text: string; children: React.ReactNode }) {
-  const [isHovered, setIsHovered] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [hovered, setHovered] = useState(false);
 
   const handleCopy = async (e: React.MouseEvent) => {
     e.preventDefault();
@@ -19,22 +18,18 @@ export function HoverableCopyText({ text, children }: { text: string; children: 
 
   return (
     <span
-      className="relative inline-flex items-center gap-1.5 group cursor-pointer"
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
+      className="relative inline-flex items-center group cursor-pointer"
       onClick={handleCopy}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
     >
       <span className={`group-hover:underline transition-colors ${copied ? 'text-green dark:text-light-green' : ''}`}>
         {children}
       </span>
-      <Icon
-        name="emptyclipboard"
-        className={`w-3 h-3 text-burgundy/60 dark:text-white/60 flex-shrink-0 transition-opacity ${isHovered ? 'opacity-100' : 'opacity-0'}`}
-      />
-      {isHovered && (
-        <span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 px-2 py-1 text-xs text-white bg-gray-900 dark:bg-gray-700 rounded whitespace-nowrap pointer-events-none z-50 shadow-lg">
+      {hovered && (
+        <span className={`absolute bottom-full left-1/2 -translate-x-1/2 mb-1.5 px-2 py-1 font-inter text-sm sm:text-xs tracking-normal rounded shadow-lg whitespace-nowrap pointer-events-none z-50 ${copied ? 'bg-green text-white' : 'bg-tooltip text-[var(--color-text-tooltip)]'}`}>
           {copied ? 'Copied!' : 'Click to copy'}
-          <span className="absolute top-full left-1/2 -translate-x-1/2 -mt-1 border-4 border-transparent border-t-gray-900 dark:border-t-gray-700" />
+          <span className={`absolute top-full left-1/2 -translate-x-1/2 -mt-px border-4 border-transparent ${copied ? 'border-t-green' : 'border-t-[var(--color-bg-tooltip)]'}`} />
         </span>
       )}
     </span>

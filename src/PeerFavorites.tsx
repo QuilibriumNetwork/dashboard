@@ -6,9 +6,12 @@ import { explorerApi, type PeerRecord } from "@/lib/api";
 import { formatPeerRows, type PeerRow } from "@/lib/peers";
 import { truncateMiddle, formatTimestamp, formatRelativeTime } from "@/lib/format";
 import { HoverableCopyText } from "@/components/HoverableCopyText";
-import Icon from "@/components/ui/Icons";
+import { IconEye, IconPencil, IconTrash, IconDownload, IconUpload, IconPlus } from "@tabler/icons-react";
 import Spinner from "@/components/ui/Spinner";
 import Arrow from "@/components/ui/Arrow";
+import { Button } from "@/components/ui/Button";
+import { Select } from "@/components/ui/Select";
+import { Pagination } from "@/components/ui/Pagination";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import Modal from "@/components/ui/Modal";
 
@@ -31,7 +34,7 @@ function FavoritePeerItem({ favorite, peerRecord, peerRow, onDelete, onNavigate,
   const hasLabel = Boolean(favorite.label);
 
   return (
-    <div className="rounded-2xl border border-burgundy/10 bg-white/95 p-5 text-sm text-burgundy shadow-[0_20px_55px_-45px_rgba(64,0,27,0.5)] dark:border-white/10 dark:bg-[#211430]/95 dark:text-white">
+    <div className="rounded-2xl border border-default bg-surface-raised p-5 text-sm text-burgundy dark:text-white">
       <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
         <div className="flex-1 min-w-0">
           {hasLabel ? (
@@ -39,10 +42,10 @@ function FavoritePeerItem({ favorite, peerRecord, peerRow, onDelete, onNavigate,
               <div className="text-sm font-semibold mb-2 break-words">
                 {favorite.label}
               </div>
-              <div className="text-xs font-semibold uppercase tracking-[0.2em] text-burgundy/60 dark:text-white/60 mb-1">
+              <div className="label-text mb-1">
                 Peer ID
               </div>
-              <div className="font-mono text-xs break-all mb-2">
+              <div className="font-mono text-sm sm:text-xs break-all mb-2">
                 <HoverableCopyText text={favorite.peerId}>
                   <span className="md:hidden">{truncateMiddle(favorite.peerId, 20)}</span>
                   <span className="hidden md:inline break-all">{favorite.peerId}</span>
@@ -51,10 +54,10 @@ function FavoritePeerItem({ favorite, peerRecord, peerRow, onDelete, onNavigate,
             </>
           ) : (
             <>
-              <div className="text-xs font-semibold uppercase tracking-[0.3em] text-burgundy/60 dark:text-white/60 mb-2">
+              <div className="label-text mb-2">
                 Peer ID
               </div>
-              <div className="font-mono text-xs break-all mb-2">
+              <div className="font-mono text-sm sm:text-xs break-all mb-2">
                 <HoverableCopyText text={favorite.peerId}>
                   <span className="md:hidden">{truncateMiddle(favorite.peerId, 20)}</span>
                   <span className="hidden md:inline">{favorite.peerId}</span>
@@ -66,91 +69,97 @@ function FavoritePeerItem({ favorite, peerRecord, peerRow, onDelete, onNavigate,
             <>
               {peerRow && (
                 <>
-                  <div className="mt-3 text-xs">
-                    <div className="text-[0.65rem] uppercase tracking-[0.3em] text-burgundy/50 dark:text-white/50 mb-1">
+                  <div className="mt-3 text-sm sm:text-xs">
+                    <div className="text-sm sm:text-xs font-medium text-muted mb-1">
                       Version
                     </div>
-                    <div className="text-[0.7rem] mb-2">{peerRow.version}</div>
+                    <div className="text-xs mb-2">{peerRow.version}</div>
                   </div>
                   {peerRecord && peerRecord.last_seen && (() => {
                     const timestamp = peerRecord.last_seen > 1e12 ? peerRecord.last_seen : peerRecord.last_seen * 1000;
                     const isoString = new Date(timestamp).toISOString();
                     return (
-                      <div className="mt-2 text-xs">
-                        <div className="text-[0.65rem] uppercase tracking-[0.3em] text-burgundy/50 dark:text-white/50 mb-1">
+                      <div className="mt-2 text-sm sm:text-xs">
+                        <div className="text-sm sm:text-xs font-medium text-muted mb-1">
                           Last Seen
                         </div>
-                        <div className="text-[0.7rem] mb-2">
+                        <div className="text-xs mb-2">
                           {formatTimestamp(isoString)} ({formatRelativeTime(isoString)})
                         </div>
                       </div>
                     );
                   })()}
-                  <div className="mt-2 text-xs">
-                    <div className="text-[0.65rem] uppercase tracking-[0.3em] text-burgundy/50 dark:text-white/50 mb-1">
+                  <div className="mt-2 text-sm sm:text-xs">
+                    <div className="text-sm sm:text-xs font-medium text-muted mb-1">
                       Pubsub
                     </div>
                     {peerRow.pubsub.length > 0 ? (
                       peerRow.pubsub.slice(0, 2).map((addr) => (
-                        <div key={addr} className="truncate text-[0.7rem] mb-1">
+                        <div key={addr} className="truncate text-xs mb-1">
                           <HoverableCopyText text={addr}>{addr}</HoverableCopyText>
                         </div>
                       ))
                     ) : (
-                      <div className="text-[0.7rem] text-burgundy/60 dark:text-white/60">–</div>
+                      <div className="text-xs text-muted">–</div>
                     )}
                   </div>
-                  <div className="mt-2 text-xs">
-                    <div className="text-[0.65rem] uppercase tracking-[0.3em] text-burgundy/50 dark:text-white/50 mb-1">
+                  <div className="mt-2 text-sm sm:text-xs">
+                    <div className="text-sm sm:text-xs font-medium text-muted mb-1">
                       Stream
                     </div>
                     {peerRow.stream.length > 0 ? (
                       peerRow.stream.slice(0, 2).map((addr) => (
-                        <div key={addr} className="truncate text-[0.7rem] mb-1">
+                        <div key={addr} className="truncate text-xs mb-1">
                           <HoverableCopyText text={addr}>{addr}</HoverableCopyText>
                         </div>
                       ))
                     ) : (
-                      <div className="text-[0.7rem] text-burgundy/60 dark:text-white/60">–</div>
+                      <div className="text-xs text-muted">–</div>
                     )}
                   </div>
                 </>
               )}
             </>
           ) : (
-            <div className="mt-3 text-xs text-burgundy/60 dark:text-white/60 italic">
+            <div className="mt-3 text-sm sm:text-xs text-muted italic">
               Peer not seen.
             </div>
           )}
         </div>
-        <div className="flex flex-row md:flex-col gap-2 flex-shrink-0 md:mt-0 mt-4 pt-4 md:pt-0 border-t md:border-t-0 border-burgundy/10 dark:border-white/10">
+        <div className="flex flex-row md:flex-col gap-2 flex-shrink-0 md:mt-0 mt-4 pt-4 md:pt-0 border-t md:border-t-0 border-subtle">
           {isSeen && (
-            <button
+            <Button
+              variant="subtle"
+              size="xs"
               onClick={() => onNavigate(favorite.peerId)}
-              className="flex items-center justify-center gap-1 px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.2em] text-burgundy/70 hover:text-burgundy dark:text-white/70 dark:hover:text-white transition-colors border border-burgundy/20 dark:border-white/20 rounded-lg hover:bg-burgundy/10 dark:hover:bg-white/10 flex-1 md:flex-none"
+              className="flex-1 md:flex-none gap-1"
               aria-label="View peer"
             >
-              <Icon name="visible" className="w-4 h-4 md:w-3 md:h-3" />
+              <IconEye className="w-5 h-5 md:w-4 md:h-4" />
               <span className="hidden md:inline">View</span>
               <Arrow className="hidden md:inline w-3 h-3" />
-            </button>
+            </Button>
           )}
-          <button
+          <Button
+            variant="subtle"
+            size="xs"
             onClick={() => onEdit(favorite.peerId)}
-            className="flex items-center justify-center gap-1 px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.2em] text-burgundy/70 hover:text-burgundy dark:text-white/70 dark:hover:text-white transition-colors border border-burgundy/20 dark:border-white/20 rounded-lg hover:bg-burgundy/10 dark:hover:bg-white/10 flex-1 md:flex-none"
+            className="flex-1 md:flex-none gap-1"
             aria-label="Edit peer"
           >
-            <Icon name="pen1" className="w-4 h-4 md:w-3 md:h-3" />
+            <IconPencil className="w-5 h-5 md:w-4 md:h-4" />
             <span className="hidden md:inline">Edit</span>
-          </button>
-          <button
+          </Button>
+          <Button
+            variant="danger"
+            size="xs"
             onClick={() => onDelete(favorite.peerId)}
-            className="flex items-center justify-center gap-1 px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.2em] text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 transition-colors border border-red-600/20 dark:border-red-400/20 rounded-lg hover:bg-red-600/10 dark:hover:bg-red-400/10 flex-1 md:flex-none"
+            className="flex-1 md:flex-none gap-1"
             aria-label="Delete peer"
           >
-            <Icon name="recyclebin2" className="w-4 h-4 md:w-3 md:h-3" />
+            <IconTrash className="w-5 h-5 md:w-4 md:h-4" />
             <span className="hidden md:inline">Delete</span>
-          </button>
+          </Button>
         </div>
       </div>
     </div>
@@ -491,29 +500,33 @@ export default function PeerFavorites() {
     <PageLayout title="Peer Favorites • Quilibrium Explorer">
       <div className="relative mx-auto max-w-6xl px-6">
         <div className="flex items-center justify-between gap-4 mb-6">
-          <Link to="/" className="text-sm font-semibold uppercase tracking-[0.3em] text-burgundy/70 hover:text-burgundy dark:text-white/70">
+          <Link to="/" className="text-sm action-text">
             ← Back
           </Link>
           <div className="flex items-center gap-4">
             {/* Import/Export buttons - hidden on mobile, shown on desktop */}
             <div className="hidden md:flex items-center gap-4">
-              <button
+              <Button
+                variant="ghost"
+                size="small"
                 onClick={handleExportCSV}
                 disabled={favorites.length === 0}
-                className="flex items-center gap-2 text-sm font-semibold uppercase tracking-[0.3em] text-burgundy/70 hover:text-burgundy dark:text-white/70 dark:hover:text-white transition-colors bg-transparent hover:bg-transparent disabled:opacity-50 disabled:cursor-not-allowed"
+                className="gap-2"
                 aria-label="Export favorites to CSV"
               >
-                <Icon name="downloadsquare" className="w-4 h-4" />
+                <IconDownload className="w-4 h-4" />
                 <span>Export CSV</span>
-              </button>
-              <button
+              </Button>
+              <Button
+                variant="ghost"
+                size="small"
                 onClick={handleImportClick}
-                className="flex items-center gap-2 text-sm font-semibold uppercase tracking-[0.3em] text-burgundy/70 hover:text-burgundy dark:text-white/70 dark:hover:text-white transition-colors bg-transparent hover:bg-transparent"
+                className="gap-2"
                 aria-label="Import favorites from CSV"
               >
-                <Icon name="arrowuplarge2" className="w-4 h-4" />
+                <IconUpload className="w-4 h-4" />
                 <span>Import CSV</span>
-              </button>
+              </Button>
             </div>
             <input
               ref={fileInputRef}
@@ -523,60 +536,66 @@ export default function PeerFavorites() {
               className="hidden"
               aria-label="Import CSV file"
             />
-            <button
+            <Button
+              variant="ghost"
+              size="small"
               onClick={() => setShowAddDialog(true)}
-              className="flex items-center gap-2 text-sm font-semibold uppercase tracking-[0.3em] text-burgundy/70 hover:text-burgundy dark:text-white/70 dark:hover:text-white transition-colors bg-transparent hover:bg-transparent"
+              className="gap-2"
             >
-              <Icon name="applicationadd" className="w-4 h-4" />
+              <IconPlus className="w-4 h-4" />
               <span>Add Peer</span>
-            </button>
+            </Button>
           </div>
         </div>
 
         {/* Import/Export Messages */}
         {(importError || importSuccess !== null) && (
-          <div className="mb-4 rounded-lg border border-burgundy/20 dark:border-white/20 bg-white/95 dark:bg-[#1a0f27]/95 p-4 text-sm shadow-[0_20px_55px_-45px_rgba(64,0,27,0.5)]">
+          <div className="mb-4 rounded-lg border border-default bg-surface p-4 text-sm">
             {importSuccess !== null && (
-              <div className="text-green-600 dark:text-green-400 font-semibold">
+              <div className="text-success font-semibold">
                 Successfully imported {importSuccess} peer{importSuccess !== 1 ? "s" : ""}.
               </div>
             )}
             {importError && (
-              <div className={`${importSuccess !== null ? "mt-2 text-yellow-600 dark:text-yellow-400" : "text-red-600 dark:text-red-400"}`}>
+              <div className={`${importSuccess !== null ? "mt-2 text-warning" : "text-danger"}`}>
                 {importError}
               </div>
             )}
           </div>
         )}
 
-        <section className="mb-10 rounded-3xl border border-burgundy/10 bg-white/95 p-8 text-burgundy shadow-[0_35px_80px_-50px_rgba(57,31,91,0.45)] dark:border-white/10 dark:bg-[#1a0f27]/95 dark:text-white">
+        <section className="mb-10 rounded-3xl border border-subtle bg-surface p-5 xs:p-8 text-burgundy shadow-xl dark:text-white">
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
             <h2 className="text-2xl font-semibold">Peer Favorites</h2>
             {/* Import/Export buttons - shown on mobile, hidden on desktop */}
             <div className="flex md:hidden items-center gap-4">
-              <button
+              <Button
+                variant="ghost"
+                size="xs"
                 onClick={handleExportCSV}
                 disabled={favorites.length === 0}
-                className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-[0.2em] text-burgundy/70 hover:text-burgundy dark:text-white/70 dark:hover:text-white transition-colors bg-transparent hover:bg-transparent disabled:opacity-50 disabled:cursor-not-allowed"
+                className="gap-1.5"
                 aria-label="Export favorites to CSV"
               >
-                <Icon name="downloadsquare" className="w-3.5 h-3.5" />
+                <IconDownload className="w-3.5 h-3.5" />
                 <span>Export</span>
-              </button>
-              <button
+              </Button>
+              <Button
+                variant="ghost"
+                size="xs"
                 onClick={handleImportClick}
-                className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-[0.2em] text-burgundy/70 hover:text-burgundy dark:text-white/70 dark:hover:text-white transition-colors bg-transparent hover:bg-transparent"
+                className="gap-1.5"
                 aria-label="Import favorites from CSV"
               >
-                <Icon name="arrowuplarge2" className="w-3.5 h-3.5" />
+                <IconUpload className="w-3.5 h-3.5" />
                 <span>Import</span>
-              </button>
+              </Button>
             </div>
           </div>
 
           {favorites.length === 0 ? (
             <div className="py-12 text-center">
-              <p className="text-sm text-burgundy/70 dark:text-white/70">
+              <p className="text-sm text-secondary">
                 No favorites yet. Click "Add Peer" to add a peer to your favorites.
               </p>
             </div>
@@ -584,23 +603,23 @@ export default function PeerFavorites() {
             <>
               {/* Items per page selector */}
               <div className="flex flex-wrap items-center gap-3 mb-6">
-                <span className="text-xs font-semibold uppercase tracking-[0.3em] text-burgundy/60 dark:text-white/60">
+                <span className="text-sm sm:text-xs text-muted">
                   Show
                 </span>
-                <select
-                  value={itemsPerPage}
-                  onChange={(e) => {
-                    setItemsPerPage(Number(e.target.value));
+                <Select
+                  value={String(itemsPerPage)}
+                  onValueChange={(val) => {
+                    setItemsPerPage(Number(val));
                     setCurrentPage(1);
                   }}
-                  className="border border-burgundy/20 dark:border-white/20 bg-white dark:bg-[#1a0f27] px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.3em] text-burgundy dark:text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-burgundy/30 dark:focus:ring-white/30 transition-colors"
-                >
-                  <option value={10}>10</option>
-                  <option value={25}>25</option>
-                  <option value={50}>50</option>
-                  <option value={100}>100</option>
-                </select>
-                <span className="text-xs font-semibold uppercase tracking-[0.3em] text-burgundy/60 dark:text-white/60">
+                  options={[
+                    { value: "10", label: "10" },
+                    { value: "25", label: "25" },
+                    { value: "50", label: "50" },
+                    { value: "100", label: "100" },
+                  ]}
+                />
+                <span className="text-sm sm:text-xs text-muted">
                   per page
                 </span>
               </div>
@@ -623,40 +642,14 @@ export default function PeerFavorites() {
               {/* Pagination Controls */}
               {totalPages > 1 && (
                 <div className="flex flex-wrap items-center justify-between gap-4 pt-6">
-                  <div className="text-xs font-semibold uppercase tracking-[0.3em] text-burgundy/60 dark:text-white/60">
+                  <div className="text-sm sm:text-xs text-muted">
                     Showing {startIndex + 1}–{Math.min(endIndex, favorites.length)} of {favorites.length}
                   </div>
-                  <div className="flex items-center gap-2">
-                    <button
-                      onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
-                      disabled={currentPage === 1}
-                      className="px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.3em] text-burgundy/70 hover:text-burgundy dark:text-white/70 dark:hover:text-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed border border-burgundy/20 dark:border-white/20 rounded-lg hover:bg-burgundy/10 dark:hover:bg-white/10"
-                    >
-                      Previous
-                    </button>
-                    <div className="flex items-center gap-1">
-                      {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-                        <button
-                          key={page}
-                          onClick={() => setCurrentPage(page)}
-                          className={`px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.3em] rounded-lg transition-colors ${
-                            currentPage === page
-                              ? "bg-burgundy/20 dark:bg-white/20 text-burgundy dark:text-white"
-                              : "text-burgundy/70 hover:text-burgundy dark:text-white/70 dark:hover:text-white hover:bg-burgundy/10 dark:hover:bg-white/10"
-                          }`}
-                        >
-                          {page}
-                        </button>
-                      ))}
-                    </div>
-                    <button
-                      onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
-                      disabled={currentPage === totalPages}
-                      className="px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.3em] text-burgundy/70 hover:text-burgundy dark:text-white/70 dark:hover:text-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed border border-burgundy/20 dark:border-white/20 rounded-lg hover:bg-burgundy/10 dark:hover:bg-white/10"
-                    >
-                      Next
-                    </button>
-                  </div>
+                  <Pagination
+                    currentPage={currentPage}
+                    totalPages={totalPages}
+                    onPageChange={setCurrentPage}
+                  />
                 </div>
               )}
             </>
@@ -677,7 +670,7 @@ export default function PeerFavorites() {
         >
           <div className="space-y-6">
             <div>
-              <label className="block text-xs font-semibold uppercase tracking-[0.3em] text-burgundy/60 dark:text-white/60 mb-2">
+              <label className="block form-label mb-2">
                 Peer Address
               </label>
               <input
@@ -699,18 +692,18 @@ export default function PeerFavorites() {
                   }
                 }}
                 placeholder="Enter peer ID (Qm...)"
-                className={`w-full rounded-lg border border-burgundy/20 dark:border-white/20 bg-white dark:bg-[#1a0f27] px-3 py-2 text-sm text-burgundy placeholder:text-burgundy/40 focus:outline-none focus:border-burgundy/40 dark:focus:border-white/40 focus:ring-2 focus:ring-burgundy/20 dark:focus:ring-white/20 dark:text-white dark:placeholder:text-white/40 ${
-                  addValidationError ? "outline outline-2 outline-red-500 dark:outline-red-400 outline-offset-0" : ""
+                className={`w-full rounded-lg border border-default bg-white dark:bg-overlay px-3 py-2 text-sm text-burgundy placeholder:text-burgundy/40 focus:outline-none focus:border-strong focus:ring-2 focus:ring-brand/20 dark:text-white dark:placeholder:text-white/40 ${
+                  addValidationError ? "outline outline-2 outline-danger outline-offset-0" : ""
                 }`}
                 autoFocus
               />
               {addValidationError && (
-                <p className="mt-1 text-xs text-red-600 dark:text-red-400">{addValidationError}</p>
+                <p className="mt-1 text-sm sm:text-xs text-danger">{addValidationError}</p>
               )}
             </div>
             <div>
-              <label className="block text-xs font-semibold uppercase tracking-[0.3em] text-burgundy/60 dark:text-white/60 mb-2">
-                Label <span className="text-burgundy/40 dark:text-white/40 font-normal normal-case">(optional)</span>
+              <label className="block form-label mb-2">
+                Label <span className="text-faint font-normal normal-case">(optional)</span>
               </label>
               <input
                 type="text"
@@ -727,27 +720,29 @@ export default function PeerFavorites() {
                   }
                 }}
                 placeholder="Enter a label for this peer"
-                className="w-full rounded-lg border border-burgundy/20 bg-white px-3 py-2 text-sm text-burgundy placeholder:text-burgundy/40 focus:border-burgundy/40 focus:outline-none focus:ring-2 focus:ring-burgundy/20 dark:border-white/20 dark:bg-[#1a0f27] dark:text-white dark:placeholder:text-white/40 dark:focus:border-white/40 dark:focus:ring-white/20"
+                className="w-full rounded-lg border border-default bg-white px-3 py-2 text-sm text-burgundy placeholder:text-burgundy/40 focus:border-strong focus:outline-none focus:ring-2 focus:ring-brand/20 dark:bg-overlay dark:text-white dark:placeholder:text-white/40"
               />
             </div>
             <div className="flex items-center justify-end gap-3">
-              <button
+              <Button
+                variant="secondary"
+                size="small"
                 onClick={() => {
                   setShowAddDialog(false);
                   setNewPeerId("");
                   setNewLabel("");
                   setAddValidationError(null);
                 }}
-                className="px-4 py-2 text-sm font-semibold uppercase tracking-[0.2em] text-burgundy/70 hover:text-burgundy dark:text-white/70 dark:hover:text-white transition-colors border border-burgundy/20 dark:border-white/20 rounded-lg hover:bg-burgundy/10 dark:hover:bg-white/10"
               >
                 Cancel
-              </button>
-              <button
+              </Button>
+              <Button
+                variant="primary"
+                size="small"
                 onClick={handleAdd}
-                className="px-4 py-2 text-sm font-semibold uppercase tracking-[0.2em] text-burgundy/70 hover:text-burgundy dark:text-white/70 dark:hover:text-white transition-colors border border-burgundy/20 dark:border-white/20 rounded-lg hover:bg-burgundy/10 dark:hover:bg-white/10"
               >
                 Add
-              </button>
+              </Button>
             </div>
           </div>
         </Modal>
@@ -767,7 +762,7 @@ export default function PeerFavorites() {
         >
           <div className="space-y-6">
             <div>
-              <label className="block text-xs font-semibold uppercase tracking-[0.3em] text-burgundy/60 dark:text-white/60 mb-2">
+              <label className="block form-label mb-2">
                 Peer Address
               </label>
               <input
@@ -790,18 +785,18 @@ export default function PeerFavorites() {
                   }
                 }}
                 placeholder="Enter peer ID (Qm...)"
-                className={`w-full rounded-lg border border-burgundy/20 dark:border-white/20 bg-white dark:bg-[#1a0f27] px-3 py-2 text-sm text-burgundy placeholder:text-burgundy/40 focus:outline-none focus:border-burgundy/40 dark:focus:border-white/40 focus:ring-2 focus:ring-burgundy/20 dark:focus:ring-white/20 dark:text-white dark:placeholder:text-white/40 ${
-                  editValidationError ? "outline outline-2 outline-red-500 dark:outline-red-400 outline-offset-0" : ""
+                className={`w-full rounded-lg border border-default bg-white dark:bg-overlay px-3 py-2 text-sm text-burgundy placeholder:text-burgundy/40 focus:outline-none focus:border-strong focus:ring-2 focus:ring-brand/20 dark:text-white dark:placeholder:text-white/40 ${
+                  editValidationError ? "outline outline-2 outline-danger outline-offset-0" : ""
                 }`}
                 autoFocus
               />
               {editValidationError && (
-                <p className="mt-1 text-xs text-red-600 dark:text-red-400">{editValidationError}</p>
+                <p className="mt-1 text-sm sm:text-xs text-danger">{editValidationError}</p>
               )}
             </div>
             <div>
-              <label className="block text-xs font-semibold uppercase tracking-[0.3em] text-burgundy/60 dark:text-white/60 mb-2">
-                Label <span className="text-burgundy/40 dark:text-white/40 font-normal normal-case">(optional)</span>
+              <label className="block form-label mb-2">
+                Label <span className="text-faint font-normal normal-case">(optional)</span>
               </label>
               <input
                 type="text"
@@ -818,11 +813,13 @@ export default function PeerFavorites() {
                   }
                 }}
                 placeholder="Enter a label for this peer"
-                className="w-full rounded-lg border border-burgundy/20 bg-white px-3 py-2 text-sm text-burgundy placeholder:text-burgundy/40 focus:border-burgundy/40 focus:outline-none focus:ring-2 focus:ring-burgundy/20 dark:border-white/20 dark:bg-[#1a0f27] dark:text-white dark:placeholder:text-white/40 dark:focus:border-white/40 dark:focus:ring-white/20"
+                className="w-full rounded-lg border border-default bg-white px-3 py-2 text-sm text-burgundy placeholder:text-burgundy/40 focus:border-strong focus:outline-none focus:ring-2 focus:ring-brand/20 dark:bg-overlay dark:text-white dark:placeholder:text-white/40"
               />
             </div>
             <div className="flex items-center justify-end gap-3">
-              <button
+              <Button
+                variant="secondary"
+                size="small"
                 onClick={() => {
                   setShowEditDialog(false);
                   setEditPeerId("");
@@ -830,16 +827,16 @@ export default function PeerFavorites() {
                   setOriginalPeerId("");
                   setEditValidationError(null);
                 }}
-                className="px-4 py-2 text-sm font-semibold uppercase tracking-[0.2em] text-burgundy/70 hover:text-burgundy dark:text-white/70 dark:hover:text-white transition-colors border border-burgundy/20 dark:border-white/20 rounded-lg hover:bg-burgundy/10 dark:hover:bg-white/10"
               >
                 Cancel
-              </button>
-              <button
+              </Button>
+              <Button
+                variant="primary"
+                size="small"
                 onClick={handleSaveEdit}
-                className="px-4 py-2 text-sm font-semibold uppercase tracking-[0.2em] text-burgundy/70 hover:text-burgundy dark:text-white/70 dark:hover:text-white transition-colors border border-burgundy/20 dark:border-white/20 rounded-lg hover:bg-burgundy/10 dark:hover:bg-white/10"
               >
                 Save
-              </button>
+              </Button>
             </div>
           </div>
         </Modal>

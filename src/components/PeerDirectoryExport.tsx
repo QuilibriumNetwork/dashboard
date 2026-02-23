@@ -1,5 +1,7 @@
 import { useState } from "react";
-import ChevronDown from "@/components/ui/ChevronDown";
+import { Button } from "@/components/ui/Button";
+import { Checkbox } from "@/components/ui/Checkbox";
+import { CollapsiblePanel } from "@/components/ui/CollapsiblePanel";
 import { type PeerRow } from "@/lib/peers";
 import { type PeerRecord } from "@/lib/api";
 import { formatCapability, getCapabilityLabel } from "@/lib/capabilities";
@@ -24,7 +26,6 @@ export function PeerDirectoryExport({
   allPeerRecords,
   filters,
 }: PeerDirectoryExportProps) {
-  const [exportExpanded, setExportExpanded] = useState(false);
   const [exportOptions, setExportOptions] = useState<ExportOptions>({
     includeVersion: false,
     includePubsubAddress: false,
@@ -217,28 +218,15 @@ export function PeerDirectoryExport({
   const hasAnyOptionSelected = Object.values(exportOptions).some((v) => v === true);
 
   return (
-    <div className="rounded-2xl border border-burgundy/10 bg-white/95 shadow-[0_20px_55px_-45px_rgba(64,0,27,0.5)] dark:border-white/10 dark:bg-[#211430]/95">
-      <button
-        onClick={() => setExportExpanded(!exportExpanded)}
-        className="w-full flex items-center justify-between px-6 py-4 text-left transition-colors hover:bg-light-grey/30 dark:hover:bg-white/5"
-      >
-        <span className="text-sm font-semibold uppercase tracking-[0.3em] text-burgundy/70 dark:text-white/70">
-          Export
-        </span>
-        <ChevronDown
-          className={`w-4 h-4 text-burgundy/60 dark:text-white/60 transition-transform ${exportExpanded ? 'rotate-180' : ''}`}
-        />
-      </button>
-
-      {exportExpanded && (
-        <div className="px-6 pb-6 pt-2 space-y-4 border-t border-burgundy/10 dark:border-white/10">
-          <div className="text-xs text-burgundy/60 dark:text-white/60">
+    <CollapsiblePanel label="Export">
+      <div className="px-6 pb-6 pt-2 space-y-4">
+          <div className="text-sm sm:text-xs text-muted">
             Export {filteredPeers.length} peer{filteredPeers.length !== 1 ? "s" : ""} (respects current filters)
           </div>
 
           <div className="space-y-3">
             <div className="flex items-center justify-between">
-              <div className="text-xs font-semibold uppercase tracking-[0.3em] text-burgundy/60 dark:text-white/60">
+              <div className="form-label">
                 Include Properties
               </div>
               <button
@@ -252,93 +240,79 @@ export function PeerDirectoryExport({
                     includeReachabilityRecord: !allSelected,
                   });
                 }}
-                className="text-xs font-semibold text-burgundy/70 hover:text-burgundy dark:text-white/70 dark:hover:text-white transition-colors"
+                className="text-sm sm:text-xs font-semibold text-secondary hover:text-primary transition-colors"
               >
                 {Object.values(exportOptions).every((v) => v === true) ? "Deselect all" : "Select all"}
               </button>
             </div>
             <div className="space-y-2">
               <label className="flex items-center gap-2 px-2 py-1.5 rounded transition-colors opacity-60 cursor-not-allowed">
-                <input
-                  type="checkbox"
-                  checked={true}
-                  disabled={true}
-                  className="w-4 h-4 text-burgundy border-burgundy/30 rounded focus:ring-burgundy/30 dark:border-white/30 dark:focus:ring-white/30 cursor-not-allowed"
-                />
-                <span className="text-sm text-burgundy dark:text-white">Peer ID</span>
+                <Checkbox checked={true} onCheckedChange={() => {}} disabled />
+                <span className="text-sm text-primary">Peer ID</span>
               </label>
 
               <label className="flex items-center gap-2 px-2 py-1.5 rounded hover:bg-light-grey/30 dark:hover:bg-white/5 cursor-pointer transition-colors">
-                <input
-                  type="checkbox"
+                <Checkbox
                   checked={exportOptions.includeVersion}
-                  onChange={(e) => updateExportOption("includeVersion", e.target.checked)}
-                  className="w-4 h-4 text-burgundy border-burgundy/30 rounded focus:ring-burgundy/30 dark:border-white/30 dark:focus:ring-white/30"
+                  onCheckedChange={(checked) => updateExportOption("includeVersion", checked)}
                 />
-                <span className="text-sm text-burgundy dark:text-white">Version</span>
+                <span className="text-sm text-primary">Version</span>
               </label>
 
               <label className="flex items-center gap-2 px-2 py-1.5 rounded hover:bg-light-grey/30 dark:hover:bg-white/5 cursor-pointer transition-colors">
-                <input
-                  type="checkbox"
+                <Checkbox
                   checked={exportOptions.includePubsubAddress}
-                  onChange={(e) => updateExportOption("includePubsubAddress", e.target.checked)}
-                  className="w-4 h-4 text-burgundy border-burgundy/30 rounded focus:ring-burgundy/30 dark:border-white/30 dark:focus:ring-white/30"
+                  onCheckedChange={(checked) => updateExportOption("includePubsubAddress", checked)}
                 />
-                <span className="text-sm text-burgundy dark:text-white">Pubsub Address</span>
+                <span className="text-sm text-primary">Pubsub Address</span>
               </label>
 
               <label className="flex items-center gap-2 px-2 py-1.5 rounded hover:bg-light-grey/30 dark:hover:bg-white/5 cursor-pointer transition-colors">
-                <input
-                  type="checkbox"
+                <Checkbox
                   checked={exportOptions.includeStreamAddress}
-                  onChange={(e) => updateExportOption("includeStreamAddress", e.target.checked)}
-                  className="w-4 h-4 text-burgundy border-burgundy/30 rounded focus:ring-burgundy/30 dark:border-white/30 dark:focus:ring-white/30"
+                  onCheckedChange={(checked) => updateExportOption("includeStreamAddress", checked)}
                 />
-                <span className="text-sm text-burgundy dark:text-white">Stream Address</span>
+                <span className="text-sm text-primary">Stream Address</span>
               </label>
 
               <label className="flex items-center gap-2 px-2 py-1.5 rounded hover:bg-light-grey/30 dark:hover:bg-white/5 cursor-pointer transition-colors">
-                <input
-                  type="checkbox"
+                <Checkbox
                   checked={exportOptions.includeCapabilities}
-                  onChange={(e) => updateExportOption("includeCapabilities", e.target.checked)}
-                  className="w-4 h-4 text-burgundy border-burgundy/30 rounded focus:ring-burgundy/30 dark:border-white/30 dark:focus:ring-white/30"
+                  onCheckedChange={(checked) => updateExportOption("includeCapabilities", checked)}
                 />
-                <span className="text-sm text-burgundy dark:text-white">Capabilities</span>
+                <span className="text-sm text-primary">Capabilities</span>
               </label>
 
               <label className="flex items-center gap-2 px-2 py-1.5 rounded hover:bg-light-grey/30 dark:hover:bg-white/5 cursor-pointer transition-colors">
-                <input
-                  type="checkbox"
+                <Checkbox
                   checked={exportOptions.includeReachabilityRecord}
-                  onChange={(e) => updateExportOption("includeReachabilityRecord", e.target.checked)}
-                  className="w-4 h-4 text-burgundy border-burgundy/30 rounded focus:ring-burgundy/30 dark:border-white/30 dark:focus:ring-white/30"
+                  onCheckedChange={(checked) => updateExportOption("includeReachabilityRecord", checked)}
                 />
-                <span className="text-sm text-burgundy dark:text-white">Reachability Record</span>
+                <span className="text-sm text-primary">Reachability Record</span>
               </label>
             </div>
           </div>
 
           <div className="flex gap-3 pt-2">
-            <button
+            <Button
+              variant="subtle"
+              size="small"
               onClick={exportToCSV}
               disabled={filteredPeers.length === 0}
-              className="flex-1 px-4 py-2 text-xs font-semibold uppercase tracking-[0.3em] text-burgundy/70 hover:text-burgundy dark:text-white/70 dark:hover:text-white border border-burgundy/20 dark:border-white/20 rounded-lg hover:bg-burgundy/10 dark:hover:bg-white/10 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
               Export CSV
-            </button>
-            <button
+            </Button>
+            <Button
+              variant="subtle"
+              size="small"
               onClick={exportToJSON}
               disabled={filteredPeers.length === 0}
-              className="flex-1 px-4 py-2 text-xs font-semibold uppercase tracking-[0.3em] text-burgundy/70 hover:text-burgundy dark:text-white/70 dark:hover:text-white border border-burgundy/20 dark:border-white/20 rounded-lg hover:bg-burgundy/10 dark:hover:bg-white/10 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
               Export JSON
-            </button>
+            </Button>
           </div>
-        </div>
-      )}
-    </div>
+      </div>
+    </CollapsiblePanel>
   );
 }
 

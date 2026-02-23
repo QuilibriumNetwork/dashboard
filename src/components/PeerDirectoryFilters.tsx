@@ -1,5 +1,7 @@
-import { useState } from "react";
-import ChevronDown from "@/components/ui/ChevronDown";
+import { Checkbox } from "@/components/ui/Checkbox";
+import { Button } from "@/components/ui/Button";
+import { CollapsiblePanel } from "@/components/ui/CollapsiblePanel";
+import { IconX } from "@tabler/icons-react";
 
 export interface PeerFilterState {
   searchQuery: string;
@@ -18,6 +20,7 @@ interface PeerDirectoryFiltersProps {
   capabilityCountCounts: Map<number, number>;
   pubsubProtocolCounts: Map<"tcp" | "udp" | "other", number>;
   streamProtocolCounts: Map<"tcp" | "udp" | "other", number>;
+  headerAction?: React.ReactNode;
 }
 
 export function PeerDirectoryFilters({
@@ -29,9 +32,8 @@ export function PeerDirectoryFilters({
   capabilityCountCounts,
   pubsubProtocolCounts,
   streamProtocolCounts,
+  headerAction,
 }: PeerDirectoryFiltersProps) {
-  const [filtersExpanded, setFiltersExpanded] = useState(false);
-
   const updateFilter = <K extends keyof PeerFilterState>(
     key: K,
     value: PeerFilterState[K]
@@ -57,24 +59,11 @@ export function PeerDirectoryFilters({
     filters.selectedCapabilityCounts.size > 0;
 
   return (
-    <div className="rounded-2xl border border-burgundy/10 bg-white/95 shadow-[0_20px_55px_-45px_rgba(64,0,27,0.5)] dark:border-white/10 dark:bg-[#211430]/95">
-      <button
-        onClick={() => setFiltersExpanded(!filtersExpanded)}
-        className="w-full flex items-center justify-between px-6 py-4 text-left transition-colors hover:bg-light-grey/30 dark:hover:bg-white/5"
-      >
-        <span className="text-sm font-semibold uppercase tracking-[0.3em] text-burgundy/70 dark:text-white/70">
-          Filters
-        </span>
-        <ChevronDown
-          className={`w-4 h-4 text-burgundy/60 dark:text-white/60 transition-transform ${filtersExpanded ? 'rotate-180' : ''}`}
-        />
-      </button>
-
-      {filtersExpanded && (
-        <div className="px-6 pb-6 pt-2 space-y-4 border-t border-burgundy/10 dark:border-white/10">
+    <CollapsiblePanel label="Filters">
+      <div className="px-6 pb-6 pt-2 space-y-4">
           {/* Search by Peer ID or IP */}
           <div>
-            <label className="block text-xs font-semibold uppercase tracking-[0.3em] text-burgundy/60 dark:text-white/60 mb-2">
+            <label className="block form-label mb-2">
               Search by Peer ID or IP Address
             </label>
             <div className="relative">
@@ -83,12 +72,12 @@ export function PeerDirectoryFilters({
                 value={filters.searchQuery}
                 onChange={(e) => updateFilter("searchQuery", e.target.value)}
                 placeholder="Enter peer ID, IPv4, or IPv6 address..."
-                className="w-full border border-burgundy/20 dark:border-white/20 bg-white dark:bg-[#1a0f27] px-4 py-2 pr-10 text-sm text-burgundy dark:text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-burgundy/30 dark:focus:ring-white/30 transition-colors"
+                className="w-full border border-default bg-white dark:bg-overlay px-4 py-2 pr-10 text-sm text-primary rounded-lg focus:outline-none focus:ring-2 focus:ring-brand/30 transition-colors"
               />
               {filters.searchQuery && (
                 <button
                   onClick={() => updateFilter("searchQuery", "")}
-                  className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center justify-center w-6 h-6 text-burgundy/60 hover:text-burgundy dark:text-white/60 dark:hover:text-white transition-colors rounded hover:bg-burgundy/10 dark:hover:bg-white/10"
+                  className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center justify-center w-6 h-6 text-burgundy/60 hover:text-primary/60 dark:hover:text-white transition-colors rounded hover:bg-active-highlight"
                   aria-label="Clear search"
                 >
                   <span className="text-lg leading-none">×</span>
@@ -100,7 +89,7 @@ export function PeerDirectoryFilters({
           {/* Version Filter */}
           <div>
             <div className="flex items-center justify-between mb-2">
-              <label className="block text-xs font-semibold uppercase tracking-[0.3em] text-burgundy/60 dark:text-white/60">
+              <label className="block form-label">
                 Version
               </label>
               {uniqueVersions.length > 0 && (
@@ -112,15 +101,15 @@ export function PeerDirectoryFilters({
                       updateFilter("selectedVersions", new Set(uniqueVersions));
                     }
                   }}
-                  className="text-xs font-semibold text-burgundy/70 hover:text-burgundy dark:text-white/70 dark:hover:text-white transition-colors"
+                  className="text-sm sm:text-xs font-semibold text-secondary hover:text-primary transition-colors"
                 >
                   {filters.selectedVersions.size === uniqueVersions.length ? "Deselect all" : "Select all"}
                 </button>
               )}
             </div>
-            <div className="max-h-48 overflow-y-auto border border-burgundy/20 dark:border-white/20 bg-white dark:bg-[#1a0f27] rounded-lg p-2">
+            <div className="max-h-48 overflow-y-auto border border-default bg-white dark:bg-overlay rounded-lg p-2">
               {uniqueVersions.length === 0 ? (
-                <div className="text-xs text-burgundy/60 dark:text-white/60 py-2 px-2">
+                <div className="text-sm sm:text-xs text-muted py-2 px-2">
                   No versions available
                 </div>
               ) : (
@@ -130,21 +119,19 @@ export function PeerDirectoryFilters({
                       key={version}
                       className="flex items-center gap-2 px-2 py-1.5 rounded hover:bg-light-grey/30 dark:hover:bg-white/5 cursor-pointer transition-colors"
                     >
-                      <input
-                        type="checkbox"
+                      <Checkbox
                         checked={filters.selectedVersions.has(version)}
-                        onChange={(e) => {
+                        onCheckedChange={(checked) => {
                           const newSelected = new Set(filters.selectedVersions);
-                          if (e.target.checked) {
+                          if (checked) {
                             newSelected.add(version);
                           } else {
                             newSelected.delete(version);
                           }
                           updateFilter("selectedVersions", newSelected);
                         }}
-                        className="w-4 h-4 text-burgundy border-burgundy/30 rounded focus:ring-burgundy/30 dark:border-white/30 dark:focus:ring-white/30 flex-shrink-0"
                       />
-                      <span className="text-sm text-burgundy dark:text-white whitespace-nowrap">
+                      <span className="text-sm text-primary whitespace-nowrap">
                         {version} ({versionCounts.get(version) || 0})
                       </span>
                     </label>
@@ -158,30 +145,28 @@ export function PeerDirectoryFilters({
           <div className="space-y-4">
             {/* Pubsub Protocol Filter */}
             <div>
-              <label className="block text-xs font-semibold uppercase tracking-[0.3em] text-burgundy/60 dark:text-white/60 mb-2">
+              <label className="block form-label mb-2">
                 Pubsub Protocol
               </label>
               <div className="flex gap-3">
                 {(["tcp", "udp", "other"] as const).map((protocol) => (
                   <label
                     key={protocol}
-                    className="flex items-center gap-2 px-3 py-2 rounded border border-burgundy/20 dark:border-white/20 bg-white dark:bg-[#1a0f27] hover:bg-light-grey/30 dark:hover:bg-white/5 cursor-pointer transition-colors"
+                    className="flex items-center gap-2 px-3 py-2 rounded-lg border border-default bg-white dark:bg-overlay hover:bg-light-grey/30 dark:hover:bg-white/5 cursor-pointer transition-colors"
                   >
-                    <input
-                      type="checkbox"
+                    <Checkbox
                       checked={filters.selectedPubsubProtocols.has(protocol)}
-                      onChange={(e) => {
+                      onCheckedChange={(checked) => {
                         const newSelected = new Set(filters.selectedPubsubProtocols);
-                        if (e.target.checked) {
+                        if (checked) {
                           newSelected.add(protocol);
                         } else {
                           newSelected.delete(protocol);
                         }
                         updateFilter("selectedPubsubProtocols", newSelected);
                       }}
-                      className="w-4 h-4 text-burgundy border-burgundy/30 rounded focus:ring-burgundy/30 dark:border-white/30 dark:focus:ring-white/30"
                     />
-                    <span className={`text-sm text-burgundy dark:text-white ${protocol === "other" ? "" : "uppercase"}`}>
+                    <span className={`text-sm text-primary ${protocol === "other" ? "" : "uppercase"}`}>
                       {protocol === "other" ? "No Address" : protocol.toUpperCase()} ({pubsubProtocolCounts.get(protocol) || 0})
                     </span>
                   </label>
@@ -191,30 +176,28 @@ export function PeerDirectoryFilters({
 
             {/* Stream Protocol Filter */}
             <div>
-              <label className="block text-xs font-semibold uppercase tracking-[0.3em] text-burgundy/60 dark:text-white/60 mb-2">
+              <label className="block form-label mb-2">
                 Stream Protocol
               </label>
               <div className="flex gap-3">
                 {(["tcp", "udp", "other"] as const).map((protocol) => (
                   <label
                     key={protocol}
-                    className="flex items-center gap-2 px-3 py-2 rounded border border-burgundy/20 dark:border-white/20 bg-white dark:bg-[#1a0f27] hover:bg-light-grey/30 dark:hover:bg-white/5 cursor-pointer transition-colors"
+                    className="flex items-center gap-2 px-3 py-2 rounded-lg border border-default bg-white dark:bg-overlay hover:bg-light-grey/30 dark:hover:bg-white/5 cursor-pointer transition-colors"
                   >
-                    <input
-                      type="checkbox"
+                    <Checkbox
                       checked={filters.selectedStreamProtocols.has(protocol)}
-                      onChange={(e) => {
+                      onCheckedChange={(checked) => {
                         const newSelected = new Set(filters.selectedStreamProtocols);
-                        if (e.target.checked) {
+                        if (checked) {
                           newSelected.add(protocol);
                         } else {
                           newSelected.delete(protocol);
                         }
                         updateFilter("selectedStreamProtocols", newSelected);
                       }}
-                      className="w-4 h-4 text-burgundy border-burgundy/30 rounded focus:ring-burgundy/30 dark:border-white/30 dark:focus:ring-white/30"
                     />
-                    <span className={`text-sm text-burgundy dark:text-white ${protocol === "other" ? "" : "uppercase"}`}>
+                    <span className={`text-sm text-primary ${protocol === "other" ? "" : "uppercase"}`}>
                       {protocol === "other" ? "No Address" : protocol.toUpperCase()} ({streamProtocolCounts.get(protocol) || 0})
                     </span>
                   </label>
@@ -226,7 +209,7 @@ export function PeerDirectoryFilters({
           {/* Capability Count Filter */}
           <div>
             <div className="flex items-center justify-between mb-2">
-              <label className="block text-xs font-semibold uppercase tracking-[0.3em] text-burgundy/60 dark:text-white/60">
+              <label className="block form-label">
                 Capability Count
               </label>
               {uniqueCapabilityCounts.length > 0 && (
@@ -238,15 +221,15 @@ export function PeerDirectoryFilters({
                       updateFilter("selectedCapabilityCounts", new Set(uniqueCapabilityCounts));
                     }
                   }}
-                  className="text-xs font-semibold text-burgundy/70 hover:text-burgundy dark:text-white/70 dark:hover:text-white transition-colors"
+                  className="text-sm sm:text-xs font-semibold text-secondary hover:text-primary transition-colors"
                 >
                   {filters.selectedCapabilityCounts.size === uniqueCapabilityCounts.length ? "Deselect all" : "Select all"}
                 </button>
               )}
             </div>
-            <div className="max-h-48 overflow-y-auto border border-burgundy/20 dark:border-white/20 bg-white dark:bg-[#1a0f27] rounded-lg p-2 space-y-2">
+            <div className="max-h-48 overflow-y-auto border border-default bg-white dark:bg-overlay rounded-lg p-2 space-y-2">
               {uniqueCapabilityCounts.length === 0 ? (
-                <div className="text-xs text-burgundy/60 dark:text-white/60 py-2 px-2">
+                <div className="text-sm sm:text-xs text-muted py-2 px-2">
                   No capability counts available
                 </div>
               ) : (
@@ -255,21 +238,19 @@ export function PeerDirectoryFilters({
                     key={count}
                     className="flex items-center gap-2 px-2 py-1.5 rounded hover:bg-light-grey/30 dark:hover:bg-white/5 cursor-pointer transition-colors"
                   >
-                    <input
-                      type="checkbox"
+                    <Checkbox
                       checked={filters.selectedCapabilityCounts.has(count)}
-                      onChange={(e) => {
+                      onCheckedChange={(checked) => {
                         const newSelected = new Set(filters.selectedCapabilityCounts);
-                        if (e.target.checked) {
+                        if (checked) {
                           newSelected.add(count);
                         } else {
                           newSelected.delete(count);
                         }
                         updateFilter("selectedCapabilityCounts", newSelected);
                       }}
-                      className="w-4 h-4 text-burgundy border-burgundy/30 rounded focus:ring-burgundy/30 dark:border-white/30 dark:focus:ring-white/30"
                     />
-                    <span className="text-sm text-burgundy dark:text-white">
+                    <span className="text-sm text-primary">
                       {count} {count === 1 ? "capability" : "capabilities"} ({capabilityCountCounts.get(count) || 0})
                     </span>
                   </label>
@@ -278,20 +259,24 @@ export function PeerDirectoryFilters({
             </div>
           </div>
 
-          {/* Clear Filters Button */}
+          {/* Filter Actions */}
           {hasActiveFilters && (
-            <div className="pt-2">
-              <button
+            <div className="pt-2 flex flex-col xs:flex-row items-stretch xs:items-center justify-between gap-2">
+              {headerAction}
+              <Button
                 onClick={clearAllFilters}
-                className="text-xs font-semibold text-burgundy/70 hover:text-burgundy dark:text-white/70 dark:hover:text-white transition-colors"
+                variant="danger"
+                size="small"
+                rounded="lg"
+                className="gap-1.5"
               >
-                Clear all filters
-              </button>
+                <IconX className="w-3.5 h-3.5" />
+                <span>Clear all filters</span>
+              </Button>
             </div>
           )}
-        </div>
-      )}
-    </div>
+      </div>
+    </CollapsiblePanel>
   );
 }
 

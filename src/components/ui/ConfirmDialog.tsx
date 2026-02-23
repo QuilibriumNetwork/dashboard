@@ -1,3 +1,4 @@
+import { Button } from "./Button";
 import Modal from "./Modal";
 
 interface ConfirmDialogProps {
@@ -38,29 +39,26 @@ export function ConfirmDialog({
       minHeight="min-h-0"
     >
       <div className="space-y-6">
-        <p className="text-sm text-burgundy dark:text-white">{message}</p>
+        <p className="text-sm text-primary">{message}</p>
         <div className="flex items-center justify-end gap-3">
-          <button
+          <Button
+            variant="secondary"
+            size="small"
             onClick={onClose}
             disabled={isLoading}
-            className="px-4 py-2 text-sm font-semibold uppercase tracking-[0.2em] text-burgundy/70 hover:text-burgundy dark:text-white/70 dark:hover:text-white transition-colors border border-burgundy/20 dark:border-white/20 rounded-lg hover:bg-burgundy/10 dark:hover:bg-white/10 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {cancelText}
-          </button>
-          <button
+          </Button>
+          <Button
+            variant={confirmVariant === "danger" ? "danger" : "primary"}
+            size="small"
             onClick={handleConfirm}
             disabled={isLoading}
-            className={`px-4 py-2 text-sm font-semibold uppercase tracking-[0.2em] transition-colors rounded-lg disabled:opacity-50 disabled:cursor-not-allowed ${
-              confirmVariant === "danger"
-                ? "text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 border border-red-600/20 dark:border-red-400/20 hover:bg-red-600/10 dark:hover:bg-red-400/10"
-                : "text-burgundy/70 hover:text-burgundy dark:text-white/70 dark:hover:text-white border border-burgundy/20 dark:border-white/20 hover:bg-burgundy/10 dark:hover:bg-white/10"
-            }`}
           >
             {isLoading ? "Processing..." : confirmText}
-          </button>
+          </Button>
         </div>
       </div>
     </Modal>
   );
 }
-

@@ -8,7 +8,9 @@ import { formatPeerVersion } from "@/lib/peers";
 import { getCapabilityLabel, formatCapability, getAllCapabilityIdentifiers } from "@/lib/capabilities";
 import Spinner from "@/components/ui/Spinner";
 import Icon from "@/components/ui/Icons";
+import { IconCopy, IconCopyCheck, IconStar, IconStarFilled } from "@tabler/icons-react";
 import { HoverableCopyText } from "@/components/HoverableCopyText";
+import { Tooltip } from "@/components/ui/Tooltip";
 import { usePeerFavorites } from "@/components/helpers/PeerFavoritesContext";
 
 function DetailCard({
@@ -35,8 +37,8 @@ function DetailCard({
   );
 
   return (
-    <div className="rounded-2xl border border-burgundy/10 bg-light-grey px-4 py-4 text-burgundy shadow-[0_20px_55px_-45px_rgba(64,0,27,0.5)] dark:border-white/10 dark:bg-[#211430]/70 dark:text-white">
-      <div className="text-[0.7rem] font-semibold uppercase tracking-[0.3em] text-burgundy/60 dark:text-white/60">{label}</div>
+    <div className="rounded-2xl border border-default bg-surface-raised px-4 py-4 text-burgundy dark:text-white">
+      <div className="label-text">{label}</div>
       {displayValue}
     </div>
   );
@@ -44,6 +46,7 @@ function DetailCard({
 
 function CopyPeerDataButton({ peer }: { peer: PeerRecord }) {
   const [copied, setCopied] = useState(false);
+  const [hovered, setHovered] = useState(false);
 
   const handleCopy = async () => {
     try {
@@ -59,15 +62,28 @@ function CopyPeerDataButton({ peer }: { peer: PeerRecord }) {
   return (
     <button
       onClick={handleCopy}
-      className="flex items-center gap-2 px-2 py-1 text-sm font-semibold uppercase tracking-[0.2em] text-burgundy/70 hover:text-burgundy dark:text-white/70 transition-colors bg-transparent hover:bg-transparent"
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+      className="relative p-2.5 text-muted hover:text-pink transition-colors bg-transparent hover:bg-transparent"
     >
-      <span>{copied ? 'Copied!' : 'Copy data'}</span>
+      {copied ? (
+        <IconCopyCheck className="w-6 h-6" />
+      ) : (
+        <IconCopy className="w-6 h-6" />
+      )}
+      {hovered && (
+        <span className={`absolute bottom-full left-1/2 -translate-x-1/2 mb-0.5 px-2 py-1 font-inter text-sm sm:text-xs tracking-normal rounded shadow-lg whitespace-nowrap pointer-events-none z-50 ${copied ? 'bg-green text-white' : 'bg-tooltip text-[var(--color-text-tooltip)]'}`}>
+          {copied ? 'Copied!' : 'Copy data'}
+          <span className={`absolute top-full left-1/2 -translate-x-1/2 -mt-px border-4 border-transparent ${copied ? 'border-t-green' : 'border-t-[var(--color-bg-tooltip)]'}`} />
+        </span>
+      )}
     </button>
   );
 }
 
 function CopyKeyRegistryButton({ keyRegistry }: { keyRegistry: KeyRegistry }) {
   const [copied, setCopied] = useState(false);
+  const [hovered, setHovered] = useState(false);
 
   const handleCopy = async () => {
     try {
@@ -83,38 +99,40 @@ function CopyKeyRegistryButton({ keyRegistry }: { keyRegistry: KeyRegistry }) {
   return (
     <button
       onClick={handleCopy}
-      className="flex items-center gap-2 px-2 py-1 text-sm font-semibold uppercase tracking-[0.2em] text-burgundy/70 hover:text-burgundy dark:text-white/70 transition-colors bg-transparent hover:bg-transparent"
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+      className="relative p-2.5 text-muted hover:text-pink transition-colors bg-transparent hover:bg-transparent"
     >
-      <span>{copied ? 'Copied!' : 'Copy data'}</span>
+      {copied ? (
+        <IconCopyCheck className="w-6 h-6" />
+      ) : (
+        <IconCopy className="w-6 h-6" />
+      )}
+      {hovered && (
+        <span className={`absolute bottom-full left-1/2 -translate-x-1/2 mb-0.5 px-2 py-1 font-inter text-sm sm:text-xs tracking-normal rounded shadow-lg whitespace-nowrap pointer-events-none z-50 ${copied ? 'bg-green text-white' : 'bg-tooltip text-[var(--color-text-tooltip)]'}`}>
+          {copied ? 'Copied!' : 'Copy data'}
+          <span className={`absolute top-full left-1/2 -translate-x-1/2 -mt-px border-4 border-transparent ${copied ? 'border-t-green' : 'border-t-[var(--color-bg-tooltip)]'}`} />
+        </span>
+      )}
     </button>
   );
 }
 
 function LastSeenCard({ label, relativeTime, timestamp }: { label: string; relativeTime: string; timestamp: string | null }) {
-  const [isHovered, setIsHovered] = useState(false);
-
   return (
-    <div className="rounded-2xl border border-burgundy/10 bg-light-grey px-4 py-4 text-burgundy shadow-[0_20px_55px_-45px_rgba(64,0,27,0.5)] dark:border-white/10 dark:bg-[#211430]/70 dark:text-white">
-      <div className="text-[0.7rem] font-semibold uppercase tracking-[0.3em] text-burgundy/60 dark:text-white/60">{label}</div>
+    <div className="rounded-2xl border border-default bg-surface-raised px-4 py-4 text-burgundy dark:text-white">
+      <div className="label-text">{label}</div>
       <div className="mt-2 text-base font-semibold flex items-center gap-2">
         <span>{relativeTime}</span>
         {timestamp && (
-          <span
-            className="relative inline-flex items-center"
-            onMouseEnter={() => setIsHovered(true)}
-            onMouseLeave={() => setIsHovered(false)}
-          >
-            <Icon
-              name="resetclock"
-              className="w-4 h-4 text-burgundy/60 dark:text-white/60 cursor-help"
-            />
-            {isHovered && (
-              <span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 text-xs text-white bg-gray-900 dark:bg-gray-700 rounded whitespace-nowrap pointer-events-none z-50 shadow-lg">
-                {formatTimestamp(timestamp)}
-                <span className="absolute top-full left-1/2 -translate-x-1/2 -mt-1 border-4 border-transparent border-t-gray-900 dark:border-t-gray-700" />
-              </span>
-            )}
-          </span>
+          <Tooltip content={formatTimestamp(timestamp)}>
+            <span className="inline-flex items-center">
+              <Icon
+                name="resetclock"
+                className="w-4 h-4 text-muted cursor-help"
+              />
+            </span>
+          </Tooltip>
         )}
       </div>
     </div>
@@ -132,20 +150,15 @@ function CapabilityBadge({
   hasCapability: boolean;
   additionalMetadata?: string;
 }) {
-  const [isHovered, setIsHovered] = useState(false);
   const tooltipText = `Protocol ID: ${protocolId}${additionalMetadata ? `\nMetadata: ${additionalMetadata}` : ''}`;
 
   return (
-    <div
-      className="relative"
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
-    >
+    <Tooltip content={tooltipText} className="whitespace-pre-line max-w-xs px-3 py-2">
       <div
-        className={`flex items-center justify-center gap-2 px-3 py-2 rounded-lg border text-xs font-medium transition-all ${
+        className={`flex items-center justify-center gap-2 px-3 py-2 rounded-lg border text-sm sm:text-xs font-medium transition-all ${
           hasCapability
-            ? 'border-burgundy/30 bg-burgundy/5 text-burgundy dark:border-white/30 dark:bg-white/5 dark:text-white'
-            : 'border-burgundy/10 bg-transparent text-burgundy/30 dark:border-white/10 dark:text-white/20 opacity-50'
+            ? 'border-strong bg-brand-subtle text-primary'
+            : 'border-subtle bg-transparent text-faint opacity-50'
         }`}
       >
         <span>{label}</span>
@@ -161,13 +174,7 @@ function CapabilityBadge({
           )}
         </div>
       </div>
-      {isHovered && (
-        <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-2 text-xs text-white bg-gray-900 dark:bg-gray-700 rounded whitespace-pre-line pointer-events-none z-50 shadow-lg max-w-xs">
-          {tooltipText}
-          <span className="absolute top-full left-1/2 -translate-x-1/2 -mt-1 border-4 border-transparent border-t-gray-900 dark:border-t-gray-700" />
-        </div>
-      )}
-    </div>
+    </Tooltip>
   );
 }
 
@@ -268,35 +275,37 @@ export default function PeerDetail() {
   }
 
   return (
-    <PageLayout title={`Peer ${peer?.peer_id.slice(0, 16)}… • Quilibrium Explorer`}>
+    <PageLayout title="Peer Detail • Quilibrium Explorer">
       <div className="relative mx-auto max-w-6xl px-6">
         <div className="flex items-center justify-between gap-4">
           <button
             onClick={() => navigate(-1)}
-            className="text-sm font-semibold uppercase tracking-[0.3em] text-burgundy/70 hover:text-burgundy dark:text-white/70 transition-colors bg-transparent hover:bg-transparent"
+            className="text-sm action-text bg-transparent hover:bg-transparent"
           >
             ← Back
           </button>
           <div className="flex items-center gap-4">
             {peer && (
               <>
-                <button
-                  onClick={() => {
-                    if (isFavorite(peer.peer_id)) {
-                      removeFavorite(peer.peer_id);
-                    } else {
-                      addFavorite(peer.peer_id);
-                    }
-                  }}
-                  className="flex items-center justify-center w-8 h-8 text-burgundy/70 hover:text-burgundy dark:text-white/70 dark:hover:text-white transition-colors"
-                  aria-label={isFavorite(peer.peer_id) ? "Remove from favorites" : "Add to favorites"}
-                >
-                  {isFavorite(peer.peer_id) ? (
-                    <Icon name="starfilled" className="w-5 h-5 text-yellow-500 dark:text-yellow-400" />
-                  ) : (
-                    <Icon name="staroutline" className="w-5 h-5" />
-                  )}
-                </button>
+                <Tooltip content={isFavorite(peer.peer_id) ? "Remove from favorites" : "Add to favorites"}>
+                  <button
+                    onClick={() => {
+                      if (isFavorite(peer.peer_id)) {
+                        removeFavorite(peer.peer_id);
+                      } else {
+                        addFavorite(peer.peer_id);
+                      }
+                    }}
+                    className="flex items-center justify-center p-2.5 text-secondary hover:text-primary transition-colors"
+                    aria-label={isFavorite(peer.peer_id) ? "Remove from favorites" : "Add to favorites"}
+                  >
+                    {isFavorite(peer.peer_id) ? (
+                      <IconStarFilled className="w-5 h-5 text-pink" />
+                    ) : (
+                      <IconStar className="w-5 h-5" />
+                    )}
+                  </button>
+                </Tooltip>
                 <CopyPeerDataButton peer={peer} />
               </>
             )}
@@ -311,24 +320,24 @@ export default function PeerDetail() {
 
         {peer && (
           <>
-            <section className="mt-6 rounded-3xl border border-burgundy/10 bg-white/95 p-8 text-burgundy shadow-[0_35px_80px_-50px_rgba(57,31,91,0.45)] dark:border-white/10 dark:bg-[#1a0f27]/95 dark:text-white">
+            <section className="section-glow-a mt-6 rounded-3xl border border-subtle bg-surface p-5 xs:p-8 text-burgundy shadow-xl dark:text-white">
               <div className="flex-1 min-w-0">
-                <h1 className="text-xl md:text-2xl font-mono font-semibold break-all text-burgundy dark:text-white">
+                <h1 className="text-xl md:text-2xl font-mono font-semibold break-all text-primary">
                   <HoverableCopyText text={peer.peer_id}>
                     {peer.peer_id}
                   </HoverableCopyText>
                 </h1>
                 {lastSeenTimestamp && (
-                  <div className="mt-1 text-xs uppercase tracking-[0.3em] text-burgundy/60 dark:text-white/60">
+                  <div className="mt-1 text-sm sm:text-xs text-muted">
                     {formatTimestamp(lastSeenTimestamp)} {formatRelative(lastSeenTimestamp) && `(${formatRelative(lastSeenTimestamp)})`}
                   </div>
                 )}
-                <h2 className="mt-3 text-lg font-semibold text-burgundy/80 dark:text-white/80">Peer Details</h2>
+                <h2 className="mt-3 text-lg font-semibold text-secondary">Peer Details</h2>
               </div>
 
               <div className="mt-6 grid gap-4 md:grid-cols-2">
-                <div className="rounded-2xl border border-burgundy/10 bg-white/90 p-5 dark:border-white/10 dark:bg-[#211430]">
-                  <div className="text-xs font-semibold uppercase tracking-[0.3em] text-burgundy/60 dark:text-white/60">Version</div>
+                <div className="rounded-2xl border border-subtle bg-white/90 p-5 dark:bg-surface-raised">
+                  <div className="label-text">Version</div>
                   <div className="mt-2 text-2xl font-semibold">{formattedVersion}</div>
                 </div>
                 <LastSeenCard
@@ -349,8 +358,8 @@ export default function PeerDetail() {
               </div>
             </section>
 
-            <section className="mt-10 rounded-3xl border border-burgundy/10 bg-white/95 p-8 shadow-[0_34px_80px_-55px_rgba(57,31,91,0.4)] dark:border-white/10 dark:bg-[#1a0f27]/95">
-              <h2 className="text-2xl font-semibold text-burgundy dark:text-white">
+            <section className="section-glow-b mt-10 rounded-3xl border border-subtle bg-surface p-5 xs:p-8 shadow-xl">
+              <h2 className="text-2xl font-semibold text-primary">
                 Capabilities ({peer.capabilities?.length ?? 0} / {getAllCapabilityIdentifiers().length})
               </h2>
               <div className="mt-6 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
@@ -373,10 +382,10 @@ export default function PeerDetail() {
             </section>
 
             {peer.reachability && peer.reachability.length > 0 && (
-              <section className="mt-10 rounded-3xl border border-burgundy/10 bg-white/95 p-8 shadow-[0_34px_80px_-55px_rgba(57,31,91,0.4)] dark:border-white/10 dark:bg-[#1a0f27]/95">
+              <section className="section-glow-c mt-10 rounded-3xl border border-subtle bg-surface p-5 xs:p-8 shadow-xl">
                 <div className="flex flex-wrap items-center justify-between gap-4">
-                  <h2 className="text-2xl font-semibold text-burgundy dark:text-white">Reachability</h2>
-                  <div className="text-sm text-burgundy/60 dark:text-white/60">
+                  <h2 className="text-2xl font-semibold text-primary">Reachability</h2>
+                  <div className="text-sm text-muted">
                     {peer.reachability.length} reachability record{peer.reachability.length === 1 ? "" : "s"}
                   </div>
                 </div>
@@ -384,30 +393,30 @@ export default function PeerDetail() {
                   {peer.reachability.map((reach, index) => (
                     <div
                       key={index}
-                      className="rounded-2xl border border-burgundy/10 bg-white/90 p-5 shadow-[0_20px_55px_-45px_rgba(64,0,27,0.5)] dark:border-white/10 dark:bg-[#211430]/95"
+                      className="rounded-2xl border border-default bg-white/90 p-5 dark:bg-surface-raised"
                     >
-                      <div className="text-sm font-semibold uppercase tracking-[0.25em] text-burgundy/60 dark:text-white/60">
+                      <div className="label-text">
                         Record {index + 1}
                       </div>
                       <div className="mt-4 grid gap-4">
                         <div>
-                          <div className="text-[0.7rem] font-semibold uppercase tracking-[0.3em] text-burgundy/60 dark:text-white/60 mb-2">
+                          <div className="form-label mb-2">
                             Filter
                           </div>
-                          <div className="font-mono text-xs md:text-sm break-all md:break-normal md:truncate text-burgundy dark:text-white">
+                          <div className="font-mono text-sm sm:text-xs md:text-sm break-all md:break-normal md:truncate text-primary">
                             <HoverableCopyText text={reach.filter}>
                               {reach.filter}
                             </HoverableCopyText>
                           </div>
                         </div>
                         <div>
-                          <div className="text-[0.7rem] font-semibold uppercase tracking-[0.3em] text-burgundy/60 dark:text-white/60 mb-2">
+                          <div className="form-label mb-2">
                             Pubsub Multiaddrs ({reach.pubsub_multiaddrs?.length ?? 0})
                           </div>
                           {reach.pubsub_multiaddrs && reach.pubsub_multiaddrs.length > 0 ? (
                             <div className="space-y-2">
                               {reach.pubsub_multiaddrs.map((addr, addrIndex) => (
-                                <div key={addrIndex} className="font-mono text-xs md:text-sm break-all md:break-normal md:truncate text-burgundy dark:text-white">
+                                <div key={addrIndex} className="font-mono text-sm sm:text-xs md:text-sm break-all md:break-normal md:truncate text-primary">
                                   <HoverableCopyText text={addr}>
                                     {addr}
                                   </HoverableCopyText>
@@ -415,17 +424,17 @@ export default function PeerDetail() {
                               ))}
                             </div>
                           ) : (
-                            <div className="text-sm text-burgundy/60 dark:text-white/60">–</div>
+                            <div className="text-sm text-muted">–</div>
                           )}
                         </div>
                         <div>
-                          <div className="text-[0.7rem] font-semibold uppercase tracking-[0.3em] text-burgundy/60 dark:text-white/60 mb-2">
+                          <div className="form-label mb-2">
                             Stream Multiaddrs ({reach.stream_multiaddrs?.length ?? 0})
                           </div>
                           {reach.stream_multiaddrs && reach.stream_multiaddrs.length > 0 ? (
                             <div className="space-y-2">
                               {reach.stream_multiaddrs.map((addr, addrIndex) => (
-                                <div key={addrIndex} className="font-mono text-xs md:text-sm break-all md:break-normal md:truncate text-burgundy dark:text-white">
+                                <div key={addrIndex} className="font-mono text-sm sm:text-xs md:text-sm break-all md:break-normal md:truncate text-primary">
                                   <HoverableCopyText text={addr}>
                                     {addr}
                                   </HoverableCopyText>
@@ -433,7 +442,7 @@ export default function PeerDetail() {
                               ))}
                             </div>
                           ) : (
-                            <div className="text-sm text-burgundy/60 dark:text-white/60">–</div>
+                            <div className="text-sm text-muted">–</div>
                           )}
                         </div>
                       </div>
@@ -443,9 +452,9 @@ export default function PeerDetail() {
               </section>
             )}
 
-            <section className="mt-10 rounded-3xl border border-burgundy/10 bg-white/95 p-8 shadow-[0_34px_80px_-55px_rgba(57,31,91,0.4)] dark:border-white/10 dark:bg-[#1a0f27]/95">
+            <section className="section-glow-a mt-10 rounded-3xl border border-subtle bg-surface p-5 xs:p-8 shadow-xl">
               <div className="flex items-center justify-between gap-4">
-                <h2 className="text-2xl font-semibold text-burgundy dark:text-white">Key Registry</h2>
+                <h2 className="text-2xl font-semibold text-primary">Key Registry</h2>
                 {keyRegistry && (
                   <CopyKeyRegistryButton keyRegistry={keyRegistry} />
                 )}
@@ -462,22 +471,22 @@ export default function PeerDetail() {
               )}
               {keyRegistry && !keyRegistryLoading && (
                 <div className="mt-6 space-y-6">
-                  <div className="rounded-2xl border border-burgundy/10 bg-white/90 p-5 shadow-[0_20px_55px_-45px_rgba(64,0,27,0.5)] dark:border-white/10 dark:bg-[#211430]/95">
-                    <div className="text-sm font-semibold uppercase tracking-[0.25em] text-burgundy/60 dark:text-white/60 mb-4">
+                  <div className="rounded-2xl border border-default bg-white/90 p-5 dark:bg-surface-raised">
+                    <div className="label-text mb-4">
                       Identity Key
                     </div>
-                    <div className="font-mono text-xs md:text-sm break-all text-burgundy dark:text-white">
+                    <div className="font-mono text-sm sm:text-xs md:text-sm break-all text-primary">
                       <HoverableCopyText text={keyRegistry.identityKey.keyValue}>
                         {keyRegistry.identityKey.keyValue}
                       </HoverableCopyText>
                     </div>
                   </div>
 
-                  <div className="rounded-2xl border border-burgundy/10 bg-white/90 p-5 shadow-[0_20px_55px_-45px_rgba(64,0,27,0.5)] dark:border-white/10 dark:bg-[#211430]/95">
-                    <div className="text-sm font-semibold uppercase tracking-[0.25em] text-burgundy/60 dark:text-white/60 mb-4">
+                  <div className="rounded-2xl border border-default bg-white/90 p-5 dark:bg-surface-raised">
+                    <div className="label-text mb-4">
                       Prover Key
                     </div>
-                    <div className="font-mono text-xs md:text-sm break-all text-burgundy dark:text-white">
+                    <div className="font-mono text-sm sm:text-xs md:text-sm break-all text-primary">
                       <HoverableCopyText text={keyRegistry.proverKey.keyValue}>
                         {keyRegistry.proverKey.keyValue}
                       </HoverableCopyText>
@@ -485,22 +494,22 @@ export default function PeerDetail() {
                   </div>
 
                   <div className="grid gap-4 md:grid-cols-2">
-                    <div className="rounded-2xl border border-burgundy/10 bg-white/90 p-5 shadow-[0_20px_55px_-45px_rgba(64,0,27,0.5)] dark:border-white/10 dark:bg-[#211430]/95">
-                      <div className="text-sm font-semibold uppercase tracking-[0.25em] text-burgundy/60 dark:text-white/60 mb-4">
+                    <div className="rounded-2xl border border-default bg-white/90 p-5 dark:bg-surface-raised">
+                      <div className="label-text mb-4">
                         Identity to Prover Signature
                       </div>
-                      <div className="font-mono text-xs md:text-sm break-all text-burgundy dark:text-white">
+                      <div className="font-mono text-sm sm:text-xs md:text-sm break-all text-primary">
                         <HoverableCopyText text={keyRegistry.identityToProver.signature}>
                           {keyRegistry.identityToProver.signature}
                         </HoverableCopyText>
                       </div>
                     </div>
 
-                    <div className="rounded-2xl border border-burgundy/10 bg-white/90 p-5 shadow-[0_20px_55px_-45px_rgba(64,0,27,0.5)] dark:border-white/10 dark:bg-[#211430]/95">
-                      <div className="text-sm font-semibold uppercase tracking-[0.25em] text-burgundy/60 dark:text-white/60 mb-4">
+                    <div className="rounded-2xl border border-default bg-white/90 p-5 dark:bg-surface-raised">
+                      <div className="label-text mb-4">
                         Prover to Identity Signature
                       </div>
-                      <div className="font-mono text-xs md:text-sm break-all text-burgundy dark:text-white">
+                      <div className="font-mono text-sm sm:text-xs md:text-sm break-all text-primary">
                         <HoverableCopyText text={keyRegistry.proverToIdentity.signature}>
                           {keyRegistry.proverToIdentity.signature}
                         </HoverableCopyText>
@@ -509,44 +518,44 @@ export default function PeerDetail() {
                   </div>
 
                   {Object.keys(keyRegistry.keysByPurpose).length > 0 && (
-                    <div className="rounded-2xl border border-burgundy/10 bg-white/90 p-5 shadow-[0_20px_55px_-45px_rgba(64,0,27,0.5)] dark:border-white/10 dark:bg-[#211430]/95">
-                      <div className="text-sm font-semibold uppercase tracking-[0.25em] text-burgundy/60 dark:text-white/60 mb-4">
+                    <div className="rounded-2xl border border-default bg-white/90 p-5 dark:bg-surface-raised">
+                      <div className="label-text mb-4">
                         Keys by Purpose ({Object.keys(keyRegistry.keysByPurpose).length})
                       </div>
                       <div className="space-y-4">
                         {Object.entries(keyRegistry.keysByPurpose).map(([purpose, keys]) => (
-                          <div key={purpose} className="border-t border-burgundy/10 dark:border-white/10 pt-4 first:border-t-0 first:pt-0">
-                            <div className="text-xs font-semibold uppercase tracking-[0.2em] text-burgundy/60 dark:text-white/60 mb-3">
+                          <div key={purpose} className="border-t border-subtle pt-4 first:border-t-0 first:pt-0">
+                            <div className="form-label mb-3">
                               Purpose: {purpose || "(empty)"}
                             </div>
                             {keys.x448Keys.length > 0 && (
                               <div className="mb-3">
-                                <div className="text-xs font-semibold text-burgundy/70 dark:text-white/70 mb-2">
+                                <div className="text-sm sm:text-xs font-semibold text-secondary mb-2">
                                   X448 Keys ({keys.x448Keys.length})
                                 </div>
                                 <div className="space-y-2">
                                   {keys.x448Keys.map((key, idx) => (
-                                    <div key={idx} className="pl-4 border-l-2 border-burgundy/20 dark:border-white/20">
-                                      <div className="text-[0.7rem] font-semibold uppercase tracking-[0.2em] text-burgundy/50 dark:text-white/50 mb-1">
+                                    <div key={idx} className="pl-4 border-l-2 border-default">
+                                      <div className="form-label mb-1">
                                         Key Value
                                       </div>
-                                      <div className="font-mono text-xs break-all text-burgundy dark:text-white mb-2">
+                                      <div className="font-mono text-sm sm:text-xs break-all text-primary mb-2">
                                         <HoverableCopyText text={key.key.keyValue}>
                                           {key.key.keyValue}
                                         </HoverableCopyText>
                                       </div>
-                                      <div className="text-[0.7rem] font-semibold uppercase tracking-[0.2em] text-burgundy/50 dark:text-white/50 mb-1">
+                                      <div className="form-label mb-1">
                                         Parent Key Address
                                       </div>
-                                      <div className="font-mono text-xs break-all text-burgundy dark:text-white mb-2">
+                                      <div className="font-mono text-sm sm:text-xs break-all text-primary mb-2">
                                         <HoverableCopyText text={key.parentKeyAddress}>
                                           {key.parentKeyAddress}
                                         </HoverableCopyText>
                                       </div>
-                                      <div className="text-[0.7rem] font-semibold uppercase tracking-[0.2em] text-burgundy/50 dark:text-white/50 mb-1">
+                                      <div className="form-label mb-1">
                                         Signature
                                       </div>
-                                      <div className="font-mono text-xs break-all text-burgundy dark:text-white">
+                                      <div className="font-mono text-sm sm:text-xs break-all text-primary">
                                         <HoverableCopyText text={key.ed448Signature.signature}>
                                           {key.ed448Signature.signature}
                                         </HoverableCopyText>
@@ -558,32 +567,32 @@ export default function PeerDetail() {
                             )}
                             {keys.decaf448Keys.length > 0 && (
                               <div>
-                                <div className="text-xs font-semibold text-burgundy/70 dark:text-white/70 mb-2">
+                                <div className="text-sm sm:text-xs font-semibold text-secondary mb-2">
                                   Decaf448 Keys ({keys.decaf448Keys.length})
                                 </div>
                                 <div className="space-y-2">
                                   {keys.decaf448Keys.map((key, idx) => (
-                                    <div key={idx} className="pl-4 border-l-2 border-burgundy/20 dark:border-white/20">
-                                      <div className="text-[0.7rem] font-semibold uppercase tracking-[0.2em] text-burgundy/50 dark:text-white/50 mb-1">
+                                    <div key={idx} className="pl-4 border-l-2 border-default">
+                                      <div className="form-label mb-1">
                                         Key Value
                                       </div>
-                                      <div className="font-mono text-xs break-all text-burgundy dark:text-white mb-2">
+                                      <div className="font-mono text-sm sm:text-xs break-all text-primary mb-2">
                                         <HoverableCopyText text={key.key.keyValue}>
                                           {key.key.keyValue}
                                         </HoverableCopyText>
                                       </div>
-                                      <div className="text-[0.7rem] font-semibold uppercase tracking-[0.2em] text-burgundy/50 dark:text-white/50 mb-1">
+                                      <div className="form-label mb-1">
                                         Parent Key Address
                                       </div>
-                                      <div className="font-mono text-xs break-all text-burgundy dark:text-white mb-2">
+                                      <div className="font-mono text-sm sm:text-xs break-all text-primary mb-2">
                                         <HoverableCopyText text={key.parentKeyAddress}>
                                           {key.parentKeyAddress}
                                         </HoverableCopyText>
                                       </div>
-                                      <div className="text-[0.7rem] font-semibold uppercase tracking-[0.2em] text-burgundy/50 dark:text-white/50 mb-1">
+                                      <div className="form-label mb-1">
                                         Signature
                                       </div>
-                                      <div className="font-mono text-xs break-all text-burgundy dark:text-white">
+                                      <div className="font-mono text-sm sm:text-xs break-all text-primary">
                                         <HoverableCopyText text={key.ed448Signature.signature}>
                                           {key.ed448Signature.signature}
                                         </HoverableCopyText>
@@ -600,11 +609,11 @@ export default function PeerDetail() {
                   )}
 
                   {keyRegistry.lastUpdated && keyRegistry.lastUpdated !== "0" && (
-                    <div className="rounded-2xl border border-burgundy/10 bg-white/90 p-5 shadow-[0_20px_55px_-45px_rgba(64,0,27,0.5)] dark:border-white/10 dark:bg-[#211430]/95">
-                      <div className="text-sm font-semibold uppercase tracking-[0.25em] text-burgundy/60 dark:text-white/60 mb-2">
+                    <div className="rounded-2xl border border-default bg-white/90 p-5 dark:bg-surface-raised">
+                      <div className="label-text mb-2">
                         Last Updated
                       </div>
-                      <div className="text-base font-semibold text-burgundy dark:text-white">
+                      <div className="text-base font-semibold text-primary">
                         {formatTimestamp(keyRegistry.lastUpdated)}
                       </div>
                     </div>

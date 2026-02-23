@@ -14,7 +14,7 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
   const [theme, setThemeState] = useState<Theme>(() => {
     if (typeof window === 'undefined') return 'light';
 
-    // Check localStorage first
+    // Check localStorage first (only set when user explicitly toggles)
     const stored = localStorage.getItem('theme') as Theme | null;
     if (stored === 'dark' || stored === 'light') {
       return stored;
@@ -28,14 +28,22 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     return 'light';
   });
 
+  // Apply the dark class — but don't write to localStorage here.
+  // Temporarily disable all transitions so the theme swap is instant
+  // (otherwise elements with transition-colors animate through the change).
   useEffect(() => {
     const root = document.documentElement;
+    root.classList.add('no-transition');
     if (theme === 'dark') {
       root.classList.add('dark');
     } else {
       root.classList.remove('dark');
     }
-    localStorage.setItem('theme', theme);
+    // Force a reflow so the browser applies the new colors before re-enabling transitions
+    root.offsetHeight; // eslint-disable-line @typescript-eslint/no-unused-expressions
+    requestAnimationFrame(() => {
+      root.classList.remove('no-transition');
+    });
   }, [theme]);
 
   // Listen for system theme changes only if user hasn't manually set a preference
@@ -44,7 +52,6 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
 
     const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
     const handleChange = (e: MediaQueryListEvent) => {
-      // Only update if user hasn't manually set a preference
       const stored = localStorage.getItem('theme');
       if (!stored) {
         setThemeState(e.matches ? 'dark' : 'light');
@@ -55,11 +62,17 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     return () => mediaQuery.removeEventListener('change', handleChange);
   }, []);
 
+  // Only persist to localStorage when the user explicitly changes the theme
   const toggleTheme = () => {
-    setThemeState((prev) => (prev === 'dark' ? 'light' : 'dark'));
+    setThemeState((prev) => {
+      const next = prev === 'dark' ? 'light' : 'dark';
+      localStorage.setItem('theme', next);
+      return next;
+    });
   };
 
   const setTheme = (newTheme: Theme) => {
+    localStorage.setItem('theme', newTheme);
     setThemeState(newTheme);
   };
 

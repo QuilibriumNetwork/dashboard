@@ -2,6 +2,7 @@ import { useState, useMemo, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Link } from "react-router-dom";
 import { PageLayout } from "@/components/PageLayout";
+import { Select } from "@/components/ui/Select";
 import {
   PieChart,
   Pie,
@@ -11,6 +12,7 @@ import {
   ResponsiveContainer,
 } from "recharts";
 import { explorerApi, type PeerRecord } from "@/lib/api";
+import Callout from "@/components/ui/Callout";
 import {
   formatPeerRows,
   type PeerRow,
@@ -18,7 +20,8 @@ import {
 import { formatRelativeTime, formatTimestamp } from "@/lib/format";
 import { HoverableCopyText } from "@/components/HoverableCopyText";
 import Arrow from "@/components/ui/Arrow";
-import ChevronDown from "@/components/ui/ChevronDown";
+import { Button } from "@/components/ui/Button";
+import { Pagination } from "@/components/ui/Pagination";
 import Spinner from "@/components/ui/Spinner";
 import { useTheme } from "@/components/helpers/ThemeContext";
 import { PeerDirectoryFiltersAndExport } from "@/components/PeerDirectoryFiltersAndExport";
@@ -39,43 +42,43 @@ function PeerCard({ peer, onNavigate, isFavorite }: PeerCardProps & { onNavigate
   return (
     <div
       onClick={onNavigate}
-      className="rounded-2xl border border-burgundy/10 bg-white/95 p-4 text-sm text-burgundy shadow-[0_20px_55px_-45px_rgba(64,0,27,0.5)] dark:border-white/10 dark:bg-[#211430]/95 dark:text-white cursor-pointer transition hover:bg-light-grey/60 dark:hover:bg-white/5"
+      className="rounded-2xl border border-default bg-surface-raised p-4 text-sm text-burgundy dark:text-white cursor-pointer transition hover:bg-hover-highlight"
     >
       <div className="flex items-center justify-between mb-1">
-        <div className="text-xs font-semibold uppercase tracking-[0.3em] text-burgundy/60 dark:text-white/60">Peer</div>
+        <div className="label-text">Peer</div>
         {isFavorite && (
-          <Icon name="starbadge" className="w-4 h-4 text-yellow-500 dark:text-yellow-400" />
+          <Icon name="starbadge" className="w-4 h-4 text-orange" />
         )}
       </div>
-      <div className="mt-1 font-mono text-xs">
+      <div className="mt-1 font-mono text-sm sm:text-xs">
         <HoverableCopyText text={peer.peerId}>
           {shortenedId}
         </HoverableCopyText>
       </div>
-      <div className="mt-2 text-xs text-burgundy/70 dark:text-white/70">Version {peer.version}</div>
-      <div className="mt-4 text-xs">
-        <div className="text-[0.65rem] uppercase tracking-[0.3em] text-burgundy/50 dark:text-white/50">Pubsub</div>
+      <div className="mt-2 text-sm sm:text-xs text-secondary">Version {peer.version}</div>
+      <div className="mt-4 text-sm sm:text-xs">
+        <div className="text-sm sm:text-xs font-medium text-muted">Pubsub</div>
         {peer.pubsub.length ? peer.pubsub.map((addr) => (
-          <div key={addr} className="truncate text-[0.7rem]">
+          <div key={addr} className="truncate text-xs">
             <HoverableCopyText text={addr}>{addr}</HoverableCopyText>
           </div>
         )) : "–"}
       </div>
-      <div className="mt-3 text-xs">
-        <div className="text-[0.65rem] uppercase tracking-[0.3em] text-burgundy/50 dark:text-white/50">Stream</div>
+      <div className="mt-3 text-sm sm:text-xs">
+        <div className="text-sm sm:text-xs font-medium text-muted">Stream</div>
         {peer.stream.length ? peer.stream.map((addr) => (
-          <div key={addr} className="truncate text-[0.7rem]">
+          <div key={addr} className="truncate text-xs">
             <HoverableCopyText text={addr}>{addr}</HoverableCopyText>
           </div>
         )) : "–"}
       </div>
-      <div className="mt-4 pt-3 border-t border-burgundy/10 dark:border-white/10">
+      <div className="mt-4 pt-3 border-t border-subtle">
         <button
           onClick={(e) => {
             e.stopPropagation();
             onNavigate();
           }}
-          className="flex items-center gap-2 text-xs font-semibold text-burgundy/70 hover:text-burgundy dark:text-white/70 dark:hover:text-white transition-colors"
+          className="flex items-center gap-2 text-sm sm:text-xs font-semibold text-secondary hover:text-primary transition-colors"
         >
           <span>View Peer Details</span>
           <Arrow className="w-4 h-4" />
@@ -186,41 +189,6 @@ export default function Peers() {
     setCurrentPage(Math.max(1, Math.min(page, totalPages)));
   };
 
-  const getPageNumbers = () => {
-    const pages: (number | string)[] = [];
-    const maxVisible = 7;
-
-    if (totalPages <= maxVisible) {
-      for (let i = 1; i <= totalPages; i++) {
-        pages.push(i);
-      }
-    } else {
-      if (currentPage <= 3) {
-        for (let i = 1; i <= 4; i++) {
-          pages.push(i);
-        }
-        pages.push('...');
-        pages.push(totalPages);
-      } else if (currentPage >= totalPages - 2) {
-        pages.push(1);
-        pages.push('...');
-        for (let i = totalPages - 3; i <= totalPages; i++) {
-          pages.push(i);
-        }
-      } else {
-        pages.push(1);
-        pages.push('...');
-        for (let i = currentPage - 1; i <= currentPage + 1; i++) {
-          pages.push(i);
-        }
-        pages.push('...');
-        pages.push(totalPages);
-      }
-    }
-
-    return pages;
-  };
-
   // Theme-aware colors
   const isDark = theme === "dark";
   const tooltipBg = isDark ? "rgba(26,15,39,0.98)" : "rgba(255,255,255,0.98)";
@@ -271,30 +239,30 @@ export default function Peers() {
         <div className="flex items-center justify-between gap-4 mb-6">
           <Link
             to="/"
-            className="text-sm font-semibold uppercase tracking-[0.3em] text-burgundy/70 hover:text-burgundy dark:text-white/70"
+            className="text-sm action-text"
           >
             ← Back
           </Link>
         </div>
 
         {error && (
-          <div className="mb-6 rounded-2xl border border-pink/30 bg-light-pink/40 p-4 text-sm text-pink">
+          <Callout type="error" radius="2xl" padding="lg" className="mb-6">
             {error}
-          </div>
+          </Callout>
         )}
 
         {/* Total Peers Overview */}
-        <section className="mb-10 rounded-3xl border border-burgundy/10 bg-white/95 p-8 text-burgundy shadow-[0_35px_80px_-50px_rgba(57,31,91,0.45)] dark:border-white/10 dark:bg-[#1a0f27]/95 dark:text-white">
+        <section className="mb-10 rounded-3xl border border-subtle bg-surface p-5 xs:p-8 text-burgundy shadow-xl dark:text-white">
           <h2 className="mb-6 text-2xl font-semibold">Peers Overview</h2>
-          <div className="rounded-2xl border border-burgundy/10 bg-white/90 p-6 dark:border-white/10 dark:bg-[#211430]">
-            <div className="text-xs font-semibold uppercase tracking-[0.3em] text-burgundy/60 dark:text-white/60">
+          <div className="rounded-2xl border border-subtle bg-white/90 p-6 dark:bg-surface-raised">
+            <div className="label-text">
               Total Peers
             </div>
             <div className="mt-2 text-4xl font-semibold">
               {peerRows.length.toLocaleString()}
             </div>
             {filteredPeers.length !== peerRows.length && (
-              <div className="mt-2 text-sm text-burgundy/70 dark:text-white/70">
+              <div className="mt-2 text-sm text-secondary">
                 {filteredPeers.length.toLocaleString()} match{filteredPeers.length !== 1 ? "es" : ""} your filters
               </div>
             )}
@@ -303,12 +271,12 @@ export default function Peers() {
 
         {/* Favorites Section */}
         {favorites.length > 0 && (
-          <section className="mb-10 rounded-3xl border border-burgundy/10 bg-white/95 p-8 text-burgundy shadow-[0_35px_80px_-50px_rgba(57,31,91,0.45)] dark:border-white/10 dark:bg-[#1a0f27]/95 dark:text-white">
+          <section className="mb-10 rounded-3xl border border-subtle bg-surface p-5 xs:p-8 text-burgundy shadow-xl dark:text-white">
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-2xl font-semibold">Favorites</h2>
               <Link
                 to="/peer-favorites"
-                className="text-xs font-semibold uppercase tracking-[0.2em] text-burgundy/70 hover:text-burgundy dark:text-white/70 dark:hover:text-white transition-colors"
+                className="text-sm sm:text-xs action-text"
               >
                 View All →
               </Link>
@@ -328,10 +296,10 @@ export default function Peers() {
                     <div
                       key={favorite.peerId}
                       onClick={() => navigate(`/peers/${favorite.peerId}`)}
-                      className="flex items-center gap-2 p-2 rounded-lg border border-burgundy/10 dark:border-white/10 hover:bg-burgundy/5 dark:hover:bg-white/5 cursor-pointer transition-colors"
+                      className="flex items-center gap-2 p-2 rounded-lg border border-default hover:bg-burgundy/5 dark:hover:bg-white/5 cursor-pointer transition-colors"
                     >
                       <div className="flex-1 min-w-0">
-                        <div className="font-mono text-xs truncate md:truncate-none md:break-words">
+                        <div className="font-mono text-sm sm:text-xs truncate md:truncate-none md:break-words">
                           <HoverableCopyText text={favorite.peerId}>
                             <span className="md:hidden">{favorite.label || shortenPeerId(favorite.peerId)}</span>
                             <span className="hidden md:inline">{favorite.label || favorite.peerId}</span>
@@ -339,60 +307,50 @@ export default function Peers() {
                         </div>
                         {peerRecord ? (
                           <>
-                            <div className="text-xs text-burgundy/60 dark:text-white/60">
+                            <div className="text-sm sm:text-xs text-muted">
                               Version {peerRow?.version || peerRecord.version}
                             </div>
                             {lastSeenTimestamp ? (
-                              <div className="text-xs text-burgundy/50 dark:text-white/50 mt-0.5">
+                              <div className="text-sm sm:text-xs text-muted mt-0.5">
                                 Last seen {formatRelativeTime(lastSeenTimestamp)}
                               </div>
                             ) : (
-                              <div className="text-xs text-burgundy/60 dark:text-white/60 italic mt-0.5">
+                              <div className="text-sm sm:text-xs text-muted italic mt-0.5">
                                 Peer reachability data not found.
                               </div>
                             )}
                           </>
                         ) : (
-                          <div className="text-xs text-burgundy/60 dark:text-white/60 italic">
+                          <div className="text-sm sm:text-xs text-muted italic">
                             Peer not seen
                           </div>
                         )}
                       </div>
-                      {peerRecord && (
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            navigate(`/peers/${favorite.peerId}`);
-                          }}
-                          className="flex-shrink-0 p-1.5 rounded-lg border border-burgundy/20 dark:border-white/20 hover:bg-burgundy/10 dark:hover:bg-white/10 transition-colors"
-                          aria-label="View peer"
-                        >
-                          <Icon name="visible" className="w-4 h-4 text-burgundy/70 dark:text-white/70" />
-                        </button>
-                      )}
                     </div>
                   );
                 })}
             </div>
             {favorites.length > favoritesItemsPerPage && (
-              <div className="mt-3 flex items-center justify-between text-xs">
-                <button
+              <div className="mt-3 flex items-center justify-between text-sm sm:text-xs">
+                <Button
+                  variant="ghost"
+                  size="xs"
                   onClick={() => setFavoritesPage(Math.max(1, favoritesPage - 1))}
                   disabled={favoritesPage === 1}
-                  className="px-2 py-1 text-burgundy/70 hover:text-burgundy dark:text-white/70 dark:hover:text-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   ← Prev
-                </button>
-                <span className="text-burgundy/60 dark:text-white/60">
+                </Button>
+                <span className="text-muted">
                   Page {favoritesPage} of {Math.ceil(favorites.length / favoritesItemsPerPage)}
                 </span>
-                <button
+                <Button
+                  variant="ghost"
+                  size="xs"
                   onClick={() => setFavoritesPage(Math.min(Math.ceil(favorites.length / favoritesItemsPerPage), favoritesPage + 1))}
                   disabled={favoritesPage >= Math.ceil(favorites.length / favoritesItemsPerPage)}
-                  className="px-2 py-1 text-burgundy/70 hover:text-burgundy dark:text-white/70 dark:hover:text-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   Next →
-                </button>
+                </Button>
               </div>
             )}
           </section>
@@ -400,7 +358,7 @@ export default function Peers() {
 
         {/* Version Distribution Pie Chart */}
         {versionDistribution.length > 0 && (
-          <section className="mb-10 rounded-3xl border border-burgundy/10 bg-white/95 p-8 shadow-[0_35px_80px_-50px_rgba(57,31,91,0.45)] dark:border-white/10 dark:bg-[#1a0f27]/95 dark:text-white">
+          <section className="mb-10 rounded-3xl border border-subtle bg-surface p-5 xs:p-8 shadow-xl dark:text-white">
             <h2 className="mb-6 text-2xl font-semibold">Version Distribution</h2>
             <div className="flex flex-col md:flex-row items-center md:items-start gap-6">
               <div className="md:w-1/2 flex items-center justify-center min-h-[400px]">
@@ -475,7 +433,7 @@ export default function Peers() {
                   {versionDistribution.map((entry, index) => (
                     <div
                       key={entry.version}
-                      className="flex items-center justify-between p-3 rounded-lg border border-burgundy/10 dark:border-white/10"
+                      className="flex items-center justify-between p-3 rounded-lg border border-subtle"
                       style={{
                         borderColor: getVersionColor(index),
                       }}
@@ -486,7 +444,7 @@ export default function Peers() {
                           style={{ backgroundColor: getVersionColor(index) }}
                         />
                         <div className="flex-1">
-                          <div className="text-sm font-semibold text-burgundy dark:text-white">
+                          <div className="text-sm font-semibold text-primary">
                             {entry.version === "Other" ? (
                               <>
                                 Other
@@ -495,13 +453,13 @@ export default function Peers() {
                               `Version ${entry.version}`
                             )}
                           </div>
-                          <div className="text-xs text-burgundy/60 dark:text-white/60">
+                          <div className="text-sm sm:text-xs text-muted">
                             {entry.percentage.toFixed(2)}% of peers
                           </div>
                           {entry.version === "Other" && otherVersionsDetails.length > 0 && (
-                            <div className="mt-2 ml-4 space-y-1 border-l-2 border-burgundy/20 dark:border-white/20 pl-3">
+                            <div className="mt-2 ml-4 space-y-1 border-l-2 border-default pl-3">
                               {otherVersionsDetails.map((v) => (
-                                <div key={v.version} className="text-xs text-burgundy/70 dark:text-white/70">
+                                <div key={v.version} className="text-sm sm:text-xs text-secondary">
                                   <span className="font-semibold">Version {v.version}:</span> {v.count.toLocaleString()} ({v.percentage.toFixed(2)}%)
                                 </div>
                               ))}
@@ -509,7 +467,7 @@ export default function Peers() {
                           )}
                         </div>
                       </div>
-                      <div className="text-sm font-semibold text-burgundy dark:text-white">
+                      <div className="text-sm font-semibold text-primary">
                         {entry.count.toLocaleString()}
                       </div>
                     </div>
@@ -521,7 +479,7 @@ export default function Peers() {
         )}
 
         {/* Peer List */}
-        <section className="mb-10 rounded-3xl border border-burgundy/10 bg-white/95 p-8 shadow-[0_35px_80px_-50px_rgba(57,31,91,0.45)] dark:border-white/10 dark:bg-[#1a0f27]/95 dark:text-white">
+        <section className="mb-10 rounded-3xl border border-subtle bg-surface p-5 xs:p-8 shadow-xl dark:text-white">
           <h2 className="mb-6 text-2xl font-semibold">Peer Directory</h2>
 
           {/* Filters and Export */}
@@ -535,7 +493,7 @@ export default function Peers() {
 
           {filteredPeers.length === 0 ? (
             <div className="py-12 text-center">
-              <p className="text-sm text-burgundy/70 dark:text-white/70">
+              <p className="text-sm text-secondary">
                 {peerRows.length > 0 ? "No peers match your filters." : "No peers available."}
               </p>
             </div>
@@ -543,23 +501,23 @@ export default function Peers() {
             <>
               {/* Items per page selector */}
               <div className="flex flex-wrap items-center gap-3 mb-6">
-                <span className="text-xs font-semibold uppercase tracking-[0.3em] text-burgundy/60 dark:text-white/60">
+                <span className="text-sm sm:text-xs text-muted">
                   Show
                 </span>
-                <select
-                  value={itemsPerPage}
-                  onChange={(e) => {
-                    setItemsPerPage(Number(e.target.value));
+                <Select
+                  value={String(itemsPerPage)}
+                  onValueChange={(val) => {
+                    setItemsPerPage(Number(val));
                     setCurrentPage(1);
                   }}
-                  className="border border-burgundy/20 dark:border-white/20 bg-white dark:bg-[#1a0f27] px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.3em] text-burgundy dark:text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-burgundy/30 dark:focus:ring-white/30 transition-colors"
-                >
-                  <option value={10}>10</option>
-                  <option value={25}>25</option>
-                  <option value={50}>50</option>
-                  <option value={100}>100</option>
-                </select>
-                <span className="text-xs font-semibold uppercase tracking-[0.3em] text-burgundy/60 dark:text-white/60">
+                  options={[
+                    { value: "10", label: "10" },
+                    { value: "25", label: "25" },
+                    { value: "50", label: "50" },
+                    { value: "100", label: "100" },
+                  ]}
+                />
+                <span className="text-sm sm:text-xs text-muted">
                   per page
                 </span>
               </div>
@@ -578,8 +536,8 @@ export default function Peers() {
 
               {/* Desktop Table Layout */}
               <div className="hidden md:block overflow-x-auto">
-                <table className="min-w-full divide-y divide-burgundy/10 text-left text-sm text-burgundy dark:divide-white/10 dark:text-white">
-                  <thead className="sticky top-0 z-10 bg-white/95 dark:bg-[#1a0f27]/95 text-xs font-semibold uppercase tracking-[0.3em] text-burgundy/60 dark:text-white/60">
+                <table className="min-w-full divide-y divide-subtle text-left text-sm text-primary">
+                  <thead className="sticky top-0 z-10 bg-surface label-text">
                     <tr>
                       <th className="py-3 pr-6">Peer ID</th>
                       <th className="py-3 pr-6">Version</th>
@@ -588,23 +546,23 @@ export default function Peers() {
                       <th className="py-3 pr-6"></th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-burgundy/10 dark:divide-white/10">
+                  <tbody className="divide-y divide-subtle">
                     {paginatedPeers.map((peer) => (
                       <tr
                         key={peer.peerId}
                         onClick={() => navigate(`/peers/${peer.peerId}`)}
-                        className="cursor-pointer transition hover:bg-light-grey/60 dark:hover:bg-white/5"
+                        className="cursor-pointer transition hover:bg-hover-highlight"
                       >
-                        <td className="py-3 pr-6 font-mono text-xs whitespace-nowrap">
+                        <td className="py-3 pr-6 font-mono text-sm sm:text-xs whitespace-nowrap">
                           <div className="flex items-center gap-2">
                             <HoverableCopyText text={peer.peerId}>{shortenPeerId(peer.peerId)}</HoverableCopyText>
                             {isFavorite(peer.peerId) && (
-                              <Icon name="starbadge" className="w-4 h-4 text-yellow-500 dark:text-yellow-400 flex-shrink-0" />
+                              <Icon name="starbadge" className="w-4 h-4 text-orange flex-shrink-0" />
                             )}
                           </div>
                         </td>
-                        <td className="py-3 pr-6 text-xs">{peer.version}</td>
-                        <td className="py-3 pr-6 text-xs text-right">
+                        <td className="py-3 pr-6 text-sm sm:text-xs">{peer.version}</td>
+                        <td className="py-3 pr-6 text-sm sm:text-xs text-right">
                           {peer.pubsub.length
                             ? peer.pubsub.map((addr) => (
                                 <div key={addr} className="break-all md:break-normal md:truncate max-w-xs md:max-w-md">
@@ -613,7 +571,7 @@ export default function Peers() {
                               ))
                             : "–"}
                         </td>
-                        <td className="py-3 pr-6 text-xs text-right">
+                        <td className="py-3 pr-6 text-sm sm:text-xs text-right">
                           {peer.stream.length
                             ? peer.stream.map((addr) => (
                                 <div key={addr} className="break-all md:break-normal md:truncate max-w-xs md:max-w-md">
@@ -628,7 +586,7 @@ export default function Peers() {
                               e.stopPropagation();
                               navigate(`/peers/${peer.peerId}`);
                             }}
-                            className="flex items-center gap-2 text-xs font-semibold text-burgundy/70 hover:text-burgundy dark:text-white/70 dark:hover:text-white transition-colors"
+                            className="flex items-center gap-2 text-sm sm:text-xs font-semibold text-secondary hover:text-primary transition-colors"
                           >
                             <span>View Peer Details</span>
                             <Arrow className="w-4 h-4" />
@@ -642,52 +600,14 @@ export default function Peers() {
 
               {/* Pagination Controls */}
               <div className="flex flex-wrap items-center justify-between gap-4 pt-4">
-                <div className="text-xs font-semibold uppercase tracking-[0.3em] text-burgundy/60 dark:text-white/60">
+                <div className="text-sm sm:text-xs text-muted">
                   Showing {startIndex + 1}–{Math.min(endIndex, filteredPeers.length)} of {filteredPeers.length}
                 </div>
-                <div className="flex items-center gap-2">
-                  <button
-                    onClick={() => handlePageChange(currentPage - 1)}
-                    disabled={currentPage === 1}
-                    className="flex items-center gap-1 px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.3em] text-burgundy/70 hover:text-burgundy dark:text-white/70 dark:hover:text-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed border border-burgundy/20 dark:border-white/20 rounded-lg hover:bg-burgundy/10 dark:hover:bg-white/10"
-                  >
-                    <ChevronDown className="w-3 h-3 rotate-90" />
-                    <span>Previous</span>
-                  </button>
-                  <div className="flex items-center gap-1">
-                    {getPageNumbers().map((page, idx) => {
-                      if (page === '...') {
-                        return (
-                          <span key={`ellipsis-${idx}`} className="px-2 text-xs text-burgundy/40 dark:text-white/40">
-                            ...
-                          </span>
-                        );
-                      }
-                      const pageNum = page as number;
-                      return (
-                        <button
-                          key={pageNum}
-                          onClick={() => handlePageChange(pageNum)}
-                          className={`px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.3em] rounded-lg transition-colors ${
-                            currentPage === pageNum
-                              ? 'bg-burgundy/20 dark:bg-white/20 text-burgundy dark:text-white'
-                              : 'text-burgundy/70 hover:text-burgundy dark:text-white/70 dark:hover:text-white hover:bg-burgundy/10 dark:hover:bg-white/10'
-                          }`}
-                        >
-                          {pageNum}
-                        </button>
-                      );
-                    })}
-                  </div>
-                  <button
-                    onClick={() => handlePageChange(currentPage + 1)}
-                    disabled={currentPage === totalPages}
-                    className="flex items-center gap-1 px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.3em] text-burgundy/70 hover:text-burgundy dark:text-white/70 dark:hover:text-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed border border-burgundy/20 dark:border-white/20 rounded-lg hover:bg-burgundy/10 dark:hover:bg-white/10"
-                  >
-                    <span>Next</span>
-                    <ChevronDown className="w-3 h-3 -rotate-90" />
-                  </button>
-                </div>
+                <Pagination
+                  currentPage={currentPage}
+                  totalPages={totalPages}
+                  onPageChange={handlePageChange}
+                />
               </div>
             </>
           )}

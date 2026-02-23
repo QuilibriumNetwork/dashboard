@@ -5,7 +5,7 @@ import { formatPeerRows, matchesSearch, PeerRow } from "@/lib/peers";
 import { truncateMiddle } from "@/lib/format";
 import Magnifyingglass from "@/assets/icons/iconset/Magnifyingglass";
 import { usePeerFavorites } from "@/components/helpers/PeerFavoritesContext";
-import Icon from "@/components/ui/Icons";
+import { IconStarFilled } from "@tabler/icons-react";
 
 interface SearchResult {
   type: "peer" | "frame";
@@ -220,7 +220,7 @@ export function HeaderSearch({ fullWidth = false }: HeaderSearchProps) {
   return (
     <div className={`relative transition-all duration-200 ${fullWidth ? 'w-full' : isActive ? 'flex-1 max-w-2xl' : 'w-64'}`} ref={searchRef}>
       <div className="relative">
-        <div className="absolute left-3 top-1/2 -translate-y-1/2 text-burgundy/40 dark:text-white/40">
+        <div className="absolute left-3 top-1/2 -translate-y-1/2 text-faint">
           <Magnifyingglass className="h-4 w-4" />
         </div>
         <input
@@ -242,12 +242,12 @@ export function HeaderSearch({ fullWidth = false }: HeaderSearchProps) {
           }}
           onKeyDown={handleKeyDown}
           placeholder="Search IP, peer, or frame..."
-          className="w-full rounded-lg border border-burgundy/20 bg-white/50 px-10 py-2 text-sm text-burgundy placeholder:text-burgundy/40 focus:border-burgundy/40 focus:bg-white focus:outline-none focus:ring-2 focus:ring-burgundy/20 dark:border-white/20 dark:bg-[#1a0f27]/50 dark:text-white dark:placeholder:text-white/40 dark:focus:border-white/40 dark:focus:bg-[#1a0f27] dark:focus:ring-white/20"
+          className="w-full rounded-lg border border-default bg-white/50 px-10 py-2 text-sm text-burgundy placeholder:text-burgundy/40 focus:border-strong focus:bg-white focus:outline-none focus:ring-2 focus:ring-brand/20 dark:border-white/20 dark:bg-white/[0.08] dark:text-white dark:placeholder:text-white/40 dark:focus:border-white/30 dark:focus:bg-overlay"
         />
         {query && (
           <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-2">
             {showDropdown && searchResults.length > 0 && (
-              <span className="text-xs text-burgundy/60 dark:text-white/60 font-medium">
+              <span className="text-sm sm:text-xs text-muted font-medium">
                 Results ({searchResults.length})
               </span>
             )}
@@ -257,7 +257,7 @@ export function HeaderSearch({ fullWidth = false }: HeaderSearchProps) {
                 setShowDropdown(false);
                 inputRef.current?.focus();
               }}
-              className="flex items-center justify-center w-6 h-6 text-burgundy/60 hover:text-burgundy dark:text-white/60 dark:hover:text-white transition-colors rounded hover:bg-burgundy/10 dark:hover:bg-white/10"
+              className="flex items-center justify-center w-6 h-6 text-burgundy/60 hover:text-primary/60 dark:hover:text-white transition-colors rounded hover:bg-active-highlight"
               aria-label="Clear search"
             >
               <span className="text-lg leading-none">×</span>
@@ -269,33 +269,33 @@ export function HeaderSearch({ fullWidth = false }: HeaderSearchProps) {
       {showDropdown && searchResults.length > 0 && (
         <div
           ref={dropdownRef}
-          className="absolute top-full left-0 right-0 z-50 mt-2 max-h-96 overflow-y-auto rounded-lg border border-burgundy/20 bg-white shadow-lg dark:border-white/20 dark:bg-[#1a0f27]"
+          className="absolute top-full left-0 right-0 z-50 mt-2 max-h-96 overflow-y-auto rounded-lg border border-default bg-white shadow-lg dark:bg-overlay"
         >
           {searchResults.map((result, index) => (
             <button
               key={index}
               ref={index === selectedIndex ? selectedItemRef : null}
               onClick={() => handleSelect(result)}
-              className={`w-full px-4 py-3 text-left transition-colors border-b border-burgundy/10 dark:border-white/10 last:border-b-0 ${
+              className={`w-full px-4 py-3 text-left transition-colors border-b border-subtle last:border-b-0 ${
                 index === selectedIndex
                   ? "bg-burgundy/20 dark:bg-white/20"
-                  : "hover:bg-burgundy/10 dark:hover:bg-white/10"
+                  : "hover:bg-active-highlight"
               }`}
             >
               <div className="flex items-center justify-between">
                 <div className="flex-1 min-w-0">
-                  <div className="text-sm font-semibold text-burgundy dark:text-white truncate">
+                  <div className="text-sm font-semibold text-primary truncate">
                     {result.displayText}
                   </div>
                   {result.subtitle && (
-                    <div className="text-xs text-burgundy/60 dark:text-white/60 truncate mt-0.5">
+                    <div className="text-sm sm:text-xs text-muted truncate mt-0.5">
                       {result.subtitle}
                     </div>
                   )}
                 </div>
-                <div className="ml-2 flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-burgundy/40 dark:text-white/40">
+                <div className="ml-2 flex items-center gap-1.5 text-sm sm:text-xs font-semibold uppercase tracking-wider text-faint">
                   {result.type === "peer" && result.peer && isFavorite(result.peer.peerId) && (
-                    <Icon name="starfilled" className="w-3.5 h-3.5 text-yellow-500 dark:text-yellow-400 flex-shrink-0" />
+                    <IconStarFilled className="w-3.5 h-3.5 text-pink flex-shrink-0" />
                   )}
                   <span>{result.type === "peer" ? "PEER" : "FRAME"}</span>
                 </div>

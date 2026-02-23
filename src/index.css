@@ -2,6 +2,77 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Kill all transitions during theme switch so colors swap instantly */
+html.no-transition,
+html.no-transition *,
+html.no-transition *::before,
+html.no-transition *::after {
+  transition-duration: 0s !important;
+}
+
+/* -------------------------------------------------- */
+/* Reusable component utilities                        */
+/* -------------------------------------------------- */
+
+@layer components {
+  /* SPACED CAPS — data card labels, table headers, section sub-headings, badges */
+  .label-text {
+    @apply text-sm sm:text-xs font-semibold uppercase tracking-label text-muted;
+  }
+
+  /* SPACED CAPS — interactive action link / nav button (back links, toggles) */
+  .action-text {
+    @apply font-semibold uppercase tracking-label text-secondary hover:text-primary transition-colors;
+  }
+
+  /* Sentence-case — form input labels, filter group headings, checkbox headings */
+  .form-label {
+    @apply text-sm font-medium text-muted;
+  }
+
+  /* Custom select — lightweight styled dropdown (no portals) */
+  .custom-select-trigger {
+    @apply inline-flex items-center gap-1.5 rounded-lg
+           px-3 py-1.5 text-sm sm:text-xs font-semibold
+           cursor-pointer transition-colors
+           focus:outline-none focus:ring-2;
+    background-color: #ffffff;
+    color: rgb(var(--color-text-primary));
+    border: 1px solid var(--color-border-default);
+    --tw-ring-color: rgb(var(--color-brand) / 0.3);
+  }
+
+  .custom-select-trigger:hover {
+    border-color: var(--color-border-strong);
+  }
+
+  .dark .custom-select-trigger {
+    background-color: var(--color-bg-overlay);
+  }
+
+  .custom-select-dropdown {
+    @apply absolute z-50 mt-1 min-w-full rounded-lg p-1 shadow-lg;
+    background-color: #ffffff;
+    border: 1px solid var(--color-border-default);
+  }
+
+  .dark .custom-select-dropdown {
+    background-color: var(--color-bg-overlay);
+  }
+
+  .custom-select-option {
+    @apply flex w-full items-center rounded px-3 py-1.5
+           text-sm sm:text-xs font-medium cursor-pointer select-none
+           transition-colors;
+    color: rgb(var(--color-text-primary));
+  }
+
+  .custom-select-option:hover {
+    background-color: rgb(var(--color-brand) / 0.1);
+    color: var(--pink);
+  }
+}
+
 /* -------------------------------------------------- */
 /* CSS Variables (Palette + Utilities) */
 /* -------------------------------------------------- */
@@ -38,6 +109,7 @@
   /* fonts */
   --font-inter-sans: "Inter", sans-serif;
   --font-at-aero: "AtAero", sans-serif;
+  --font-geist-mono: "GeistMono", monospace;
 }
 
 /* These custom theme variables won't be processed by Tailwind
@@ -62,6 +134,100 @@
     --color-light-purple: var(--light-purple);
     --color-light-green: var(--light-green);
     --color-light-orange: var(--light-orange);
+
+    /* ---- Semantic tokens (light) ---- */
+
+    /* Backgrounds */
+    --color-bg-page:             #f0e9e4; /* beige */
+    --color-bg-surface:          #f8f8f8; /* light-grey — body/default bg */
+    --color-bg-surface-raised:   255 255 255;
+    --color-bg-surface-subtle:   #f4f0f8;
+    --color-bg-surface-inset:    #f3f0ed;
+    --color-bg-overlay:          #ffffff;
+    --color-bg-hover-highlight:  rgba(64, 0, 27, 0.06);
+    --color-bg-active-highlight: rgba(64, 0, 27, 0.1);
+    --color-field-bg:            #ffffff;
+
+    /* Text — primary as space-separated RGB for opacity support */
+    --color-text-primary:   64 0 27;
+    --color-text-secondary: rgba(64, 0, 27, 0.8);
+    --color-text-muted:     rgba(64, 0, 27, 0.6);
+    --color-text-faint:     rgba(64, 0, 27, 0.4);
+
+    /* Borders */
+    --color-border-default: rgba(64, 0, 27, 0.15);
+    --color-border-subtle:  rgba(64, 0, 27, 0.07);
+    --color-border-strong:  rgba(64, 0, 27, 0.3);
+
+    /* Shared semantic colors — space-separated RGB for opacity support */
+    --color-brand:   64 0 27;     /* burgundy — app brand color */
+    --color-accent:  255 5 109;   /* pink */
+    --color-success: 34 169 65;   /* green */
+    --color-warning: 255 96 0;    /* orange */
+    --color-danger:  220 38 38;   /* red-600 equivalent */
+    --color-info:    2 135 242;   /* blue */
+
+    /* Status subtle backgrounds */
+    --color-bg-success-subtle: #dbf4dc; /* light-green */
+    --color-bg-warning-subtle: #ffe8df; /* light-orange */
+    --color-bg-danger-subtle:  #ffe6f0; /* light-pink */
+    --color-bg-info-subtle:    #daeeff; /* light-blue */
+    --color-bg-brand-subtle:   rgba(64, 0, 27, 0.08); /* burgundy tint */
+
+    /* Tooltip */
+    --color-bg-tooltip:    #6b2e4a;
+    --color-border-tooltip: #6b2e4a;
+    --color-text-tooltip:  #ffffff;
+
+    /* Shadow base color — comma-separated for rgba() in shadow scale */
+    --shadow-color: 83, 42, 95;
+  }
+
+  html.dark {
+    /* Backgrounds */
+    --color-bg-page:             #100418;
+    --color-bg-surface:          #1a0f27;
+    --color-bg-surface-raised:   33 20 48;
+    --color-bg-surface-subtle:   #261732;
+    --color-bg-surface-inset:    #120918;
+    --color-bg-overlay:          #1a0f27;
+    --color-bg-hover-highlight:  rgba(255, 255, 255, 0.05);
+    --color-bg-active-highlight: rgba(255, 255, 255, 0.1);
+    --color-field-bg:            #1a0f27;
+
+    /* Text */
+    --color-text-primary:   255 255 255;
+    --color-text-secondary: rgba(255, 255, 255, 0.8);
+    --color-text-muted:     rgba(255, 255, 255, 0.6);
+    --color-text-faint:     rgba(255, 255, 255, 0.4);
+
+    /* Borders */
+    --color-border-default: rgba(255, 255, 255, 0.15);
+    --color-border-subtle:  rgba(255, 255, 255, 0.07);
+    --color-border-strong:  rgba(255, 255, 255, 0.3);
+
+    /* Shared semantic colors — brightened for dark backgrounds */
+    --color-brand:   255 255 255; /* white on dark — brand inverts for dark mode */
+    --color-accent:  255 60 130;  /* brighter pink */
+    --color-success: 74 222 100;  /* brighter green */
+    --color-warning: 255 140 50;  /* brighter orange */
+    --color-danger:  248 113 113; /* brighter red */
+    --color-info:    56 168 255;  /* brighter blue */
+
+    /* Status subtle backgrounds */
+    --color-bg-success-subtle: rgba(74, 222, 100, 0.15);
+    --color-bg-warning-subtle: rgba(255, 140, 50, 0.15);
+    --color-bg-danger-subtle:  rgba(248, 113, 113, 0.15);
+    --color-bg-info-subtle:    rgba(56, 168, 255, 0.15);
+    --color-bg-brand-subtle:   rgba(255, 255, 255, 0.08); /* white tint on dark */
+
+    /* Tooltip */
+    --color-bg-tooltip:     #d4c4df;
+    --color-border-tooltip: #d4c4df;
+    --color-text-tooltip:   #1a0f27;
+
+    /* Shadow */
+    --shadow-color: 0, 0, 0;
   }
 }
 
@@ -71,48 +237,24 @@
 
 @font-face {
   font-family: "Inter";
-  src: url("/src/assets/fonts/Inter-Regular.woff2") format("woff2");
-  font-weight: 400;
-  font-style: normal;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: "Inter";
-  src: url("/src/assets/fonts/Inter-Medium.woff2") format("woff2");
-  font-weight: 500;
-  font-style: normal;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: "Inter";
-  src: url("/src/assets/fonts/Inter-Bold.woff2") format("woff2");
-  font-weight: 700;
+  src: url("/src/assets/fonts/InterVariable.woff2") format("woff2");
+  font-weight: 100 900;
   font-style: normal;
   font-display: swap;
 }
 
 @font-face {
   font-family: "AtAero";
-  src: url("/src/assets/fonts/AtAero-Regular.woff2") format("woff2");
-  font-weight: 400;
+  src: url("/src/assets/fonts/AtAeroVARVF.woff2") format("woff2");
+  font-weight: 100 900;
   font-style: normal;
   font-display: swap;
 }
 
 @font-face {
-  font-family: "AtAero";
-  src: url("/src/assets/fonts/AtAero-Medium.woff2") format("woff2");
-  font-weight: 500;
-  font-style: normal;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: "AtAero";
-  src: url("/src/assets/fonts/AtAero-Semibold.woff2") format("woff2");
-  font-weight: 600;
+  font-family: "GeistMono";
+  src: url("/src/assets/fonts/GeistMonoVF.woff2") format("woff2");
+  font-weight: 100 900;
   font-style: normal;
   font-display: swap;
 }
@@ -122,16 +264,9 @@ html {
 }
 
 body {
-  background: var(--light-grey);
-  color: var(--burgundy);
+  background: var(--color-bg-surface);
+  color: rgb(var(--color-text-primary));
   font-family: var(--font-inter-sans);
-}
-
-@media (prefers-color-scheme: dark) {
-  body {
-    background: #0b0513;
-    color: var(--white);
-  }
 }
 
 h1,
@@ -145,19 +280,19 @@ h6, nav {
 
 @layer base {
   h1 {
-    @apply text-5xl sm:text-6xl lg:text-7xl font-bold text-[color:var(--burgundy)] font-["AtAero-Semibold"] mb-6 dark:text-white;
+    @apply text-5xl sm:text-6xl lg:text-7xl font-bold text-burgundy mb-6 dark:text-white;
   }
   h2 {
-    @apply text-3xl sm:text-4xl lg:text-5xl font-semibold text-[color:var(--burgundy)] font-["AtAero-Semibold"] mb-5 dark:text-white;
+    @apply text-3xl sm:text-4xl lg:text-5xl font-semibold text-burgundy mb-5 dark:text-white;
   }
   h3 {
-    @apply text-2xl sm:text-3xl lg:text-4xl font-medium text-[color:var(--burgundy)] font-["AtAero-Semibold"] mb-4 dark:text-white;
+    @apply text-2xl sm:text-3xl lg:text-4xl font-medium text-burgundy mb-4 dark:text-white;
   }
   h4 {
-    @apply text-xl sm:text-2xl lg:text-3xl font-medium text-[color:var(--burgundy)] font-["AtAero-Semibold"] mb-3 dark:text-white;
+    @apply text-xl sm:text-2xl lg:text-3xl font-medium text-burgundy mb-3 dark:text-white;
   }
   h5 {
-    @apply text-lg sm:text-xl lg:text-2xl font-medium text-[color:var(--burgundy)] font-["AtAero-Semibold"] mb-2 dark:text-white;
+    @apply text-lg sm:text-xl lg:text-2xl font-medium text-burgundy mb-2 dark:text-white;
   }
 
   strong,
@@ -168,59 +303,81 @@ h6, nav {
   code {
     @apply break-all;
   }
+
+  /* Slightly dim monospace text in dark mode so it's not blazing white.
+     Uses the semantic token so the value flips instantly with the theme
+     (an explicit rgba value would be interpolated by transition-colors). */
+  html.dark .font-mono {
+    color: rgb(var(--color-text-primary) / 0.88);
+  }
 }
 
 /* -------------------------------------------------- */
 /* Scrollbar Styling */
 /* -------------------------------------------------- */
 
-/* Global scrollbar styling for all browsers */
+/* Global scrollbar styling — solid colors for consistency across all scrollbars */
 * {
-  /* Firefox */
   scrollbar-width: thin;
-  scrollbar-color: rgba(64, 0, 27, 0.3) transparent;
+  scrollbar-color: #c0a0aa transparent;
 }
 
-/* Webkit browsers (Chrome, Safari, Edge) */
+/* Page-level scrollbar: wider */
+html {
+  scrollbar-width: auto;
+  scrollbar-color: #c0a0aa transparent;
+}
+
 *::-webkit-scrollbar {
-  width: 10px;
-  height: 10px;
+  width: 8px;
+  height: 8px;
 }
 
-*::-webkit-scrollbar-track {
+html::-webkit-scrollbar {
+  width: 12px;
+  height: 12px;
+}
+
+*::-webkit-scrollbar-track,
+html::-webkit-scrollbar-track {
   background: transparent;
 }
 
-*::-webkit-scrollbar-thumb {
-  background-color: rgba(64, 0, 27, 0.3);
+*::-webkit-scrollbar-thumb,
+html::-webkit-scrollbar-thumb {
+  background-color: #c0a0aa;
   border-radius: 10px;
   border: 2px solid transparent;
   background-clip: padding-box;
-  transition: background-color 0.2s ease;
 }
 
-*::-webkit-scrollbar-thumb:hover {
-  background-color: rgba(64, 0, 27, 0.5);
+*::-webkit-scrollbar-thumb:hover,
+html::-webkit-scrollbar-thumb:hover {
+  background-color: #a07888;
 }
 
-*::-webkit-scrollbar-corner {
+*::-webkit-scrollbar-corner,
+html::-webkit-scrollbar-corner {
   background: transparent;
 }
 
-/* Dark mode scrollbar */
-@media (prefers-color-scheme: dark) {
-  * {
-    /* Firefox dark mode */
-    scrollbar-color: rgba(255, 5, 109, 0.4) transparent;
-  }
+/* Dark mode scrollbar — muted mauve, visible on dark backgrounds */
+html.dark {
+  scrollbar-color: #6b4f5a transparent;
+}
 
-  *::-webkit-scrollbar-thumb {
-    background-color: rgba(255, 5, 109, 0.4);
-  }
+.dark * {
+  scrollbar-color: #6b4f5a transparent;
+}
 
-  *::-webkit-scrollbar-thumb:hover {
-    background-color: rgba(255, 5, 109, 0.6);
-  }
+html.dark::-webkit-scrollbar-thumb,
+.dark *::-webkit-scrollbar-thumb {
+  background-color: #6b4f5a;
+}
+
+html.dark::-webkit-scrollbar-thumb:hover,
+.dark *::-webkit-scrollbar-thumb:hover {
+  background-color: #8a6878;
 }
 
 /* -------------------------------------------------- */
@@ -232,6 +389,187 @@ h6, nav {
     @apply mx-auto lg:max-w-[1440px] px-4 sm:px-6 lg:px-20;
   }
 
+  /* Section ambient glow patterns — 3 variants cycled across sections.
+     Fixed-size ellipses so the glow stays consistent regardless of section height.
+     background-clip: padding-box prevents gradient color from bleeding into
+     the anti-aliased rounded-corner edges. */
+  .section-glow-a,
+  .section-glow-b,
+  .section-glow-c {
+    background-clip: padding-box;
+  }
+
+  .section-glow-a {
+    background-image: radial-gradient(400px 350px at 95% 0%, rgba(255, 5, 109, 0.12), transparent 70%),
+                      radial-gradient(600px 500px at 0% 95%, rgba(231, 221, 255, 0.25), transparent 70%);
+  }
+  .dark .section-glow-a {
+    background-image: radial-gradient(400px 350px at 95% 0%, rgba(255, 5, 109, 0.12), transparent 70%),
+                      radial-gradient(600px 500px at 0% 95%, rgba(99, 48, 202, 0.18), transparent 70%);
+  }
+
+  .section-glow-b {
+    background-image: radial-gradient(400px 350px at 5% 0%, rgba(255, 160, 60, 0.22), transparent 70%),
+                      radial-gradient(600px 500px at 100% 95%, rgba(255, 96, 0, 0.14), transparent 70%);
+  }
+  .dark .section-glow-b {
+    background-image: radial-gradient(400px 350px at 5% 0%, rgba(255, 140, 0, 0.12), transparent 70%),
+                      radial-gradient(600px 500px at 100% 95%, rgba(255, 96, 0, 0.12), transparent 70%);
+  }
+
+  .section-glow-c {
+    background-image: radial-gradient(400px 350px at 95% 0%, rgba(147, 112, 219, 0.2), transparent 70%),
+                      radial-gradient(600px 500px at 5% 95%, rgba(147, 112, 219, 0.16), transparent 70%);
+  }
+  .dark .section-glow-c {
+    background-image: radial-gradient(400px 350px at 95% 0%, rgba(120, 80, 255, 0.18), transparent 70%),
+                      radial-gradient(600px 500px at 5% 95%, rgba(120, 80, 255, 0.14), transparent 70%);
+  }
+
+  .gradient-sweep {
+    display: block;
+    background-size: 200% auto;
+    background-clip: text;
+    -webkit-background-clip: text;
+    color: transparent;
+    -webkit-text-fill-color: transparent;
+    animation: gradient-sweep 10s linear infinite;
+    background-image: linear-gradient(
+      120deg,
+      var(--pink) 0%,
+      var(--burgundy) 50%,
+      var(--pink) 100%
+    );
+  }
+
+  .dark .gradient-sweep {
+    background-image: linear-gradient(
+      120deg,
+      var(--white) 0%,
+      var(--pink) 50%,
+      var(--white) 100%
+    );
+  }
+
+  @keyframes gradient-sweep {
+    0% {
+      background-position: 200% center;
+    }
+    100% {
+      background-position: -200% center;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .gradient-sweep {
+      animation: none;
+    }
+  }
+
+  @keyframes spinner-animation {
+    0%,
+    100% {
+      transform: scale(0.9);
+      opacity: 0.3;
+    }
+    50% {
+      transform: scale(1.1);
+      opacity: 1;
+    }
+  }
+
+  .spinner-animation {
+    animation: spinner-animation 3s ease-in-out infinite;
+  }
+}
+
+/* -------------------------------------------------- */
+/* Components (shared background colors) */
+/* -------------------------------------------------- */
+
+@layer components {
+  .bg-pink {
+    background-color: var(--pink);
+  }
+  .bg-burgundy {
+    background-color: var(--burgundy);
+  }
+  .bg-dark-grey {
+    background-color: var(--dark-grey);
+  }
+  .bg-beige {
+    background-color: var(--beige);
+  }
+  .bg-light-grey {
+    background-color: var(--light-grey);
+  }
+  .bg-light-pink {
+    background-color: var(--light-pink);
+  }
+  .bg-light-blue {
+    background-color: var(--light-blue);
+  }
+  .bg-light-purple {
+    background-color: var(--light-purple);
+  }
+  .bg-light-green {
+    background-color: var(--light-green);
+  }
+  .bg-light-orange {
+    background-color: var(--light-orange);
+  }
+
+  /* Number input spinner styling */
+  input[type="number"] {
+    -moz-appearance: textfield;
+  }
+
+  input[type="number"]::-webkit-inner-spin-button,
+  input[type="number"]::-webkit-outer-spin-button {
+    opacity: 1;
+    height: 100%;
+    width: 20px;
+    cursor: pointer;
+    padding: 0 4px;
+  }
+
+  input[type="number"]::-webkit-inner-spin-button {
+    background: transparent;
+    border-left: 1px solid rgba(64, 0, 27, 0.2);
+    margin-left: 4px;
+  }
+
+  input[type="number"]::-webkit-outer-spin-button {
+    background: transparent;
+  }
+
+  input[type="number"]:hover::-webkit-inner-spin-button {
+    border-left-color: rgba(64, 0, 27, 0.4);
+  }
+
+  input[type="number"]:focus::-webkit-inner-spin-button {
+    border-left-color: rgba(64, 0, 27, 0.6);
+  }
+
+  html.dark input[type="number"]::-webkit-inner-spin-button {
+    border-left-color: rgba(255, 255, 255, 0.2);
+  }
+
+  html.dark input[type="number"]:hover::-webkit-inner-spin-button {
+    border-left-color: rgba(255, 255, 255, 0.4);
+  }
+
+  html.dark input[type="number"]:focus::-webkit-inner-spin-button {
+    border-left-color: rgba(255, 255, 255, 0.6);
+  }
+}
+
+/* ================================================== */
+/* OLD CSS — currently unused, kept for _reference/   */
+/* Remove this section when _reference/ is deleted.   */
+/* ================================================== */
+
+@layer utilities {
   .container-lg {
     @apply container mx-auto lg:max-w-[1440px] px-4 sm:px-6 lg:px-10;
   }
@@ -283,22 +621,6 @@ h6, nav {
     );
   }
 
-  .gradient-sweep {
-    display: block;
-    background-size: 200% auto;
-    background-clip: text;
-    -webkit-background-clip: text;
-    color: transparent;
-    -webkit-text-fill-color: transparent;
-    animation: gradient-sweep 10s linear infinite;
-    background-image: linear-gradient(
-      120deg,
-      var(--pink) 0%,
-      var(--burgundy) 50%,
-      var(--pink) 100%
-    );
-  }
-
   .gradient-sweep--dark {
     display: block;
     background-size: 200% auto;
@@ -315,39 +637,12 @@ h6, nav {
     );
   }
 
-  @keyframes gradient-sweep {
-    0% {
-      background-position: 200% center;
+  @media (prefers-reduced-motion: reduce) {
+    .gradient-sweep--dark {
+      animation: none;
     }
-    100% {
-      background-position: -200% center;
-    }
-  }
-
-  .drop-shadow-box {
-    box-shadow: 0px 8px 8px rgba(0, 0, 0, 0.02);
-  }
-
-  @keyframes spinner-animation {
-    0%,
-    100% {
-      transform: scale(0.9);
-      opacity: 0.3;
-    }
-    50% {
-      transform: scale(1.1);
-      opacity: 1;
-    }
-  }
-
-  .spinner-animation {
-    animation: spinner-animation 3s ease-in-out infinite;
   }
 }
-
-/* -------------------------------------------------- */
-/* Components (shared background colors) */
-/* -------------------------------------------------- */
 
 @layer components {
   .text-link {
@@ -368,38 +663,6 @@ h6, nav {
     background-color: var(--purple);
   }
 
-  .bg-pink {
-    background-color: var(--pink);
-  }
-  .bg-burgundy {
-    background-color: var(--burgundy);
-  }
-  .bg-dark-grey {
-    background-color: var(--dark-grey);
-  }
-  .bg-beige {
-    background-color: var(--beige);
-  }
-  .bg-light-grey {
-    background-color: var(--light-grey);
-  }
-  .bg-light-pink {
-    background-color: var(--light-pink);
-  }
-  .bg-light-blue {
-    background-color: var(--light-blue);
-  }
-  .bg-light-purple {
-    background-color: var(--light-purple);
-  }
-  .bg-light-green {
-    background-color: var(--light-green);
-  }
-  .bg-light-orange {
-    background-color: var(--light-orange);
-  }
-
-  /*lists custom styles for bullets*/
   .ul-default {
     @apply list-disc pl-5;
   }
@@ -417,85 +680,10 @@ h6, nav {
   }
 
   .code-block {
-    @apply w-full max-w-full rounded-lg bg-gray-100 border border-gray-300 text-sm p-4 font-mono break-words overflow-x-auto;
+    @apply w-full max-w-full rounded-lg bg-surface-inset border text-sm p-4 font-mono break-words overflow-x-auto;
   }
 
-  /*mainly used in Bridge.tsx*/
   .input-base {
-    @apply w-full border border-slate-600/30 px-4 py-2 text-sm mb-4 rounded-xl focus:outline-none focus:ring-4 focus:ring-pink/20 focus:ring-offset-0 transition-colors;
-  }
-
-  /* Number input spinner styling */
-  input[type="number"] {
-    -moz-appearance: textfield;
-  }
-
-  input[type="number"]::-webkit-inner-spin-button,
-  input[type="number"]::-webkit-outer-spin-button {
-    opacity: 1;
-    height: 100%;
-    width: 20px;
-    cursor: pointer;
-    padding: 0 4px;
-  }
-
-  input[type="number"]::-webkit-inner-spin-button {
-    background: transparent;
-    border-left: 1px solid rgba(64, 0, 27, 0.2);
-    margin-left: 4px;
-  }
-
-  input[type="number"]::-webkit-outer-spin-button {
-    background: transparent;
-  }
-
-  input[type="number"]:hover::-webkit-inner-spin-button {
-    border-left-color: rgba(64, 0, 27, 0.4);
-  }
-
-  input[type="number"]:focus::-webkit-inner-spin-button {
-    border-left-color: rgba(64, 0, 27, 0.6);
-  }
-
-  @media (prefers-color-scheme: dark) {
-    input[type="number"]::-webkit-inner-spin-button {
-      border-left-color: rgba(255, 255, 255, 0.2);
-    }
-
-    input[type="number"]:hover::-webkit-inner-spin-button {
-      border-left-color: rgba(255, 255, 255, 0.4);
-    }
-
-    input[type="number"]:focus::-webkit-inner-spin-button {
-      border-left-color: rgba(255, 255, 255, 0.6);
-    }
-  }
-}
-
-/* -------------------------------------------------- */
-/* Particle Animations & SVG Effects */
-/* -------------------------------------------------- */
-
-@layer utilities {
-  .pa--particle-glow {
-    transition: opacity 0.2s ease;
-  }
-  .pa--particle-glow--pink {
-    fill: var(--pink);
-    filter: drop-shadow(0 0 4px var(--pink)) drop-shadow(0 0 10px var(--pink));
-  }
-  .pa--particle-glow--white {
-    fill: white;
-    filter: drop-shadow(0 0 6px white) drop-shadow(0 0 14px white);
-  }
-
-  .svg-tags {
-    opacity: 1;
-    transition: opacity 0.3s ease, filter 0.3s ease;
-    filter: brightness(0.9);
-  }
-
-  .svg-tags:hover {
-    filter: brightness(1.75) drop-shadow(0 0 6px var(--pink));
+    @apply w-full border px-4 py-2 text-sm mb-4 rounded-xl focus:outline-none focus:ring-4 focus:ring-pink/20 focus:ring-offset-0 transition-colors;
   }
 }

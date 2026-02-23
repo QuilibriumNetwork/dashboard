@@ -7,6 +7,7 @@ import { Routes, Route } from "react-router-dom";
 import Spinner from "@/components/ui/Spinner";
 import { ThemeProvider } from "@/components/helpers/ThemeContext";
 import { PeerFavoritesProvider } from "@/components/helpers/PeerFavoritesContext";
+import { TooltipProvider } from "@/components/ui/Tooltip";
 
 // Pages
 const NotFound = lazy(() => import("@/404"));
@@ -35,9 +36,10 @@ const withSuspense = (
 export default function App() {
   return (
     <ThemeProvider>
+      <TooltipProvider delayDuration={300}>
       <PeerFavoritesProvider>
         <ScrollToTop />
-        <div className="min-h-screen flex flex-col">
+        <div className="min-h-screen flex flex-col bg-beige dark:bg-page">
           <SimpleNavbar />
           <main className="flex-grow">
             <Routes>
@@ -54,6 +56,7 @@ export default function App() {
           <SimpleFooter />
         </div>
       </PeerFavoritesProvider>
+      </TooltipProvider>
     </ThemeProvider>
   );
 }

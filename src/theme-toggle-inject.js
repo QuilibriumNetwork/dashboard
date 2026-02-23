@@ -55,7 +55,7 @@
     `;
 
     const button = document.createElement('button');
-    button.className = 'flex items-center justify-center w-8 h-8 rounded-lg border border-burgundy/20 dark:border-white/20 bg-white dark:bg-[#1a0f27] text-burgundy dark:text-white transition-colors hover:bg-light-grey/30 dark:hover:bg-white/5 focus:outline-none focus:ring-2 focus:ring-burgundy/30 dark:focus:ring-white/30';
+    button.className = 'flex items-center justify-center w-8 h-8 rounded-lg border border-default bg-white dark:bg-overlay text-primary transition-colors hover:bg-light-grey/30 dark:hover:bg-white/5 focus:outline-none focus:ring-2 focus:ring-brand/30';
     button.setAttribute('aria-label', isDark ? 'Switch to light mode' : 'Switch to dark mode');
     button.setAttribute('title', isDark ? 'Switch to light mode' : 'Switch to dark mode');
     button.innerHTML = isDark ? sunIcon : moonIcon;
