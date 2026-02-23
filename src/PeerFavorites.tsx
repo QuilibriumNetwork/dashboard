@@ -10,6 +10,7 @@ import Icon from "@/components/ui/Icons";
 import Spinner from "@/components/ui/Spinner";
 import Arrow from "@/components/ui/Arrow";
 import { Button } from "@/components/ui/Button";
+import { Select } from "@/components/ui/Select";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import Modal from "@/components/ui/Modal";
 
@@ -604,19 +605,19 @@ export default function PeerFavorites() {
                 <span className="text-sm sm:text-xs text-muted">
                   Show
                 </span>
-                <select
-                  value={itemsPerPage}
-                  onChange={(e) => {
-                    setItemsPerPage(Number(e.target.value));
+                <Select
+                  value={String(itemsPerPage)}
+                  onValueChange={(val) => {
+                    setItemsPerPage(Number(val));
                     setCurrentPage(1);
                   }}
-                  className="border border-default bg-white dark:bg-overlay px-3 py-1.5 text-sm sm:text-xs font-semibold text-primary rounded-lg focus:outline-none focus:ring-2 focus:ring-brand/30 transition-colors"
-                >
-                  <option value={10}>10</option>
-                  <option value={25}>25</option>
-                  <option value={50}>50</option>
-                  <option value={100}>100</option>
-                </select>
+                  options={[
+                    { value: "10", label: "10" },
+                    { value: "25", label: "25" },
+                    { value: "50", label: "50" },
+                    { value: "100", label: "100" },
+                  ]}
+                />
                 <span className="text-sm sm:text-xs text-muted">
                   per page
                 </span>
@@ -751,7 +752,7 @@ export default function PeerFavorites() {
             </div>
             <div className="flex items-center justify-end gap-3">
               <Button
-                variant="ghost"
+                variant="secondary"
                 size="small"
                 onClick={() => {
                   setShowAddDialog(false);
@@ -763,7 +764,7 @@ export default function PeerFavorites() {
                 Cancel
               </Button>
               <Button
-                variant="burgundy"
+                variant="primary"
                 size="small"
                 onClick={handleAdd}
               >
@@ -844,7 +845,7 @@ export default function PeerFavorites() {
             </div>
             <div className="flex items-center justify-end gap-3">
               <Button
-                variant="ghost"
+                variant="secondary"
                 size="small"
                 onClick={() => {
                   setShowEditDialog(false);
@@ -857,7 +858,7 @@ export default function PeerFavorites() {
                 Cancel
               </Button>
               <Button
-                variant="burgundy"
+                variant="primary"
                 size="small"
                 onClick={handleSaveEdit}
               >

@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState, useRef, useCallback } from "react";
 import { useNavigate, useSearchParams, useLocation, Link } from "react-router-dom";
 import { PageLayout } from "@/components/PageLayout";
+import { Select } from "@/components/ui/Select";
 
 import {
   CertifiedProposal,
@@ -1193,20 +1194,20 @@ export default function Explorer() {
                   <span className="text-sm sm:text-xs text-muted">
                     Showing statistics from the last
                   </span>
-                  <select
-                    value={frameCount}
-                    onChange={(e) => {
-                      const newCount = parseInt(e.target.value, 10);
+                  <Select
+                    value={String(frameCount)}
+                    onValueChange={(val) => {
+                      const newCount = parseInt(val, 10);
                       if (VALID_FRAME_COUNTS.includes(newCount as any)) {
                         setFrameCount(newCount);
                       }
                     }}
-                    className="text-sm sm:text-xs font-semibold text-primary bg-white dark:bg-surface border border-default rounded-lg px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-brand/30 transition-colors cursor-pointer"
-                  >
-                    <option value={10}>10</option>
-                    <option value={25}>25</option>
-                    <option value={50}>50</option>
-                  </select>
+                    options={[
+                      { value: "10", label: "10" },
+                      { value: "25", label: "25" },
+                      { value: "50", label: "50" },
+                    ]}
+                  />
                   <span className="text-sm sm:text-xs text-muted">
                     frames
                   </span>

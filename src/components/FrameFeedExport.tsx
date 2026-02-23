@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/Button";
 import ChevronDown from "@/components/ui/ChevronDown";
+import { Checkbox } from "@/components/ui/Checkbox";
 import { type FrameFilterState } from "./FrameFeedFilters";
 import { base64ToHex, base64ToIPFSCID } from "@/lib/format";
 
@@ -222,7 +223,7 @@ export function FrameFeedExport({
   };
 
   return (
-    <div className="rounded-2xl border border-default bg-surface-raised">
+    <div className="rounded-2xl border border-default bg-surface-raised overflow-hidden">
       <button
         onClick={() => setExportExpanded(!exportExpanded)}
         className="w-full flex items-center justify-between px-6 py-4 text-left transition-colors hover:bg-light-grey/30 dark:hover:bg-white/5"
@@ -264,61 +265,46 @@ export function FrameFeedExport({
             </div>
             <div className="space-y-2">
               <label className="flex items-center gap-2 px-2 py-1.5 rounded transition-colors opacity-60 cursor-not-allowed">
-                <input
-                  type="checkbox"
-                  checked={true}
-                  disabled={true}
-                  className="w-4 h-4 text-burgundy border-strong rounded focus:ring-brand/30 cursor-not-allowed"
-                />
+                <Checkbox checked={true} onCheckedChange={() => {}} disabled />
                 <span className="text-sm text-primary">Frame Number</span>
               </label>
 
               <label className="flex items-center gap-2 px-2 py-1.5 rounded hover:bg-light-grey/30 dark:hover:bg-white/5 cursor-pointer transition-colors">
-                <input
-                  type="checkbox"
+                <Checkbox
                   checked={exportOptions.includeRequests}
-                  onChange={(e) => updateExportOption("includeRequests", e.target.checked)}
-                  className="w-4 h-4 text-burgundy border-strong rounded focus:ring-brand/30"
+                  onCheckedChange={(checked) => updateExportOption("includeRequests", checked)}
                 />
                 <span className="text-sm text-primary">Requests</span>
               </label>
 
               <label className="flex items-center gap-2 px-2 py-1.5 rounded hover:bg-light-grey/30 dark:hover:bg-white/5 cursor-pointer transition-colors">
-                <input
-                  type="checkbox"
+                <Checkbox
                   checked={exportOptions.includeShardsTouched}
-                  onChange={(e) => updateExportOption("includeShardsTouched", e.target.checked)}
-                  className="w-4 h-4 text-burgundy border-strong rounded focus:ring-brand/30"
+                  onCheckedChange={(checked) => updateExportOption("includeShardsTouched", checked)}
                 />
                 <span className="text-sm text-primary">Shards Touched</span>
               </label>
 
               <label className="flex items-center gap-2 px-2 py-1.5 rounded hover:bg-light-grey/30 dark:hover:bg-white/5 cursor-pointer transition-colors">
-                <input
-                  type="checkbox"
+                <Checkbox
                   checked={exportOptions.includeProver}
-                  onChange={(e) => updateExportOption("includeProver", e.target.checked)}
-                  className="w-4 h-4 text-burgundy border-strong rounded focus:ring-brand/30"
+                  onCheckedChange={(checked) => updateExportOption("includeProver", checked)}
                 />
                 <span className="text-sm text-primary">Prover</span>
               </label>
 
               <label className="flex items-center gap-2 px-2 py-1.5 rounded hover:bg-light-grey/30 dark:hover:bg-white/5 cursor-pointer transition-colors">
-                <input
-                  type="checkbox"
+                <Checkbox
                   checked={exportOptions.includeSelector}
-                  onChange={(e) => updateExportOption("includeSelector", e.target.checked)}
-                  className="w-4 h-4 text-burgundy border-strong rounded focus:ring-brand/30"
+                  onCheckedChange={(checked) => updateExportOption("includeSelector", checked)}
                 />
                 <span className="text-sm text-primary">Selector</span>
               </label>
 
               <label className="flex items-center gap-2 px-2 py-1.5 rounded hover:bg-light-grey/30 dark:hover:bg-white/5 cursor-pointer transition-colors">
-                <input
-                  type="checkbox"
+                <Checkbox
                   checked={exportOptions.includeTimestamp}
-                  onChange={(e) => updateExportOption("includeTimestamp", e.target.checked)}
-                  className="w-4 h-4 text-burgundy border-strong rounded focus:ring-brand/30"
+                  onCheckedChange={(checked) => updateExportOption("includeTimestamp", checked)}
                 />
                 <span className="text-sm text-primary">Timestamp</span>
               </label>

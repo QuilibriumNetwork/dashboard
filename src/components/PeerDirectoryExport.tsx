@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/Button";
 import ChevronDown from "@/components/ui/ChevronDown";
+import { Checkbox } from "@/components/ui/Checkbox";
 import { type PeerRow } from "@/lib/peers";
 import { type PeerRecord } from "@/lib/api";
 import { formatCapability, getCapabilityLabel } from "@/lib/capabilities";
@@ -218,7 +219,7 @@ export function PeerDirectoryExport({
   const hasAnyOptionSelected = Object.values(exportOptions).some((v) => v === true);
 
   return (
-    <div className="rounded-2xl border border-default bg-surface-raised">
+    <div className="rounded-2xl border border-default bg-surface-raised overflow-hidden">
       <button
         onClick={() => setExportExpanded(!exportExpanded)}
         className="w-full flex items-center justify-between px-6 py-4 text-left transition-colors hover:bg-light-grey/30 dark:hover:bg-white/5"
@@ -260,61 +261,46 @@ export function PeerDirectoryExport({
             </div>
             <div className="space-y-2">
               <label className="flex items-center gap-2 px-2 py-1.5 rounded transition-colors opacity-60 cursor-not-allowed">
-                <input
-                  type="checkbox"
-                  checked={true}
-                  disabled={true}
-                  className="w-4 h-4 text-burgundy border-strong rounded focus:ring-brand/30 cursor-not-allowed"
-                />
+                <Checkbox checked={true} onCheckedChange={() => {}} disabled />
                 <span className="text-sm text-primary">Peer ID</span>
               </label>
 
               <label className="flex items-center gap-2 px-2 py-1.5 rounded hover:bg-light-grey/30 dark:hover:bg-white/5 cursor-pointer transition-colors">
-                <input
-                  type="checkbox"
+                <Checkbox
                   checked={exportOptions.includeVersion}
-                  onChange={(e) => updateExportOption("includeVersion", e.target.checked)}
-                  className="w-4 h-4 text-burgundy border-strong rounded focus:ring-brand/30"
+                  onCheckedChange={(checked) => updateExportOption("includeVersion", checked)}
                 />
                 <span className="text-sm text-primary">Version</span>
               </label>
 
               <label className="flex items-center gap-2 px-2 py-1.5 rounded hover:bg-light-grey/30 dark:hover:bg-white/5 cursor-pointer transition-colors">
-                <input
-                  type="checkbox"
+                <Checkbox
                   checked={exportOptions.includePubsubAddress}
-                  onChange={(e) => updateExportOption("includePubsubAddress", e.target.checked)}
-                  className="w-4 h-4 text-burgundy border-strong rounded focus:ring-brand/30"
+                  onCheckedChange={(checked) => updateExportOption("includePubsubAddress", checked)}
                 />
                 <span className="text-sm text-primary">Pubsub Address</span>
               </label>
 
               <label className="flex items-center gap-2 px-2 py-1.5 rounded hover:bg-light-grey/30 dark:hover:bg-white/5 cursor-pointer transition-colors">
-                <input
-                  type="checkbox"
+                <Checkbox
                   checked={exportOptions.includeStreamAddress}
-                  onChange={(e) => updateExportOption("includeStreamAddress", e.target.checked)}
-                  className="w-4 h-4 text-burgundy border-strong rounded focus:ring-brand/30"
+                  onCheckedChange={(checked) => updateExportOption("includeStreamAddress", checked)}
                 />
                 <span className="text-sm text-primary">Stream Address</span>
               </label>
 
               <label className="flex items-center gap-2 px-2 py-1.5 rounded hover:bg-light-grey/30 dark:hover:bg-white/5 cursor-pointer transition-colors">
-                <input
-                  type="checkbox"
+                <Checkbox
                   checked={exportOptions.includeCapabilities}
-                  onChange={(e) => updateExportOption("includeCapabilities", e.target.checked)}
-                  className="w-4 h-4 text-burgundy border-strong rounded focus:ring-brand/30"
+                  onCheckedChange={(checked) => updateExportOption("includeCapabilities", checked)}
                 />
                 <span className="text-sm text-primary">Capabilities</span>
               </label>
 
               <label className="flex items-center gap-2 px-2 py-1.5 rounded hover:bg-light-grey/30 dark:hover:bg-white/5 cursor-pointer transition-colors">
-                <input
-                  type="checkbox"
+                <Checkbox
                   checked={exportOptions.includeReachabilityRecord}
-                  onChange={(e) => updateExportOption("includeReachabilityRecord", e.target.checked)}
-                  className="w-4 h-4 text-burgundy border-strong rounded focus:ring-brand/30"
+                  onCheckedChange={(checked) => updateExportOption("includeReachabilityRecord", checked)}
                 />
                 <span className="text-sm text-primary">Reachability Record</span>
               </label>

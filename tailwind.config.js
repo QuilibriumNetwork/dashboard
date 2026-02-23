@@ -28,6 +28,7 @@ module.exports = {
     extend: {
       screens: {
         xs: "480px",
+        nav: "1120px",
       },
       colors: {
         // Raw palette (theme-independent, opacity-compatible)

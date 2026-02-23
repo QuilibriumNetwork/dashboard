@@ -42,7 +42,7 @@ export function ConfirmDialog({
         <p className="text-sm text-primary">{message}</p>
         <div className="flex items-center justify-end gap-3">
           <Button
-            variant="ghost"
+            variant="secondary"
             size="small"
             onClick={onClose}
             disabled={isLoading}
@@ -50,7 +50,7 @@ export function ConfirmDialog({
             {cancelText}
           </Button>
           <Button
-            variant={confirmVariant === "danger" ? "danger" : "burgundy"}
+            variant={confirmVariant === "danger" ? "danger" : "primary"}
             size="small"
             onClick={handleConfirm}
             disabled={isLoading}

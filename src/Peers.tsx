@@ -2,6 +2,7 @@ import { useState, useMemo, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Link } from "react-router-dom";
 import { PageLayout } from "@/components/PageLayout";
+import { Select } from "@/components/ui/Select";
 import {
   PieChart,
   Pie,
@@ -549,19 +550,19 @@ export default function Peers() {
                 <span className="text-sm sm:text-xs text-muted">
                   Show
                 </span>
-                <select
-                  value={itemsPerPage}
-                  onChange={(e) => {
-                    setItemsPerPage(Number(e.target.value));
+                <Select
+                  value={String(itemsPerPage)}
+                  onValueChange={(val) => {
+                    setItemsPerPage(Number(val));
                     setCurrentPage(1);
                   }}
-                  className="border border-default bg-white dark:bg-surface px-3 py-1.5 text-sm sm:text-xs font-semibold text-primary rounded-lg focus:outline-none focus:ring-2 focus:ring-brand/30 transition-colors"
-                >
-                  <option value={10}>10</option>
-                  <option value={25}>25</option>
-                  <option value={50}>50</option>
-                  <option value={100}>100</option>
-                </select>
+                  options={[
+                    { value: "10", label: "10" },
+                    { value: "25", label: "25" },
+                    { value: "50", label: "50" },
+                    { value: "100", label: "100" },
+                  ]}
+                />
                 <span className="text-sm sm:text-xs text-muted">
                   per page
                 </span>

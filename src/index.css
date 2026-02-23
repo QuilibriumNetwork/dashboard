@@ -594,18 +594,17 @@ html.dark::-webkit-scrollbar-thumb:hover,
     border-left-color: rgba(64, 0, 27, 0.6);
   }
 
-  @media (prefers-color-scheme: dark) {
-    input[type="number"]::-webkit-inner-spin-button {
-      border-left-color: rgba(255, 255, 255, 0.2);
-    }
-
-    input[type="number"]:hover::-webkit-inner-spin-button {
-      border-left-color: rgba(255, 255, 255, 0.4);
-    }
-
-    input[type="number"]:focus::-webkit-inner-spin-button {
-      border-left-color: rgba(255, 255, 255, 0.6);
-    }
+  html.dark input[type="number"]::-webkit-inner-spin-button {
+    border-left-color: rgba(255, 255, 255, 0.2);
   }
+
+  html.dark input[type="number"]:hover::-webkit-inner-spin-button {
+    border-left-color: rgba(255, 255, 255, 0.4);
+  }
+
+  html.dark input[type="number"]:focus::-webkit-inner-spin-button {
+    border-left-color: rgba(255, 255, 255, 0.6);
+  }
+
 }
 

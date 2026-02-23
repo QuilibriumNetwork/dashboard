@@ -1,130 +1,141 @@
 import { Link, useLocation } from "react-router-dom";
 import { useState, useEffect } from "react";
-import { createPortal } from "react-dom";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { HeaderSearch } from "@/components/HeaderSearch";
-import HamburgerMenu from "@/assets/icons/iconset/HamburgerMenu";
-import Close from "@/assets/icons/iconset/Close";
 
 export function SimpleNavbar() {
   const location = useLocation();
   const isAnalyticsActive = location.pathname === "/frames-analytics";
   const isPeersActive = location.pathname === "/peers" || location.pathname.startsWith("/peers/");
   const isFavoritesActive = location.pathname === "/peer-favorites";
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   // Close mobile menu when route changes
   useEffect(() => {
-    setIsMobileMenuOpen(false);
+    setMobileMenuOpen(false);
   }, [location.pathname]);
 
-  // Prevent body scroll when mobile menu is open
-  useEffect(() => {
-    if (isMobileMenuOpen) {
-      document.body.style.overflow = "hidden";
-    } else {
-      document.body.style.overflow = "";
-    }
-    return () => {
-      document.body.style.overflow = "";
-    };
-  }, [isMobileMenuOpen]);
+  const handleLinkClick = () => {
+    setMobileMenuOpen(false);
+  };
 
   return (
-    <>
-      <nav className={`sticky top-0 border-b border-subtle bg-surface backdrop-blur overflow-visible ${isMobileMenuOpen ? 'z-[80]' : 'z-50'}`}>
-        <div className="container mx-auto px-4 md:px-4 pr-6 md:pr-4">
-          <div className="flex h-16 items-center justify-between gap-4">
-            <Link to="/" className="flex items-center space-x-3 flex-shrink-0">
-              <div className="flex flex-col">
-                <span className="text-xl font-bold text-primary">
-                  Quilibrium Dashboard
-                </span>
-              </div>
-            </Link>
+    <nav className="sticky top-0 z-50 border-b border-subtle bg-surface backdrop-blur">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div className="flex h-16 items-center justify-between">
+          <Link to="/" className="flex items-center flex-shrink-0">
+            <span className="text-xl font-bold text-primary">
+              Quilibrium Dashboard
+            </span>
+          </Link>
 
-            {/* Desktop Navigation */}
-            <div className="hidden md:flex items-center gap-5 flex-1 justify-end min-w-0">
-              <HeaderSearch />
-              <span className="items-center gap-2 rounded-full border border-green/20 bg-light-green/70 px-4 py-1 text-xs font-semibold uppercase tracking-label text-green shadow-status inline-flex dark:border-green/30 dark:bg-green/15 dark:text-green">
-                <span className="relative inline-flex h-2 w-2">
-                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-green/70 opacity-75 dark:bg-green/60" />
-                  <span className="relative inline-flex h-2 w-2 rounded-full bg-green" />
-                </span>
-                Operational
+          {/* Desktop Navigation */}
+          <div className="hidden nav:flex items-center gap-5">
+            <HeaderSearch />
+            <span className="items-center gap-2 rounded-full border border-green/20 bg-light-green/70 px-4 py-1 text-xs font-semibold uppercase tracking-label text-green shadow-status inline-flex dark:border-green/30 dark:bg-green/15 dark:text-green">
+              <span className="relative inline-flex h-2 w-2">
+                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-green/70 opacity-75 dark:bg-green/60" />
+                <span className="relative inline-flex h-2 w-2 rounded-full bg-green" />
               </span>
-              <Link
-                to="/peers"
-                className={`text-sm font-semibold transition-colors ${
-                  isPeersActive
-                    ? "text-purple dark:text-light-blue"
-                    : "text-burgundy hover:text-pink dark:text-white dark:hover:text-pink"
-                }`}
-              >
-                Peers
-              </Link>
-              <Link
-                to="/peer-favorites"
-                className={`text-sm font-semibold transition-colors ${
-                  isFavoritesActive
-                    ? "text-purple dark:text-light-blue"
-                    : "text-burgundy hover:text-pink dark:text-white dark:hover:text-pink"
-                }`}
-              >
-                Favorites
-              </Link>
-              <Link
-                to="/frames-analytics"
-                className={`text-sm font-semibold transition-colors ${
-                  isAnalyticsActive
-                    ? "text-purple dark:text-light-blue"
-                    : "text-burgundy hover:text-pink dark:text-white dark:hover:text-pink"
-                }`}
-              >
-                Frame Analytics
-              </Link>
-              <a
-                href="https://status.quilibrium.com"
-                className="text-sm font-semibold text-burgundy transition-colors hover:text-pink dark:text-white dark:hover:text-pink"
-              >
-                Status
-              </a>
-              <ThemeToggle />
-            </div>
-
-            {/* Mobile Hamburger/Close Button */}
-            <button
-              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              className="md:hidden flex items-center justify-center h-11 w-11 text-primary hover:bg-active-highlight rounded transition-colors relative z-[80]"
-              aria-label="Toggle menu"
-              aria-expanded={isMobileMenuOpen}
+              Operational
+            </span>
+            <Link
+              to="/peers"
+              className={`group relative flex items-center py-1 text-sm font-semibold transition-colors ${
+                isPeersActive
+                  ? "text-purple dark:text-light-blue"
+                  : "text-burgundy hover:text-pink dark:text-white dark:hover:text-pink"
+              }`}
             >
-              {isMobileMenuOpen ? (
-                <Close className="h-6 w-6" />
-              ) : (
-                <HamburgerMenu className="h-6 w-6" />
-              )}
-            </button>
+              Peers
+              <span
+                className={`absolute bottom-0 left-0 h-0.5 transition-all duration-300 ease-out ${
+                  isPeersActive ? "w-full bg-purple dark:bg-light-blue" : "w-0 group-hover:w-full bg-pink"
+                }`}
+              />
+            </Link>
+            <Link
+              to="/peer-favorites"
+              className={`group relative flex items-center py-1 text-sm font-semibold transition-colors ${
+                isFavoritesActive
+                  ? "text-purple dark:text-light-blue"
+                  : "text-burgundy hover:text-pink dark:text-white dark:hover:text-pink"
+              }`}
+            >
+              Favorites
+              <span
+                className={`absolute bottom-0 left-0 h-0.5 transition-all duration-300 ease-out ${
+                  isFavoritesActive ? "w-full bg-purple dark:bg-light-blue" : "w-0 group-hover:w-full bg-pink"
+                }`}
+              />
+            </Link>
+            <Link
+              to="/frames-analytics"
+              className={`group relative flex items-center py-1 text-sm font-semibold transition-colors ${
+                isAnalyticsActive
+                  ? "text-purple dark:text-light-blue"
+                  : "text-burgundy hover:text-pink dark:text-white dark:hover:text-pink"
+              }`}
+            >
+              Frame Analytics
+              <span
+                className={`absolute bottom-0 left-0 h-0.5 transition-all duration-300 ease-out ${
+                  isAnalyticsActive ? "w-full bg-purple dark:bg-light-blue" : "w-0 group-hover:w-full bg-pink"
+                }`}
+              />
+            </Link>
+            <a
+              href="https://status.quilibrium.com"
+              className="group relative flex items-center py-1 text-sm font-semibold text-burgundy transition-colors hover:text-pink dark:text-white dark:hover:text-pink"
+            >
+              Status
+              <span className="absolute bottom-0 left-0 h-0.5 w-0 bg-pink transition-all duration-300 ease-out group-hover:w-full" />
+            </a>
+            <ThemeToggle />
           </div>
-        </div>
-      </nav>
 
-      {/* Mobile Menu */}
-      {isMobileMenuOpen && createPortal(
-        <>
-          {/* Backdrop */}
-          <div
-            className="md:hidden fixed top-0 left-0 right-0 bottom-0 w-screen bg-black/20 dark:bg-black/40 z-[60]"
-            onClick={() => setIsMobileMenuOpen(false)}
-            style={{ width: '100vw', maxWidth: '100vw' }}
-          />
-          {/* Menu Drawer */}
-          <div className="md:hidden fixed top-0 left-0 right-0 bottom-0 w-screen bg-surface backdrop-blur z-[70] overflow-y-auto"
-            style={{ width: '100vw', maxWidth: '100vw' }}
+          {/* Mobile: Animated Hamburger Button */}
+          <button
+            className="nav:hidden p-2.5"
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            aria-label="Toggle menu"
+            aria-expanded={mobileMenuOpen}
           >
-            <div className="w-full px-4 pt-20 pb-6 space-y-4">
+            <div className="w-6 h-5 relative flex flex-col justify-between">
+              <span
+                className={`block h-0.5 w-full bg-[rgb(var(--color-text-primary))] transition-all duration-300 origin-center ${
+                  mobileMenuOpen ? "rotate-45 translate-y-[9px]" : ""
+                }`}
+              />
+              <span
+                className={`block h-0.5 w-full bg-[rgb(var(--color-text-primary))] transition-all duration-300 ${
+                  mobileMenuOpen ? "opacity-0" : ""
+                }`}
+              />
+              <span
+                className={`block h-0.5 w-full bg-[rgb(var(--color-text-primary))] transition-all duration-300 origin-center ${
+                  mobileMenuOpen ? "-rotate-45 -translate-y-[9px]" : ""
+                }`}
+              />
+            </div>
+          </button>
+        </div>
+
+        {/* Mobile menu — slides down inside the navbar */}
+        <div
+          className={`nav:hidden overflow-hidden transition-all duration-300 ease-out ${
+            mobileMenuOpen ? "max-h-[600px]" : "max-h-0"
+          }`}
+        >
+          <div className="py-4">
+            <div className="flex flex-col space-y-1 font-semibold">
               {/* Status Badge */}
-              <div className="flex items-center gap-2 rounded-full border border-green/20 bg-light-green/70 px-4 py-2 text-xs font-semibold uppercase tracking-label text-green shadow-status w-fit dark:border-green/30 dark:bg-green/15 dark:text-green">
+              <div
+                className={`flex items-center gap-2 rounded-full border border-green/20 bg-light-green/70 px-4 py-2 text-xs font-semibold uppercase tracking-label text-green shadow-status w-fit mb-3 dark:border-green/30 dark:bg-green/15 dark:text-green transition-all duration-300 ease-out ${
+                  mobileMenuOpen ? "opacity-100 translate-x-0" : "opacity-0 -translate-x-4"
+                }`}
+                style={{ transitionDelay: mobileMenuOpen ? "50ms" : "0ms" }}
+              >
                 <span className="relative inline-flex h-2 w-2">
                   <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-green/70 opacity-75 dark:bg-green/60" />
                   <span className="relative inline-flex h-2 w-2 rounded-full bg-green" />
@@ -133,66 +144,84 @@ export function SimpleNavbar() {
               </div>
 
               {/* Search */}
-            <div className="w-full">
-              <HeaderSearch fullWidth={true} />
-            </div>
+              <div
+                className={`w-full mb-2 transition-all duration-300 ease-out ${
+                  mobileMenuOpen ? "opacity-100 translate-x-0" : "opacity-0 -translate-x-4"
+                }`}
+                style={{ transitionDelay: mobileMenuOpen ? "100ms" : "0ms" }}
+              >
+                <HeaderSearch fullWidth={true} />
+              </div>
 
-            {/* Navigation Links */}
-            <div className="flex flex-col space-y-4">
+              {/* Navigation Links */}
               <Link
                 to="/peers"
-                className={`text-base font-semibold transition-colors py-2 ${
+                onClick={handleLinkClick}
+                className={`flex items-center py-3 px-2 rounded-lg transition-all duration-300 ease-out ${
+                  mobileMenuOpen ? "opacity-100 translate-x-0" : "opacity-0 -translate-x-4"
+                } ${
                   isPeersActive
-                    ? "text-purple dark:text-light-blue"
-                    : "text-burgundy hover:text-pink dark:text-white dark:hover:text-pink"
+                    ? "text-purple dark:text-light-blue bg-purple/5 dark:bg-light-blue/5"
+                    : "text-primary hover:text-pink hover:bg-pink/5"
                 }`}
-                onClick={() => setIsMobileMenuOpen(false)}
+                style={{ transitionDelay: mobileMenuOpen ? "150ms" : "0ms" }}
               >
                 Peers
               </Link>
               <Link
                 to="/peer-favorites"
-                className={`text-base font-semibold transition-colors py-2 ${
+                onClick={handleLinkClick}
+                className={`flex items-center py-3 px-2 rounded-lg transition-all duration-300 ease-out ${
+                  mobileMenuOpen ? "opacity-100 translate-x-0" : "opacity-0 -translate-x-4"
+                } ${
                   isFavoritesActive
-                    ? "text-purple dark:text-light-blue"
-                    : "text-burgundy hover:text-pink dark:text-white dark:hover:text-pink"
+                    ? "text-purple dark:text-light-blue bg-purple/5 dark:bg-light-blue/5"
+                    : "text-primary hover:text-pink hover:bg-pink/5"
                 }`}
-                onClick={() => setIsMobileMenuOpen(false)}
+                style={{ transitionDelay: mobileMenuOpen ? "200ms" : "0ms" }}
               >
                 Favorites
               </Link>
               <Link
                 to="/frames-analytics"
-                className={`text-base font-semibold transition-colors py-2 ${
+                onClick={handleLinkClick}
+                className={`flex items-center py-3 px-2 rounded-lg transition-all duration-300 ease-out ${
+                  mobileMenuOpen ? "opacity-100 translate-x-0" : "opacity-0 -translate-x-4"
+                } ${
                   isAnalyticsActive
-                    ? "text-purple dark:text-light-blue"
-                    : "text-burgundy hover:text-pink dark:text-white dark:hover:text-pink"
+                    ? "text-purple dark:text-light-blue bg-purple/5 dark:bg-light-blue/5"
+                    : "text-primary hover:text-pink hover:bg-pink/5"
                 }`}
-                onClick={() => setIsMobileMenuOpen(false)}
+                style={{ transitionDelay: mobileMenuOpen ? "250ms" : "0ms" }}
               >
                 Frame Analytics
               </Link>
               <a
                 href="https://status.quilibrium.com"
-                className="text-base font-semibold text-burgundy transition-colors hover:text-pink dark:text-white dark:hover:text-pink py-2"
-                onClick={() => setIsMobileMenuOpen(false)}
+                onClick={handleLinkClick}
+                className={`flex items-center py-3 px-2 rounded-lg transition-all duration-300 ease-out text-primary hover:text-pink hover:bg-pink/5 ${
+                  mobileMenuOpen ? "opacity-100 translate-x-0" : "opacity-0 -translate-x-4"
+                }`}
+                style={{ transitionDelay: mobileMenuOpen ? "300ms" : "0ms" }}
               >
                 Status
               </a>
-            </div>
 
-            {/* Theme Toggle */}
-            <div className="pt-4 border-t border-subtle">
-              <div className="flex items-center justify-between">
-                <span className="text-sm font-semibold text-primary">Theme</span>
-                <ThemeToggle />
+              {/* Theme Toggle */}
+              <div
+                className={`pt-3 mt-2 border-t border-subtle transition-all duration-300 ease-out ${
+                  mobileMenuOpen ? "opacity-100 translate-x-0" : "opacity-0 -translate-x-4"
+                }`}
+                style={{ transitionDelay: mobileMenuOpen ? "350ms" : "0ms" }}
+              >
+                <div className="-ml-1">
+                  <ThemeToggle />
+                </div>
               </div>
             </div>
-            </div>
           </div>
-        </>,
-        document.body
-      )}
-    </>
+        </div>
+      </div>
+    </nav>
   );
 }

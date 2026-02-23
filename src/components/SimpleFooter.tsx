@@ -15,8 +15,8 @@ export function SimpleFooter() {
     <footer className="relative text-white py-12 overflow-hidden bg-gradient-to-br from-[#251542] via-[#1a1024] to-[#1a1024]">
       {/* Decorative radial gradients */}
       <div className="absolute top-0 left-0 w-[350px] h-[350px] bg-purple/25 rounded-full blur-[100px]" />
-      <div className="absolute bottom-0 right-0 w-[300px] h-[300px] bg-pink/25 rounded-full blur-[80px]" />
-      <div className="absolute top-0 right-1/4 w-[200px] h-[200px] bg-pink/20 rounded-full blur-[60px]" />
+      <div className="absolute bottom-0 right-0 w-[300px] h-[300px] bg-purple/25 rounded-full blur-[80px]" />
+      <div className="absolute top-0 right-1/4 w-[200px] h-[200px] bg-purple/20 rounded-full blur-[60px]" />
       <div className="absolute bottom-1/3 left-1/3 w-[250px] h-[150px] bg-purple/15 rounded-full blur-[90px]" />
 
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 relative z-10">
@@ -95,7 +95,7 @@ export function SimpleFooter() {
         </div>
 
         <div className="border-t border-white/20 mt-8 pt-8 text-center text-white/50">
-          <p>&copy; 2025 Quilibrium. All rights reserved.</p>
+          <p>&copy; {new Date().getFullYear()} Quilibrium. All rights reserved.</p>
         </div>
       </div>
 
