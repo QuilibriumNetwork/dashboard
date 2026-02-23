@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useState, useRef, useCallback } from "react"
 import { useNavigate, useSearchParams, useLocation, Link } from "react-router-dom";
 import { PageLayout } from "@/components/PageLayout";
 import { Select } from "@/components/ui/Select";
+import { SectionTitle } from "@/components/ui/SectionTitle";
 
 import {
   CertifiedProposal,
@@ -1088,9 +1089,7 @@ export default function Explorer() {
             <div className="relative space-y-6">
               <div className="flex flex-wrap items-start justify-between gap-3">
                 <div className="flex flex-col gap-2">
-                  <h2 className="text-lg md:text-3xl font-semibold uppercase tracking-label text-primary">
-                    Global frame
-                  </h2>
+                  <SectionTitle icon="visible">Global frame</SectionTitle>
                   <span className="text-sm sm:text-xs font-semibold uppercase tracking-label text-secondary">
                     Rank #{latestHeader?.rank.toLocaleString() ?? "–"}
                   </span>
@@ -1191,9 +1190,7 @@ export default function Explorer() {
           <section id="frame-feed" className="section-glow-b mt-14 relative overflow-hidden rounded-3xl border border-subtle bg-surface p-5 xs:p-10 text-burgundy shadow-xl backdrop-blur-lg dark:text-white">
             <div className="relative space-y-6">
               <div className="flex flex-wrap items-center justify-between gap-4">
-                <h2 className="text-lg md:text-3xl font-semibold uppercase tracking-label text-primary">
-                  Frame feed
-                </h2>
+                <SectionTitle icon="layers1">Frame feed</SectionTitle>
                 <Link
                   to="/frames-analytics"
                   className="text-sm sm:text-xs action-text flex items-center gap-2"
@@ -1326,9 +1323,7 @@ export default function Explorer() {
             <div className="relative space-y-6">
               <div className="flex flex-wrap items-start justify-between gap-3">
                 <div className="flex flex-col gap-2">
-                  <h2 className="text-lg md:text-3xl font-semibold uppercase tracking-label text-primary">
-                    Peer directory
-                  </h2>
+                  <SectionTitle icon="sharingdata">Peer directory</SectionTitle>
                   <div className="text-sm sm:text-xs font-semibold uppercase tracking-label text-secondary">
                     {formattedPeerCount} peers
                   </div>
@@ -1368,9 +1363,7 @@ export default function Explorer() {
           <section id="prover-shards" className="section-glow-a mt-14 relative overflow-hidden rounded-3xl border border-subtle bg-surface p-5 xs:p-10 text-burgundy shadow-xl backdrop-blur-lg dark:text-white">
             <div className="relative space-y-6">
               <div className="flex flex-wrap items-start justify-between gap-3">
-                <h2 className="text-lg md:text-3xl font-semibold uppercase tracking-label text-primary">
-                  Shard coverage
-                </h2>
+                <SectionTitle icon="modulepuzzle2">Shard coverage</SectionTitle>
                 <div className="text-sm sm:text-xs font-semibold uppercase tracking-label text-secondary">
                   {shardRows.length.toLocaleString()}/4096 Shards
                 </div>
@@ -1470,9 +1463,7 @@ export default function Explorer() {
 
           <section id="consensus-gossip" className="section-glow-b mt-14 relative overflow-hidden rounded-3xl border border-subtle bg-surface p-5 xs:p-10 text-burgundy shadow-xl backdrop-blur-lg dark:text-white">
             <div className="relative space-y-6">
-              <h2 className="text-lg md:text-3xl font-semibold uppercase tracking-label text-primary">
-                Consensus gossip
-              </h2>
+              <SectionTitle icon="chatbubbletypingoval">Consensus gossip</SectionTitle>
               <div className="space-y-4">
                 {messages.map((message) => {
                   const isExpanded = expandedMessages.has(message.seqno);
