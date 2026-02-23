@@ -6,7 +6,7 @@ import { explorerApi, type PeerRecord } from "@/lib/api";
 import { formatPeerRows, type PeerRow } from "@/lib/peers";
 import { truncateMiddle, formatTimestamp, formatRelativeTime } from "@/lib/format";
 import { HoverableCopyText } from "@/components/HoverableCopyText";
-import Icon from "@/components/ui/Icons";
+import { IconEye, IconPencil, IconTrash, IconDownload, IconUpload, IconPlus } from "@tabler/icons-react";
 import Spinner from "@/components/ui/Spinner";
 import Arrow from "@/components/ui/Arrow";
 import { Button } from "@/components/ui/Button";
@@ -134,7 +134,7 @@ function FavoritePeerItem({ favorite, peerRecord, peerRow, onDelete, onNavigate,
               className="flex-1 md:flex-none gap-1"
               aria-label="View peer"
             >
-              <Icon name="visible" className="w-4 h-4 md:w-3 md:h-3" />
+              <IconEye className="w-5 h-5 md:w-4 md:h-4" />
               <span className="hidden md:inline">View</span>
               <Arrow className="hidden md:inline w-3 h-3" />
             </Button>
@@ -146,7 +146,7 @@ function FavoritePeerItem({ favorite, peerRecord, peerRow, onDelete, onNavigate,
             className="flex-1 md:flex-none gap-1"
             aria-label="Edit peer"
           >
-            <Icon name="pen1" className="w-4 h-4 md:w-3 md:h-3" />
+            <IconPencil className="w-5 h-5 md:w-4 md:h-4" />
             <span className="hidden md:inline">Edit</span>
           </Button>
           <Button
@@ -156,7 +156,7 @@ function FavoritePeerItem({ favorite, peerRecord, peerRow, onDelete, onNavigate,
             className="flex-1 md:flex-none gap-1"
             aria-label="Delete peer"
           >
-            <Icon name="recyclebin2" className="w-4 h-4 md:w-3 md:h-3" />
+            <IconTrash className="w-5 h-5 md:w-4 md:h-4" />
             <span className="hidden md:inline">Delete</span>
           </Button>
         </div>
@@ -513,7 +513,7 @@ export default function PeerFavorites() {
                 className="gap-2"
                 aria-label="Export favorites to CSV"
               >
-                <Icon name="downloadsquare" className="w-4 h-4" />
+                <IconDownload className="w-4 h-4" />
                 <span>Export CSV</span>
               </Button>
               <Button
@@ -523,7 +523,7 @@ export default function PeerFavorites() {
                 className="gap-2"
                 aria-label="Import favorites from CSV"
               >
-                <Icon name="arrowuplarge2" className="w-4 h-4" />
+                <IconUpload className="w-4 h-4" />
                 <span>Import CSV</span>
               </Button>
             </div>
@@ -541,7 +541,7 @@ export default function PeerFavorites() {
               onClick={() => setShowAddDialog(true)}
               className="gap-2"
             >
-              <Icon name="applicationadd" className="w-4 h-4" />
+              <IconPlus className="w-4 h-4" />
               <span>Add Peer</span>
             </Button>
           </div>
@@ -576,7 +576,7 @@ export default function PeerFavorites() {
                 className="gap-1.5"
                 aria-label="Export favorites to CSV"
               >
-                <Icon name="downloadsquare" className="w-3.5 h-3.5" />
+                <IconDownload className="w-3.5 h-3.5" />
                 <span>Export</span>
               </Button>
               <Button
@@ -586,7 +586,7 @@ export default function PeerFavorites() {
                 className="gap-1.5"
                 aria-label="Import favorites from CSV"
               >
-                <Icon name="arrowuplarge2" className="w-3.5 h-3.5" />
+                <IconUpload className="w-3.5 h-3.5" />
                 <span>Import</span>
               </Button>
             </div>

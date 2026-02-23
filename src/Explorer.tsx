@@ -120,7 +120,7 @@ function CopyButton({ text, className = "", showText = false }: { text: string; 
       ) : (
         <>
           {showText && <span className="text-sm sm:text-xs text-secondary">Copy to Clipboard</span>}
-          <Icon name="emptyclipboard" className="w-4 h-4 text-muted" />
+          <Icon name="emptyclipboard" className="w-3 h-3 text-muted" />
         </>
       )}
     </button>

@@ -5,7 +5,7 @@ import { formatPeerRows, matchesSearch, PeerRow } from "@/lib/peers";
 import { truncateMiddle } from "@/lib/format";
 import Magnifyingglass from "@/assets/icons/iconset/Magnifyingglass";
 import { usePeerFavorites } from "@/components/helpers/PeerFavoritesContext";
-import Icon from "@/components/ui/Icons";
+import { IconStarFilled } from "@tabler/icons-react";
 
 interface SearchResult {
   type: "peer" | "frame";
@@ -295,7 +295,7 @@ export function HeaderSearch({ fullWidth = false }: HeaderSearchProps) {
                 </div>
                 <div className="ml-2 flex items-center gap-1.5 text-sm sm:text-xs font-semibold uppercase tracking-wider text-faint">
                   {result.type === "peer" && result.peer && isFavorite(result.peer.peerId) && (
-                    <Icon name="starfilled" className="w-3.5 h-3.5 text-orange flex-shrink-0" />
+                    <IconStarFilled className="w-3.5 h-3.5 text-pink flex-shrink-0" />
                   )}
                   <span>{result.type === "peer" ? "PEER" : "FRAME"}</span>
                 </div>

@@ -8,6 +8,7 @@ import { formatPeerVersion } from "@/lib/peers";
 import { getCapabilityLabel, formatCapability, getAllCapabilityIdentifiers } from "@/lib/capabilities";
 import Spinner from "@/components/ui/Spinner";
 import Icon from "@/components/ui/Icons";
+import { IconStar, IconStarFilled } from "@tabler/icons-react";
 import { HoverableCopyText } from "@/components/HoverableCopyText";
 import { Tooltip } from "@/components/ui/Tooltip";
 import { usePeerFavorites } from "@/components/helpers/PeerFavoritesContext";
@@ -272,9 +273,9 @@ export default function PeerDetail() {
                   aria-label={isFavorite(peer.peer_id) ? "Remove from favorites" : "Add to favorites"}
                 >
                   {isFavorite(peer.peer_id) ? (
-                    <Icon name="starfilled" className="w-5 h-5 text-orange" />
+                    <IconStarFilled className="w-5 h-5 text-pink" />
                   ) : (
-                    <Icon name="staroutline" className="w-5 h-5" />
+                    <IconStar className="w-5 h-5" />
                   )}
                 </button>
                 <CopyPeerDataButton peer={peer} />

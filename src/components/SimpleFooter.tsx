@@ -44,7 +44,7 @@ export function SimpleFooter() {
         <div className="grid md:grid-cols-3 gap-8">
           <div>
             <h3 className="text-lg md:text-xl font-semibold text-white/80 mb-4">
-              Quilibrium Explorer
+              Quilibrium Dashboard
             </h3>
             <p className="text-white/60">
               Live health monitoring for the Quilibrium network, applications, and
@@ -94,7 +94,7 @@ export function SimpleFooter() {
           </div>
         </div>
 
-        <div className="border-t border-white/20 mt-8 pt-8 text-center text-white/50">
+        <div className="mt-8 pt-4 text-center text-white/40 text-sm sm:text-xs">
           <p>&copy; {new Date().getFullYear()} Quilibrium. All rights reserved.</p>
         </div>
       </div>

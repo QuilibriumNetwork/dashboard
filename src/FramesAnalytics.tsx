@@ -1459,15 +1459,7 @@ export default function FramesAnalytics() {
                   color: isDark ? "#ffffff" : "#391F5B",
                   fontSize: "clamp(11px, 2.5vw, 12px)",
                 }}
-                content={({ active, payload }) => {
-                  if (!active || !payload || payload.length === 0) {
-                    // Keep the last hovered prover - don't clear on tooltip inactive
-                    return null;
-                  }
-                  const data = payload[0].payload;
-                  setHoveredProver(data.prover);
-                  return null; // Don't show tooltip, we show info in accordion instead
-                }}
+                content={() => null}
               />
               </PieChart>
               </ResponsiveContainer>
@@ -1476,7 +1468,7 @@ export default function FramesAnalytics() {
               <Accordion
                 type="single"
                 collapsible
-                value={hoveredProver || undefined}
+                value={hoveredProver ?? ""}
                 onValueChange={(value) => {
                   // Allow manual accordion control, but also sync with hover
                   if (value) {
