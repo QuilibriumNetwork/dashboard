@@ -380,7 +380,15 @@ html.dark::-webkit-scrollbar-thumb:hover,
   }
 
   /* Section ambient glow patterns — 3 variants cycled across sections.
-     Fixed-size ellipses so the glow stays consistent regardless of section height. */
+     Fixed-size ellipses so the glow stays consistent regardless of section height.
+     background-clip: padding-box prevents gradient color from bleeding into
+     the anti-aliased rounded-corner edges. */
+  .section-glow-a,
+  .section-glow-b,
+  .section-glow-c {
+    background-clip: padding-box;
+  }
+
   .section-glow-a {
     background-image: radial-gradient(400px 350px at 95% 0%, rgba(255, 5, 109, 0.12), transparent 70%),
                       radial-gradient(600px 500px at 0% 95%, rgba(231, 221, 255, 0.25), transparent 70%);

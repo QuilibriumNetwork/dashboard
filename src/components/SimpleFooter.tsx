@@ -106,7 +106,7 @@ export function SimpleFooter() {
           variant="secondary"
           size="icon"
           rounded="full"
-          className="hidden md:flex fixed bottom-6 right-6 z-50 shadow-lg hover:shadow-xl bg-surface-raised/90 backdrop-blur-sm"
+          className="hidden md:flex fixed bottom-6 right-6 z-50 shadow-lg hover:shadow-xl bg-surface-raised/90 backdrop-blur-sm hover:bg-gray-200 dark:hover:bg-white/30"
           aria-label="Scroll to top"
         >
           <svg
