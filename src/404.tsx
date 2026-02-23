@@ -25,7 +25,7 @@ export default function NotFound() {
           property="og:description"
           content="The page you’re looking for doesn’t exist in this sector. It might’ve been decommissioned, renamed, or warped elsewhere."
         />
-        <meta property="og:image" content="/images/socialcard.png" />
+        <meta property="og:image" content="https://explorer.quilibrium.com/images/og-image.png" />
         <meta property="og:url" content="https://www.quilibrium.com" />
         <meta property="og:type" content="website" />
         <meta name="twitter:card" content="summary_large_image" />
@@ -34,7 +34,7 @@ export default function NotFound() {
           name="twitter:description"
           content="The page you’re looking for doesn’t exist in this sector. It might’ve been decommissioned, renamed, or warped elsewhere."
         />
-        <meta name="twitter:image" content="/images/socialcard.png" />
+        <meta name="twitter:image" content="https://explorer.quilibrium.com/images/og-image.png" />
       </Helmet>
       <section className="min-h-screen flex flex-col justify-center items-center bg-page text-primary text-center px-4">
         <div className="max-w-xl w-full">

@@ -117,7 +117,7 @@ export default function FrameDetail() {
   }
 
   return (
-    <PageLayout title={`Frame ${header?.frameNumber.toLocaleString() ?? ""} • Quilibrium Explorer`}>
+    <PageLayout title="Frame Detail • Quilibrium Explorer">
       <div className="relative mx-auto max-w-6xl px-6">
         {/* Hidden element with frame data for copying */}
         {frame && (

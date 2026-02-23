@@ -28,14 +28,22 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     return 'light';
   });
 
-  // Apply the dark class — but don't write to localStorage here
+  // Apply the dark class — but don't write to localStorage here.
+  // Temporarily disable all transitions so the theme swap is instant
+  // (otherwise elements with transition-colors animate through the change).
   useEffect(() => {
     const root = document.documentElement;
+    root.classList.add('no-transition');
     if (theme === 'dark') {
       root.classList.add('dark');
     } else {
       root.classList.remove('dark');
     }
+    // Force a reflow so the browser applies the new colors before re-enabling transitions
+    root.offsetHeight; // eslint-disable-line @typescript-eslint/no-unused-expressions
+    requestAnimationFrame(() => {
+      root.classList.remove('no-transition');
+    });
   }, [theme]);
 
   // Listen for system theme changes only if user hasn't manually set a preference

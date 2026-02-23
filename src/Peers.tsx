@@ -296,7 +296,7 @@ export default function Peers() {
                     <div
                       key={favorite.peerId}
                       onClick={() => navigate(`/peers/${favorite.peerId}`)}
-                      className="flex items-center gap-2 p-2 rounded-lg border border-subtle hover:bg-burgundy/5 dark:hover:bg-white/5 cursor-pointer transition-colors"
+                      className="flex items-center gap-2 p-2 rounded-lg border border-default hover:bg-burgundy/5 dark:hover:bg-white/5 cursor-pointer transition-colors"
                     >
                       <div className="flex-1 min-w-0">
                         <div className="font-mono text-sm sm:text-xs truncate md:truncate-none md:break-words">
@@ -326,18 +326,6 @@ export default function Peers() {
                           </div>
                         )}
                       </div>
-                      {peerRecord && (
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            navigate(`/peers/${favorite.peerId}`);
-                          }}
-                          className="flex-shrink-0 p-2.5 rounded-lg border border-default hover:bg-active-highlight transition-colors"
-                          aria-label="View peer"
-                        >
-                          <Icon name="visible" className="w-5 h-5 text-secondary" />
-                        </button>
-                      )}
                     </div>
                   );
                 })}

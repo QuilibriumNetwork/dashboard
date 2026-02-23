@@ -275,7 +275,7 @@ export default function PeerDetail() {
   }
 
   return (
-    <PageLayout title={`Peer ${peer?.peer_id.slice(0, 16)}… • Quilibrium Explorer`}>
+    <PageLayout title="Peer Detail • Quilibrium Explorer">
       <div className="relative mx-auto max-w-6xl px-6">
         <div className="flex items-center justify-between gap-4">
           <button

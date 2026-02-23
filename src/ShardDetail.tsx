@@ -7,6 +7,7 @@ import { HoverableCopyText } from "@/components/HoverableCopyText";
 import Spinner from "@/components/ui/Spinner";
 import { CollapsiblePanel } from "@/components/ui/CollapsiblePanel";
 import Callout from "@/components/ui/Callout";
+import { PageLayout } from "@/components/PageLayout";
 
 interface CoverageState {
   label: string;
@@ -138,7 +139,7 @@ export default function ShardDetail() {
   };
 
   return (
-    <div className="relative min-h-screen bg-beige pb-24 pt-16 dark:bg-page">
+    <PageLayout title="Shard Detail • Quilibrium Explorer">
       <div className="relative mx-auto max-w-5xl px-6">
         <div className="flex items-center justify-between gap-4 mb-6">
           <Link to="/" className="text-sm action-text">
@@ -256,6 +257,6 @@ export default function ShardDetail() {
           </div>
         </section>
       </div>
-    </div>
+    </PageLayout>
   );
 }

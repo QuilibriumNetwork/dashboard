@@ -2,6 +2,14 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Kill all transitions during theme switch so colors swap instantly */
+html.no-transition,
+html.no-transition *,
+html.no-transition *::before,
+html.no-transition *::after {
+  transition-duration: 0s !important;
+}
+
 /* -------------------------------------------------- */
 /* Reusable component utilities                        */
 /* -------------------------------------------------- */
@@ -296,9 +304,11 @@ h6, nav {
     @apply break-all;
   }
 
-  /* Slightly dim monospace text in dark mode so it's not blazing white */
+  /* Slightly dim monospace text in dark mode so it's not blazing white.
+     Uses the semantic token so the value flips instantly with the theme
+     (an explicit rgba value would be interpolated by transition-colors). */
   html.dark .font-mono {
-    color: rgba(255, 255, 255, 0.88);
+    color: rgb(var(--color-text-primary) / 0.88);
   }
 }
 
