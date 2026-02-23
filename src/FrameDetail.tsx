@@ -139,7 +139,7 @@ export default function FrameDetail() {
           </div>
         )}
 
-        <section className="section-glow-a mt-6 rounded-3xl border border-subtle bg-surface p-8 text-burgundy shadow-xl dark:text-white">
+        <section className="section-glow-a mt-6 rounded-3xl border border-subtle bg-surface p-5 xs:p-8 text-burgundy shadow-xl dark:text-white">
           <div className="-mt-2 flex items-start justify-between">
             <div>
               <h1 className="text-3xl font-semibold">Frame #{header?.frameNumber.toLocaleString() ?? frameNumber}</h1>
@@ -187,7 +187,7 @@ export default function FrameDetail() {
           </div>
         </section>
 
-        <section className="section-glow-b mt-10 rounded-3xl border border-subtle bg-surface p-8 shadow-xl">
+        <section className="section-glow-b mt-10 rounded-3xl border border-subtle bg-surface p-5 xs:p-8 shadow-xl">
           <div className="flex flex-wrap items-center justify-between gap-4">
             <h2 className="text-2xl font-semibold text-primary">Request breakdown</h2>
             <div className="text-sm text-muted">

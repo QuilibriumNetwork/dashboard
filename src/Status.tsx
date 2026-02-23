@@ -446,7 +446,7 @@ export default function Explorer() {
     <>
       <PageLayout title="Quilibrium Explorer">
         <div className="relative mx-auto max-w-6xl px-6">
-          <section className="section-glow-a relative overflow-hidden rounded-3xl border border-subtle bg-surface p-10 text-burgundy shadow-xl backdrop-blur-lg dark:text-white">
+          <section className="section-glow-a relative overflow-hidden rounded-3xl border border-subtle bg-surface p-5 xs:p-10 text-burgundy shadow-xl backdrop-blur-lg dark:text-white">
             <div className="relative flex flex-col gap-10 lg:flex-row lg:items-center lg:justify-between">
               <div className="flex-1 space-y-6">
                 <div className="inline-flex flex-wrap items-center gap-3 rounded-full border border-burgundy/15 bg-light-grey px-4 py-2 text-sm sm:text-xs font-semibold uppercase tracking-label text-burgundy/70 dark:bg-surface-subtle dark:text-white/70">

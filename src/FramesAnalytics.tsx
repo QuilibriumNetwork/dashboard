@@ -1194,13 +1194,12 @@ export default function FramesAnalytics() {
               </div>
             )}
             {storageUsage && storageUsage.frameCount > 10 && (
-              <Button
-                variant="ghost"
-                size="xs"
+              <button
                 onClick={() => setShowClearModal(true)}
+                className="text-sm sm:text-xs font-medium text-muted hover:text-danger transition-colors"
               >
                 Clear Frame Data
-              </Button>
+              </button>
             )}
           </div>
           <div className="flex flex-col gap-2">
@@ -1286,7 +1285,7 @@ export default function FramesAnalytics() {
         )}
 
         {/* Statistics Cards */}
-        <section className="mb-10 rounded-3xl border border-subtle bg-surface p-8 text-burgundy shadow-xl dark:text-white">
+        <section className="mb-10 rounded-3xl border border-subtle bg-surface p-5 xs:p-8 text-burgundy shadow-xl dark:text-white">
           <h2 className="mb-6 text-2xl font-semibold">Statistics</h2>
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
             <div className="flex flex-col gap-3">
@@ -1372,7 +1371,7 @@ export default function FramesAnalytics() {
         </section>
 
         {/* Requests Per Frame Chart */}
-        <section className="mb-10 rounded-3xl border border-subtle bg-surface p-8 shadow-xl dark:text-white">
+        <section className="mb-10 rounded-3xl border border-subtle bg-surface p-5 xs:p-8 shadow-xl dark:text-white">
           <h2 className="mb-6 text-2xl font-semibold">Requests Per Frame</h2>
           <ResponsiveContainer width="100%" height={400}>
             <LineChart data={analyticsData}>
@@ -1416,7 +1415,7 @@ export default function FramesAnalytics() {
         </section>
 
         {/* Prover Distribution Pie Chart */}
-        <section className="mb-10 rounded-3xl border border-subtle bg-surface p-8 shadow-xl dark:text-white">
+        <section className="mb-10 rounded-3xl border border-subtle bg-surface p-5 xs:p-8 shadow-xl dark:text-white">
           <h2 className="mb-6 text-2xl font-semibold">
             Prover Distribution (Top 10 by Frame Count)
           </h2>
@@ -1542,7 +1541,7 @@ export default function FramesAnalytics() {
 
         {/* Frames Per Prover Per Hour */}
         {framesPerProverPerHour.chartData.length > 0 && (
-          <section className="mb-10 rounded-3xl border border-subtle bg-surface p-8 shadow-xl dark:text-white">
+          <section className="mb-10 rounded-3xl border border-subtle bg-surface p-5 xs:p-8 shadow-xl dark:text-white">
             <h2 className="mb-6 text-2xl font-semibold">
               Frames Per Prover Over Time (Top 10 Provers)
             </h2>
@@ -1708,7 +1707,7 @@ export default function FramesAnalytics() {
 
         {/* Frame Spacing Over Time */}
         {frameSpacingOverTime.length > 0 && (
-          <section className="mb-10 rounded-3xl border border-subtle bg-surface p-8 shadow-xl dark:text-white">
+          <section className="mb-10 rounded-3xl border border-subtle bg-surface p-5 xs:p-8 shadow-xl dark:text-white">
             <h2 className="mb-6 text-2xl font-semibold">Average Time Between Frames Over Time</h2>
             <ResponsiveContainer width="100%" height={400}>
               <LineChart data={frameSpacingOverTime} margin={{ left: 50, right: 20 }}>

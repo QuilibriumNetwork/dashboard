@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/Button";
-import ChevronDown from "@/components/ui/ChevronDown";
 import { Checkbox } from "@/components/ui/Checkbox";
+import { CollapsiblePanel } from "@/components/ui/CollapsiblePanel";
 import { type PeerRow } from "@/lib/peers";
 import { type PeerRecord } from "@/lib/api";
 import { formatCapability, getCapabilityLabel } from "@/lib/capabilities";
@@ -26,7 +26,6 @@ export function PeerDirectoryExport({
   allPeerRecords,
   filters,
 }: PeerDirectoryExportProps) {
-  const [exportExpanded, setExportExpanded] = useState(false);
   const [exportOptions, setExportOptions] = useState<ExportOptions>({
     includeVersion: false,
     includePubsubAddress: false,
@@ -219,21 +218,8 @@ export function PeerDirectoryExport({
   const hasAnyOptionSelected = Object.values(exportOptions).some((v) => v === true);
 
   return (
-    <div className="rounded-2xl border border-default bg-surface-raised overflow-hidden">
-      <button
-        onClick={() => setExportExpanded(!exportExpanded)}
-        className="w-full flex items-center justify-between px-6 py-4 text-left transition-colors hover:bg-light-grey/30 dark:hover:bg-white/5"
-      >
-        <span className="text-sm font-semibold uppercase tracking-label text-secondary">
-          Export
-        </span>
-        <ChevronDown
-          className={`w-4 h-4 text-muted transition-transform ${exportExpanded ? 'rotate-180' : ''}`}
-        />
-      </button>
-
-      {exportExpanded && (
-        <div className="px-6 pb-6 pt-2 space-y-4 border-t border-subtle">
+    <CollapsiblePanel label="Export">
+      <div className="px-6 pb-6 pt-2 space-y-4">
           <div className="text-sm sm:text-xs text-muted">
             Export {filteredPeers.length} peer{filteredPeers.length !== 1 ? "s" : ""} (respects current filters)
           </div>
@@ -325,9 +311,8 @@ export function PeerDirectoryExport({
               Export JSON
             </Button>
           </div>
-        </div>
-      )}
-    </div>
+      </div>
+    </CollapsiblePanel>
   );
 }
 

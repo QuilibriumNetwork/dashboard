@@ -1,7 +1,6 @@
-import { useState } from "react";
-import ChevronDown from "@/components/ui/ChevronDown";
 import { Checkbox } from "@/components/ui/Checkbox";
 import { Button } from "@/components/ui/Button";
+import { CollapsiblePanel } from "@/components/ui/CollapsiblePanel";
 import { IconX } from "@tabler/icons-react";
 
 export interface PeerFilterState {
@@ -35,8 +34,6 @@ export function PeerDirectoryFilters({
   streamProtocolCounts,
   headerAction,
 }: PeerDirectoryFiltersProps) {
-  const [filtersExpanded, setFiltersExpanded] = useState(false);
-
   const updateFilter = <K extends keyof PeerFilterState>(
     key: K,
     value: PeerFilterState[K]
@@ -62,21 +59,8 @@ export function PeerDirectoryFilters({
     filters.selectedCapabilityCounts.size > 0;
 
   return (
-    <div className="rounded-2xl border border-default bg-surface-raised overflow-hidden">
-      <button
-        onClick={() => setFiltersExpanded(!filtersExpanded)}
-        className="w-full flex items-center justify-between px-6 py-4 text-left transition-colors hover:bg-light-grey/30 dark:hover:bg-white/5"
-      >
-        <span className="text-sm font-semibold uppercase tracking-label text-secondary">
-          Filters
-        </span>
-        <ChevronDown
-          className={`w-4 h-4 text-muted transition-transform ${filtersExpanded ? 'rotate-180' : ''}`}
-        />
-      </button>
-
-      {filtersExpanded && (
-        <div className="px-6 pb-6 pt-2 space-y-4 border-t border-subtle">
+    <CollapsiblePanel label="Filters">
+      <div className="px-6 pb-6 pt-2 space-y-4">
           {/* Search by Peer ID or IP */}
           <div>
             <label className="block form-label mb-2">
@@ -291,9 +275,8 @@ export function PeerDirectoryFilters({
               </Button>
             </div>
           )}
-        </div>
-      )}
-    </div>
+      </div>
+    </CollapsiblePanel>
   );
 }
 

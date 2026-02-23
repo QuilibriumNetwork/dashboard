@@ -1,6 +1,5 @@
-import { useState } from "react";
-import ChevronDown from "@/components/ui/ChevronDown";
 import { Button } from "@/components/ui/Button";
+import { CollapsiblePanel } from "@/components/ui/CollapsiblePanel";
 import { IconX } from "@tabler/icons-react";
 
 export interface FrameFilterState {
@@ -20,8 +19,6 @@ export function FrameFeedFilters({
   filters,
   onFiltersChange,
 }: FrameFeedFiltersProps) {
-  const [filtersExpanded, setFiltersExpanded] = useState(false);
-
   const updateFilter = <K extends keyof FrameFilterState>(
     key: K,
     value: FrameFilterState[K]
@@ -47,21 +44,8 @@ export function FrameFeedFilters({
     filters.maxRequests;
 
   return (
-    <div className="rounded-2xl border border-default bg-surface-raised overflow-hidden">
-      <button
-        onClick={() => setFiltersExpanded(!filtersExpanded)}
-        className="w-full flex items-center justify-between px-6 py-4 text-left transition-colors hover:bg-light-grey/30 dark:hover:bg-white/5"
-      >
-        <span className="text-sm font-semibold uppercase tracking-label text-secondary">
-          Filters
-        </span>
-        <ChevronDown
-          className={`w-4 h-4 text-muted transition-transform ${filtersExpanded ? 'rotate-180' : ''}`}
-        />
-      </button>
-
-      {filtersExpanded && (
-        <div className="px-6 pb-6 pt-2 space-y-4 border-t border-subtle">
+    <CollapsiblePanel label="Filters">
+      <div className="px-6 pb-6 pt-2 space-y-4">
           {/* Search by Prover or Selector */}
           <div>
             <label className="block form-label mb-2">
@@ -158,9 +142,8 @@ export function FrameFeedFilters({
               </Button>
             </div>
           )}
-        </div>
-      )}
-    </div>
+      </div>
+    </CollapsiblePanel>
   );
 }
 

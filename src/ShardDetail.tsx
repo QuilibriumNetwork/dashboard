@@ -5,6 +5,7 @@ import { formatProvers, type FormattedProver, prefixHex } from "@/lib/provers";
 import { ProverCard } from "@/components/ProverCard";
 import { HoverableCopyText } from "@/components/HoverableCopyText";
 import Spinner from "@/components/ui/Spinner";
+import { CollapsiblePanel } from "@/components/ui/CollapsiblePanel";
 
 interface CoverageState {
   label: string;
@@ -138,29 +139,30 @@ export default function ShardDetail() {
   return (
     <div className="relative min-h-screen bg-beige pb-24 pt-16 dark:bg-page">
       <div className="relative mx-auto max-w-5xl px-6">
-        <section className="section-glow-a relative overflow-hidden rounded-3xl border border-subtle bg-surface p-10 text-burgundy shadow-xl backdrop-blur-lg dark:text-white">
+        <div className="flex items-center justify-between gap-4 mb-6">
+          <Link to="/" className="text-sm action-text">
+            ← Back
+          </Link>
+        </div>
+
+        <section className="section-glow-a relative overflow-hidden rounded-3xl border border-subtle bg-surface p-5 xs:p-10 text-burgundy shadow-xl backdrop-blur-lg dark:text-white">
           <div className="relative space-y-6">
-            <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-              <div>
-                <p className="label-text">
-                  Shard filter
-                </p>
-                <div className="mt-1 font-mono text-sm break-all">
-                  {hasFilter ? (
-                    displayFilter
-                  ) : (
-                    "–"
-                  )}
-                </div>
+            <div>
+              <p className="label-text">
+                Shard filter
+              </p>
+              <div className="mt-1 font-mono text-sm break-all">
+                {hasFilter ? (
+                  displayFilter
+                ) : (
+                  "–"
+                )}
               </div>
-              <Link to="/" className="text-sm sm:text-xs font-semibold uppercase tracking-label text-secondary hover:text-burgundy dark:hover:text-white transition-colors">
-                ← Back to explorer
-              </Link>
             </div>
 
             {coverage && (
-              <div className={`inline-flex flex-col rounded-2xl px-4 py-3 text-sm sm:text-xs font-semibold uppercase tracking-label ${coverageClass}`}>
-                <span>{coverage.label}</span>
+              <div className={`inline-flex flex-col rounded-2xl px-4 py-3 ${coverageClass}`}>
+                <span className="text-base sm:text-sm font-semibold">{coverage.label}</span>
                 <span className="mt-1 text-xs normal-case tracking-normal text-secondary">
                   {coverage.description}
                 </span>
@@ -193,70 +195,60 @@ export default function ShardDetail() {
                 No provers have been reported for this shard filter.
               </div>
             ) : (
-              <div className="space-y-10">
+              <div className="space-y-4">
                 {groupedProvers.map(({ status, entries }) => (
-                  <div key={status}>
-                    <div className="flex flex-wrap items-center justify-between gap-3">
-                      <h3 className="text-base font-semibold uppercase tracking-label text-primary">
-                        {status} ({entries.length})
-                      </h3>
-                      <button
-                        onClick={() => toggleStatus(status)}
-                        className="text-sm sm:text-xs font-semibold uppercase tracking-label text-secondary hover:text-burgundy dark:hover:text-white transition-colors"
-                      >
-                        {expandedStatuses.has(status) ? "Collapse" : "Expand"}
-                      </button>
+                  <CollapsiblePanel
+                    key={status}
+                    label={`${status} (${entries.length})`}
+                    expanded={expandedStatuses.has(status)}
+                    onToggle={() => toggleStatus(status)}
+                  >
+                    <div className="overflow-x-auto md:hidden">
+                      <div className="max-h-[500px] overflow-y-auto">
+                        <table className="min-w-full divide-y divide-subtle text-left text-sm text-primary">
+                          <thead className="sticky top-0 z-10 bg-surface-raised label-text">
+                            <tr>
+                              <th className="py-3 px-4">Address</th>
+                              <th className="py-3 px-4">Public key</th>
+                              <th className="py-3 px-4">Seniority</th>
+                              <th className="py-3 px-4">Storage</th>
+                              <th className="py-3 px-4">Delegate</th>
+                            </tr>
+                          </thead>
+                          <tbody className="divide-y divide-subtle">
+                            {entries.map((prover) => (
+                              <tr key={prover.id}>
+                                <td className="py-3 px-4 font-mono text-sm sm:text-xs break-all align-top">
+                                  <HoverableCopyText text={prover.address}>{prover.address}</HoverableCopyText>
+                                </td>
+                                <td className="py-3 px-4 font-mono text-sm sm:text-xs break-all align-top">
+                                  {prover.publicKey ? (
+                                    <HoverableCopyText text={prover.publicKey}>{prover.publicKey}</HoverableCopyText>
+                                  ) : (
+                                    "–"
+                                  )}
+                                </td>
+                                <td className="py-3 px-4 text-sm sm:text-xs align-top">{prover.seniorityLabel}</td>
+                                <td className="py-3 px-4 text-sm sm:text-xs align-top">{prover.storageLabel}</td>
+                                <td className="py-3 px-4 text-sm sm:text-xs break-all align-top">
+                                  {prover.delegate ? (
+                                    <HoverableCopyText text={prover.delegate}>{prover.delegate}</HoverableCopyText>
+                                  ) : (
+                                    "–"
+                                  )}
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
                     </div>
-                    {expandedStatuses.has(status) && (
-                      <>
-                        <div className="mt-4 overflow-x-auto md:hidden">
-                          <div className="max-h-[500px] overflow-y-auto">
-                            <table className="min-w-full divide-y divide-subtle text-left text-sm text-primary">
-                              <thead className="sticky top-0 z-10 bg-surface label-text">
-                                <tr>
-                                  <th className="py-3 px-4">Address</th>
-                                  <th className="py-3 px-4">Public key</th>
-                                  <th className="py-3 px-4">Seniority</th>
-                                  <th className="py-3 px-4">Storage</th>
-                                  <th className="py-3 px-4">Delegate</th>
-                                </tr>
-                              </thead>
-                              <tbody className="divide-y divide-subtle">
-                                {entries.map((prover) => (
-                                  <tr key={prover.id}>
-                                    <td className="py-3 px-4 font-mono text-sm sm:text-xs break-all align-top">
-                                      <HoverableCopyText text={prover.address}>{prover.address}</HoverableCopyText>
-                                    </td>
-                                    <td className="py-3 px-4 font-mono text-sm sm:text-xs break-all align-top">
-                                      {prover.publicKey ? (
-                                        <HoverableCopyText text={prover.publicKey}>{prover.publicKey}</HoverableCopyText>
-                                      ) : (
-                                        "–"
-                                      )}
-                                    </td>
-                                    <td className="py-3 px-4 text-sm sm:text-xs align-top">{prover.seniorityLabel}</td>
-                                    <td className="py-3 px-4 text-sm sm:text-xs align-top">{prover.storageLabel}</td>
-                                    <td className="py-3 px-4 text-sm sm:text-xs break-all align-top">
-                                      {prover.delegate ? (
-                                        <HoverableCopyText text={prover.delegate}>{prover.delegate}</HoverableCopyText>
-                                      ) : (
-                                        "–"
-                                      )}
-                                    </td>
-                                  </tr>
-                                ))}
-                              </tbody>
-                            </table>
-                          </div>
-                        </div>
-                        <div className="hidden md:grid mt-4 gap-4 md:grid-cols-2">
-                          {entries.map((prover) => (
-                            <ProverCard key={prover.id} prover={prover} />
-                          ))}
-                        </div>
-                      </>
-                    )}
-                  </div>
+                    <div className="hidden md:grid p-6 gap-4 md:grid-cols-2">
+                      {entries.map((prover) => (
+                        <ProverCard key={prover.id} prover={prover} />
+                      ))}
+                    </div>
+                  </CollapsiblePanel>
                 ))}
               </div>
             )}

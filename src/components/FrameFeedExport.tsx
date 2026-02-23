@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/Button";
-import ChevronDown from "@/components/ui/ChevronDown";
 import { Checkbox } from "@/components/ui/Checkbox";
+import { CollapsiblePanel } from "@/components/ui/CollapsiblePanel";
 import { type FrameFilterState } from "./FrameFeedFilters";
 import { base64ToHex, base64ToIPFSCID } from "@/lib/format";
 
@@ -30,7 +30,6 @@ export function FrameFeedExport({
   filteredFrames,
   filters,
 }: FrameFeedExportProps) {
-  const [exportExpanded, setExportExpanded] = useState(false);
   const [exportOptions, setExportOptions] = useState<FrameExportOptions>({
     includeRequests: false,
     includeProver: false,
@@ -223,21 +222,8 @@ export function FrameFeedExport({
   };
 
   return (
-    <div className="rounded-2xl border border-default bg-surface-raised overflow-hidden">
-      <button
-        onClick={() => setExportExpanded(!exportExpanded)}
-        className="w-full flex items-center justify-between px-6 py-4 text-left transition-colors hover:bg-light-grey/30 dark:hover:bg-white/5"
-      >
-        <span className="text-sm font-semibold uppercase tracking-label text-secondary">
-          Export
-        </span>
-        <ChevronDown
-          className={`w-4 h-4 text-muted transition-transform ${exportExpanded ? 'rotate-180' : ''}`}
-        />
-      </button>
-
-      {exportExpanded && (
-        <div className="px-6 pb-6 pt-2 space-y-4 border-t border-subtle">
+    <CollapsiblePanel label="Export">
+      <div className="px-6 pb-6 pt-2 space-y-4">
           <div className="text-sm sm:text-xs text-muted">
             Export {filteredFrames.length} frame{filteredFrames.length !== 1 ? "s" : ""} (respects current filters)
           </div>
@@ -329,9 +315,8 @@ export function FrameFeedExport({
               Export JSON
             </Button>
           </div>
-        </div>
-      )}
-    </div>
+      </div>
+    </CollapsiblePanel>
   );
 }
 
