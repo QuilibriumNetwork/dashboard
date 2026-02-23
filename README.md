@@ -1,14 +1,14 @@
-# Quilibrium New Website
+# Quilibrium Dashboard
 
-This is the new Quilibrium website built with [Vite](https://vitejs.dev/), [React](https://react.dev/), and [Tailwind CSS v3](https://tailwindcss.com/).
+This is the new Quilibrium Dashboard built with [Vite](https://vitejs.dev/), [React](https://react.dev/), and [Tailwind CSS v3](https://tailwindcss.com/).
 
 ## Getting Started
 
 First, run the development server:
 
 ```bash
-npm install
-npm run dev
+yarn install
+yarn dev
 ```
 
 Open [http://localhost:5173](http://localhost:5173) with your browser to see the result.
@@ -18,7 +18,7 @@ Open [http://localhost:5173](http://localhost:5173) with your browser to see the
 To build the project for production:
 
 ```bash
-npm run build
+yarn build
 ```
 
 This generates the static output into the `dist/` directory.
@@ -26,12 +26,23 @@ This generates the static output into the `dist/` directory.
 To preview the production build locally:
 
 ```bash
-npm run preview
+yarn preview
 ```
 
 You can host the contents of the `dist/` folder on any static hosting provider (e.g. Vercel, Netlify, S3, etc.).
 
 ---
+
+### Deployment to `gh-pages` branch
+Once you have your `dist/` folder generated, checkout the `gh-pages` branch.
+
+```cli
+git checkout gh-pages
+```
+
+then copy the `dist/assets/` directoy to the `assets` folder, and the `dist/index.html` file to the root `index.html`.
+
+When doing the commit you should see the `index.html` file changing the random `index-XXXXXX.js` and `index-XXXXXX.css` script/link tags.
 
 ## Framework & Build Setup
 
@@ -52,17 +63,4 @@ You can host the contents of the `dist/` folder on any static hosting provider (
 
 ---
 
-## Q Elements
-
-This is a hidden page containing Quilibrium’s design foundations — including typography, buttons, icons, layout components, and other visual elements.
-Go to [Q Elements](/elements)
-
----
-
-## TO DO
-
-- [DONE] Update the README with tutorials to insert/manage the various UI elements, or create a "hidden" website page with examples.
-- QConsole page
-- Builders page
-- Node runners page
 
