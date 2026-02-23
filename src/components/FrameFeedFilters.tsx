@@ -1,5 +1,7 @@
 import { useState } from "react";
 import ChevronDown from "@/components/ui/ChevronDown";
+import { Button } from "@/components/ui/Button";
+import { IconX } from "@tabler/icons-react";
 
 export interface FrameFilterState {
   searchQuery: string;
@@ -144,12 +146,16 @@ export function FrameFeedFilters({
           {/* Clear Filters Button */}
           {hasActiveFilters && (
             <div className="pt-2">
-              <button
+              <Button
                 onClick={clearAllFilters}
-                className="text-sm sm:text-xs font-semibold text-secondary hover:text-primary transition-colors"
+                variant="danger"
+                size="small"
+                rounded="lg"
+                className="gap-1.5"
               >
-                Clear all filters
-              </button>
+                <IconX className="w-3.5 h-3.5" />
+                <span>Clear all filters</span>
+              </Button>
             </div>
           )}
         </div>

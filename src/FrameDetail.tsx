@@ -14,9 +14,11 @@ import Spinner from "@/components/ui/Spinner";
 import Icon from "@/components/ui/Icons";
 import ChevronDown from "@/components/ui/ChevronDown";
 import { HoverableCopyText } from "@/components/HoverableCopyText";
+import { IconCopy, IconCopyCheck } from "@tabler/icons-react";
 
 function CopyFrameDataButton() {
   const [copied, setCopied] = useState(false);
+  const [hovered, setHovered] = useState(false);
 
   const handleCopy = async () => {
     try {
@@ -36,10 +38,21 @@ function CopyFrameDataButton() {
   return (
     <button
       onClick={handleCopy}
-      className="flex items-center gap-2 px-2 py-1 text-sm action-text bg-transparent hover:bg-transparent"
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+      className="relative p-2.5 text-muted hover:text-pink transition-colors bg-transparent hover:bg-transparent"
     >
-      <Icon name="emptyclipboard" className="w-4 h-4 flex-shrink-0" />
-      <span>{copied ? 'Copied!' : 'Copy data'}</span>
+      {copied ? (
+        <IconCopyCheck className="w-6 h-6" />
+      ) : (
+        <IconCopy className="w-6 h-6" />
+      )}
+      {hovered && (
+        <span className={`absolute bottom-full left-1/2 -translate-x-1/2 mb-0.5 px-2 py-1 font-inter text-sm sm:text-xs tracking-normal rounded shadow-lg whitespace-nowrap pointer-events-none z-50 ${copied ? 'bg-green text-white' : 'bg-tooltip text-[var(--color-text-tooltip)]'}`}>
+          {copied ? 'Copied!' : 'Copy data'}
+          <span className={`absolute top-full left-1/2 -translate-x-1/2 -mt-px border-4 border-transparent ${copied ? 'border-t-green' : 'border-t-[var(--color-bg-tooltip)]'}`} />
+        </span>
+      )}
     </button>
   );
 }
@@ -118,9 +131,6 @@ export default function FrameDetail() {
           <Link to="/" className="text-sm action-text">
             ← Back
           </Link>
-          {frame && (
-            <CopyFrameDataButton />
-          )}
         </div>
 
         {error && (
@@ -130,13 +140,16 @@ export default function FrameDetail() {
         )}
 
         <section className="section-glow-a mt-6 rounded-3xl border border-subtle bg-surface p-8 text-burgundy shadow-xl dark:text-white">
-          <div className="-mt-2">
-            <h1 className="text-3xl font-semibold">Frame #{header?.frameNumber.toLocaleString() ?? frameNumber}</h1>
-            {header && (
-              <div className="mt-2 text-sm sm:text-xs text-muted">
-                {formatTimestamp(header.timestamp)} {formatRelative(header.timestamp) && `(${formatRelative(header.timestamp)})`}
-              </div>
-            )}
+          <div className="-mt-2 flex items-start justify-between">
+            <div>
+              <h1 className="text-3xl font-semibold">Frame #{header?.frameNumber.toLocaleString() ?? frameNumber}</h1>
+              {header && (
+                <div className="mt-2 text-sm sm:text-xs text-muted">
+                  {formatTimestamp(header.timestamp)} {formatRelative(header.timestamp) && `(${formatRelative(header.timestamp)})`}
+                </div>
+              )}
+            </div>
+            {frame && <CopyFrameDataButton />}
           </div>
           <div className="mt-6 grid gap-6 md:grid-cols-2">
             <div className="rounded-2xl border border-subtle bg-white/90 p-5 dark:bg-surface-raised">

@@ -16,7 +16,7 @@ const TooltipContent = React.forwardRef<
       ref={ref}
       sideOffset={sideOffset}
       className={cn(
-        "z-50 rounded px-2 py-1 text-sm sm:text-xs text-[var(--color-text-tooltip)] bg-tooltip shadow-lg",
+        "z-50 rounded px-2 py-1 font-inter text-sm sm:text-xs tracking-normal text-[var(--color-text-tooltip)] bg-tooltip shadow-lg",
         "select-none",
         className,
       )}

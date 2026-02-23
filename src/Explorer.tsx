@@ -29,7 +29,6 @@ import {
   type PeerRow,
 } from "@/lib/peers";
 import ChevronDown from "@/components/ui/ChevronDown";
-import Icon from "@/components/ui/Icons";
 import Arrow from "@/components/ui/Arrow";
 import { HoverableCopyText } from "@/components/HoverableCopyText";
 import { usePeerFilters, serializePeerFilters } from "@/components/PeerDirectoryFiltersAndExport";
@@ -46,6 +45,8 @@ import {
 } from "@/lib/frameCache";
 import { formatProvers } from "@/lib/provers";
 import { ProverCard } from "@/components/ProverCard";
+import { Button } from "@/components/ui/Button";
+import { IconCopy, IconCopyCheck } from "@tabler/icons-react";
 
 const SHARD_STATUS_COLUMNS = [
   "active",
@@ -120,7 +121,7 @@ function CopyButton({ text, className = "", showText = false }: { text: string; 
       ) : (
         <>
           {showText && <span className="text-sm sm:text-xs text-secondary">Copy to Clipboard</span>}
-          <Icon name="emptyclipboard" className="w-3 h-3 text-muted" />
+          <IconCopy className="w-4 h-4 text-muted" />
         </>
       )}
     </button>
@@ -129,6 +130,7 @@ function CopyButton({ text, className = "", showText = false }: { text: string; 
 
 function CopyFrameDataButton({ frame }: { frame: GlobalFrame | null }) {
   const [copied, setCopied] = useState(false);
+  const [hovered, setHovered] = useState(false);
 
   const handleCopy = async () => {
     try {
@@ -148,10 +150,21 @@ function CopyFrameDataButton({ frame }: { frame: GlobalFrame | null }) {
   return (
     <button
       onClick={handleCopy}
-      className="flex items-center gap-2 px-2 py-1 text-sm action-text bg-transparent hover:bg-transparent"
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+      className="relative p-2.5 text-muted hover:text-pink transition-colors bg-transparent hover:bg-transparent"
     >
-      <Icon name="emptyclipboard" className="w-4 h-4 flex-shrink-0" />
-      <span>{copied ? 'Copied!' : 'Copy data'}</span>
+      {copied ? (
+        <IconCopyCheck className="w-6 h-6" />
+      ) : (
+        <IconCopy className="w-6 h-6" />
+      )}
+      {hovered && (
+        <span className={`absolute bottom-full left-1/2 -translate-x-1/2 mb-0.5 px-2 py-1 font-inter text-sm sm:text-xs tracking-normal rounded shadow-lg whitespace-nowrap pointer-events-none z-50 ${copied ? 'bg-green text-white' : 'bg-tooltip text-[var(--color-text-tooltip)]'}`}>
+          {copied ? 'Copied!' : 'Copy data'}
+          <span className={`absolute top-full left-1/2 -translate-x-1/2 -mt-px border-4 border-transparent ${copied ? 'border-t-green' : 'border-t-[var(--color-bg-tooltip)]'}`} />
+        </span>
+      )}
     </button>
   );
 }
@@ -187,24 +200,26 @@ function CopyFilterLinkButton({ filters }: { filters: PeerFilterState }) {
   }
 
   return (
-    <button
+    <Button
       onClick={handleCopy}
-      className="text-sm sm:text-xs font-semibold text-secondary hover:text-primary transition-colors flex items-center gap-1.5"
-      title={copied ? "Link copied!" : "Copy filter link"}
+      variant={copied ? "success" : "subtle"}
+      size="small"
+      rounded="lg"
+      className="gap-1.5"
       aria-label="Copy filter link"
     >
       {copied ? (
         <>
-          <span className="text-green dark:text-light-green">Link copied!</span>
-          <Icon name="check" className="w-3 h-3 text-green dark:text-light-green" />
+          <IconCopyCheck className="w-3.5 h-3.5" />
+          <span>Link copied!</span>
         </>
       ) : (
         <>
+          <IconCopy className="w-3.5 h-3.5" />
           <span>Copy filter link</span>
-          <Icon name="emptyclipboard" className="w-3 h-3" />
         </>
       )}
-    </button>
+    </Button>
   );
 }
 
@@ -1317,7 +1332,6 @@ export default function Explorer() {
                   <div className="text-sm sm:text-xs font-semibold uppercase tracking-label text-secondary">
                     {formattedPeerCount} peers
                   </div>
-                  <CopyFilterLinkButton filters={filters} />
                 </div>
                 <div className="flex flex-col items-end gap-2">
                   <Link
@@ -1338,6 +1352,7 @@ export default function Explorer() {
                 capabilityCountCounts={capabilityCountCounts}
                 pubsubProtocolCounts={pubsubProtocolCounts}
                 streamProtocolCounts={streamProtocolCounts}
+                headerAction={<CopyFilterLinkButton filters={filters} />}
               />
 
               <PeerDirectoryExport

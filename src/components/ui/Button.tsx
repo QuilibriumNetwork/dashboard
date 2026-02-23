@@ -16,6 +16,9 @@ const buttonVariants = cva(base, {
       secondary:
         "uppercase tracking-label text-secondary hover:text-primary border border-default hover:bg-active-highlight",
 
+      subtle:
+        "text-secondary hover:text-primary border border-default hover:bg-active-highlight",
+
       burgundy:
         "bg-burgundy text-white border-2 border-burgundy hover:bg-transparent hover:text-burgundy",
 

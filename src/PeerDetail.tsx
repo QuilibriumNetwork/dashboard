@@ -8,7 +8,7 @@ import { formatPeerVersion } from "@/lib/peers";
 import { getCapabilityLabel, formatCapability, getAllCapabilityIdentifiers } from "@/lib/capabilities";
 import Spinner from "@/components/ui/Spinner";
 import Icon from "@/components/ui/Icons";
-import { IconStar, IconStarFilled } from "@tabler/icons-react";
+import { IconCopy, IconCopyCheck, IconStar, IconStarFilled } from "@tabler/icons-react";
 import { HoverableCopyText } from "@/components/HoverableCopyText";
 import { Tooltip } from "@/components/ui/Tooltip";
 import { usePeerFavorites } from "@/components/helpers/PeerFavoritesContext";
@@ -46,6 +46,7 @@ function DetailCard({
 
 function CopyPeerDataButton({ peer }: { peer: PeerRecord }) {
   const [copied, setCopied] = useState(false);
+  const [hovered, setHovered] = useState(false);
 
   const handleCopy = async () => {
     try {
@@ -61,15 +62,28 @@ function CopyPeerDataButton({ peer }: { peer: PeerRecord }) {
   return (
     <button
       onClick={handleCopy}
-      className="flex items-center gap-2 px-2 py-1 text-sm action-text bg-transparent hover:bg-transparent"
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+      className="relative p-2.5 text-muted hover:text-pink transition-colors bg-transparent hover:bg-transparent"
     >
-      <span>{copied ? 'Copied!' : 'Copy data'}</span>
+      {copied ? (
+        <IconCopyCheck className="w-6 h-6" />
+      ) : (
+        <IconCopy className="w-6 h-6" />
+      )}
+      {hovered && (
+        <span className={`absolute bottom-full left-1/2 -translate-x-1/2 mb-0.5 px-2 py-1 font-inter text-sm sm:text-xs tracking-normal rounded shadow-lg whitespace-nowrap pointer-events-none z-50 ${copied ? 'bg-green text-white' : 'bg-tooltip text-[var(--color-text-tooltip)]'}`}>
+          {copied ? 'Copied!' : 'Copy data'}
+          <span className={`absolute top-full left-1/2 -translate-x-1/2 -mt-px border-4 border-transparent ${copied ? 'border-t-green' : 'border-t-[var(--color-bg-tooltip)]'}`} />
+        </span>
+      )}
     </button>
   );
 }
 
 function CopyKeyRegistryButton({ keyRegistry }: { keyRegistry: KeyRegistry }) {
   const [copied, setCopied] = useState(false);
+  const [hovered, setHovered] = useState(false);
 
   const handleCopy = async () => {
     try {
@@ -85,9 +99,21 @@ function CopyKeyRegistryButton({ keyRegistry }: { keyRegistry: KeyRegistry }) {
   return (
     <button
       onClick={handleCopy}
-      className="flex items-center gap-2 px-2 py-1 text-sm action-text bg-transparent hover:bg-transparent"
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+      className="relative p-2.5 text-muted hover:text-pink transition-colors bg-transparent hover:bg-transparent"
     >
-      <span>{copied ? 'Copied!' : 'Copy data'}</span>
+      {copied ? (
+        <IconCopyCheck className="w-6 h-6" />
+      ) : (
+        <IconCopy className="w-6 h-6" />
+      )}
+      {hovered && (
+        <span className={`absolute bottom-full left-1/2 -translate-x-1/2 mb-0.5 px-2 py-1 font-inter text-sm sm:text-xs tracking-normal rounded shadow-lg whitespace-nowrap pointer-events-none z-50 ${copied ? 'bg-green text-white' : 'bg-tooltip text-[var(--color-text-tooltip)]'}`}>
+          {copied ? 'Copied!' : 'Copy data'}
+          <span className={`absolute top-full left-1/2 -translate-x-1/2 -mt-px border-4 border-transparent ${copied ? 'border-t-green' : 'border-t-[var(--color-bg-tooltip)]'}`} />
+        </span>
+      )}
     </button>
   );
 }
@@ -261,23 +287,25 @@ export default function PeerDetail() {
           <div className="flex items-center gap-4">
             {peer && (
               <>
-                <button
-                  onClick={() => {
-                    if (isFavorite(peer.peer_id)) {
-                      removeFavorite(peer.peer_id);
-                    } else {
-                      addFavorite(peer.peer_id);
-                    }
-                  }}
-                  className="flex items-center justify-center w-8 h-8 text-secondary hover:text-primary transition-colors"
-                  aria-label={isFavorite(peer.peer_id) ? "Remove from favorites" : "Add to favorites"}
-                >
-                  {isFavorite(peer.peer_id) ? (
-                    <IconStarFilled className="w-5 h-5 text-pink" />
-                  ) : (
-                    <IconStar className="w-5 h-5" />
-                  )}
-                </button>
+                <Tooltip content={isFavorite(peer.peer_id) ? "Remove from favorites" : "Add to favorites"}>
+                  <button
+                    onClick={() => {
+                      if (isFavorite(peer.peer_id)) {
+                        removeFavorite(peer.peer_id);
+                      } else {
+                        addFavorite(peer.peer_id);
+                      }
+                    }}
+                    className="flex items-center justify-center p-2.5 text-secondary hover:text-primary transition-colors"
+                    aria-label={isFavorite(peer.peer_id) ? "Remove from favorites" : "Add to favorites"}
+                  >
+                    {isFavorite(peer.peer_id) ? (
+                      <IconStarFilled className="w-5 h-5 text-pink" />
+                    ) : (
+                      <IconStar className="w-5 h-5" />
+                    )}
+                  </button>
+                </Tooltip>
                 <CopyPeerDataButton peer={peer} />
               </>
             )}

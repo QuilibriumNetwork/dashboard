@@ -1,6 +1,8 @@
 import { useState } from "react";
 import ChevronDown from "@/components/ui/ChevronDown";
 import { Checkbox } from "@/components/ui/Checkbox";
+import { Button } from "@/components/ui/Button";
+import { IconX } from "@tabler/icons-react";
 
 export interface PeerFilterState {
   searchQuery: string;
@@ -19,6 +21,7 @@ interface PeerDirectoryFiltersProps {
   capabilityCountCounts: Map<number, number>;
   pubsubProtocolCounts: Map<"tcp" | "udp" | "other", number>;
   streamProtocolCounts: Map<"tcp" | "udp" | "other", number>;
+  headerAction?: React.ReactNode;
 }
 
 export function PeerDirectoryFilters({
@@ -30,6 +33,7 @@ export function PeerDirectoryFilters({
   capabilityCountCounts,
   pubsubProtocolCounts,
   streamProtocolCounts,
+  headerAction,
 }: PeerDirectoryFiltersProps) {
   const [filtersExpanded, setFiltersExpanded] = useState(false);
 
@@ -271,15 +275,20 @@ export function PeerDirectoryFilters({
             </div>
           </div>
 
-          {/* Clear Filters Button */}
+          {/* Filter Actions */}
           {hasActiveFilters && (
-            <div className="pt-2">
-              <button
+            <div className="pt-2 flex flex-col xs:flex-row items-stretch xs:items-center justify-between gap-2">
+              {headerAction}
+              <Button
                 onClick={clearAllFilters}
-                className="text-sm sm:text-xs font-semibold text-secondary hover:text-primary transition-colors"
+                variant="danger"
+                size="small"
+                rounded="lg"
+                className="gap-1.5"
               >
-                Clear all filters
-              </button>
+                <IconX className="w-3.5 h-3.5" />
+                <span>Clear all filters</span>
+              </Button>
             </div>
           )}
         </div>

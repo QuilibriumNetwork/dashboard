@@ -309,20 +309,18 @@ export function PeerDirectoryExport({
 
           <div className="flex gap-3 pt-2">
             <Button
-              variant="secondary"
-              size="xs"
+              variant="subtle"
+              size="small"
               onClick={exportToCSV}
               disabled={filteredPeers.length === 0}
-              className="flex-1"
             >
               Export CSV
             </Button>
             <Button
-              variant="secondary"
-              size="xs"
+              variant="subtle"
+              size="small"
               onClick={exportToJSON}
               disabled={filteredPeers.length === 0}
-              className="flex-1"
             >
               Export JSON
             </Button>
