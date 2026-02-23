@@ -20,7 +20,7 @@ import { formatRelativeTime, formatTimestamp } from "@/lib/format";
 import { HoverableCopyText } from "@/components/HoverableCopyText";
 import Arrow from "@/components/ui/Arrow";
 import { Button } from "@/components/ui/Button";
-import ChevronDown from "@/components/ui/ChevronDown";
+import { Pagination } from "@/components/ui/Pagination";
 import Spinner from "@/components/ui/Spinner";
 import { useTheme } from "@/components/helpers/ThemeContext";
 import { PeerDirectoryFiltersAndExport } from "@/components/PeerDirectoryFiltersAndExport";
@@ -188,41 +188,6 @@ export default function Peers() {
     setCurrentPage(Math.max(1, Math.min(page, totalPages)));
   };
 
-  const getPageNumbers = () => {
-    const pages: (number | string)[] = [];
-    const maxVisible = 7;
-
-    if (totalPages <= maxVisible) {
-      for (let i = 1; i <= totalPages; i++) {
-        pages.push(i);
-      }
-    } else {
-      if (currentPage <= 3) {
-        for (let i = 1; i <= 4; i++) {
-          pages.push(i);
-        }
-        pages.push('...');
-        pages.push(totalPages);
-      } else if (currentPage >= totalPages - 2) {
-        pages.push(1);
-        pages.push('...');
-        for (let i = totalPages - 3; i <= totalPages; i++) {
-          pages.push(i);
-        }
-      } else {
-        pages.push(1);
-        pages.push('...');
-        for (let i = currentPage - 1; i <= currentPage + 1; i++) {
-          pages.push(i);
-        }
-        pages.push('...');
-        pages.push(totalPages);
-      }
-    }
-
-    return pages;
-  };
-
   // Theme-aware colors
   const isDark = theme === "dark";
   const tooltipBg = isDark ? "rgba(26,15,39,0.98)" : "rgba(255,255,255,0.98)";
@@ -286,7 +251,7 @@ export default function Peers() {
         )}
 
         {/* Total Peers Overview */}
-        <section className="mb-10 rounded-3xl border border-subtle bg-surface p-8 text-burgundy shadow-xl dark:text-white">
+        <section className="mb-10 rounded-3xl border border-subtle bg-surface p-5 xs:p-8 text-burgundy shadow-xl dark:text-white">
           <h2 className="mb-6 text-2xl font-semibold">Peers Overview</h2>
           <div className="rounded-2xl border border-subtle bg-white/90 p-6 dark:bg-surface-raised">
             <div className="label-text">
@@ -305,7 +270,7 @@ export default function Peers() {
 
         {/* Favorites Section */}
         {favorites.length > 0 && (
-          <section className="mb-10 rounded-3xl border border-subtle bg-surface p-8 text-burgundy shadow-xl dark:text-white">
+          <section className="mb-10 rounded-3xl border border-subtle bg-surface p-5 xs:p-8 text-burgundy shadow-xl dark:text-white">
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-2xl font-semibold">Favorites</h2>
               <Link
@@ -404,7 +369,7 @@ export default function Peers() {
 
         {/* Version Distribution Pie Chart */}
         {versionDistribution.length > 0 && (
-          <section className="mb-10 rounded-3xl border border-subtle bg-surface p-8 shadow-xl dark:text-white">
+          <section className="mb-10 rounded-3xl border border-subtle bg-surface p-5 xs:p-8 shadow-xl dark:text-white">
             <h2 className="mb-6 text-2xl font-semibold">Version Distribution</h2>
             <div className="flex flex-col md:flex-row items-center md:items-start gap-6">
               <div className="md:w-1/2 flex items-center justify-center min-h-[400px]">
@@ -525,7 +490,7 @@ export default function Peers() {
         )}
 
         {/* Peer List */}
-        <section className="mb-10 rounded-3xl border border-subtle bg-surface p-8 shadow-xl dark:text-white">
+        <section className="mb-10 rounded-3xl border border-subtle bg-surface p-5 xs:p-8 shadow-xl dark:text-white">
           <h2 className="mb-6 text-2xl font-semibold">Peer Directory</h2>
 
           {/* Filters and Export */}
@@ -649,53 +614,11 @@ export default function Peers() {
                 <div className="text-sm sm:text-xs text-muted">
                   Showing {startIndex + 1}–{Math.min(endIndex, filteredPeers.length)} of {filteredPeers.length}
                 </div>
-                <div className="flex items-center gap-2">
-                  <Button
-                    variant="secondary"
-                    size="xs"
-                    onClick={() => handlePageChange(currentPage - 1)}
-                    disabled={currentPage === 1}
-                    className="gap-1"
-                  >
-                    <ChevronDown className="w-3 h-3 rotate-90" />
-                    <span>Previous</span>
-                  </Button>
-                  <div className="flex items-center gap-1">
-                    {getPageNumbers().map((page, idx) => {
-                      if (page === '...') {
-                        return (
-                          <span key={`ellipsis-${idx}`} className="px-2 text-sm sm:text-xs text-faint">
-                            ...
-                          </span>
-                        );
-                      }
-                      const pageNum = page as number;
-                      return (
-                        <button
-                          key={pageNum}
-                          onClick={() => handlePageChange(pageNum)}
-                          className={`px-3 py-1.5 text-sm sm:text-xs font-semibold rounded-lg transition-colors ${
-                            currentPage === pageNum
-                              ? 'bg-burgundy/20 dark:bg-white/20 text-primary'
-                              : 'text-secondary hover:text-primary hover:bg-active-highlight'
-                          }`}
-                        >
-                          {pageNum}
-                        </button>
-                      );
-                    })}
-                  </div>
-                  <Button
-                    variant="secondary"
-                    size="xs"
-                    onClick={() => handlePageChange(currentPage + 1)}
-                    disabled={currentPage === totalPages}
-                    className="gap-1"
-                  >
-                    <span>Next</span>
-                    <ChevronDown className="w-3 h-3 -rotate-90" />
-                  </Button>
-                </div>
+                <Pagination
+                  currentPage={currentPage}
+                  totalPages={totalPages}
+                  onPageChange={handlePageChange}
+                />
               </div>
             </>
           )}

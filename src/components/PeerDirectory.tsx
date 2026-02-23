@@ -3,9 +3,8 @@ import { useNavigate } from "react-router-dom";
 import { HoverableCopyText } from "./HoverableCopyText";
 import { type PeerRow } from "@/lib/peers";
 import Arrow from "@/components/ui/Arrow";
-import { Button } from "@/components/ui/Button";
 import { Select } from "@/components/ui/Select";
-import ChevronDown from "@/components/ui/ChevronDown";
+import { Pagination } from "@/components/ui/Pagination";
 
 function shortenPeerId(peerId: string): string {
   if (peerId.length <= 16) return peerId;
@@ -98,40 +97,6 @@ export function PeerDirectory({ peers }: PeerDirectoryProps) {
     setCurrentPage(Math.max(1, Math.min(page, totalPages)));
   };
 
-  const getPageNumbers = () => {
-    const pages: (number | string)[] = [];
-    const maxVisible = 7;
-
-    if (totalPages <= maxVisible) {
-      for (let i = 1; i <= totalPages; i++) {
-        pages.push(i);
-      }
-    } else {
-      if (currentPage <= 3) {
-        for (let i = 1; i <= 4; i++) {
-          pages.push(i);
-        }
-        pages.push('...');
-        pages.push(totalPages);
-      } else if (currentPage >= totalPages - 2) {
-        pages.push(1);
-        pages.push('...');
-        for (let i = totalPages - 3; i <= totalPages; i++) {
-          pages.push(i);
-        }
-      } else {
-        pages.push(1);
-        pages.push('...');
-        for (let i = currentPage - 1; i <= currentPage + 1; i++) {
-          pages.push(i);
-        }
-        pages.push('...');
-        pages.push(totalPages);
-      }
-    }
-
-    return pages;
-  };
 
   return (
     <div className="space-y-6">
@@ -233,53 +198,11 @@ export function PeerDirectory({ peers }: PeerDirectoryProps) {
         <div className="text-sm sm:text-xs text-muted">
           Showing {startIndex + 1}–{Math.min(endIndex, peers.length)} of {peers.length}
         </div>
-        <div className="flex items-center gap-2">
-          <Button
-            variant="secondary"
-            size="xs"
-            onClick={() => handlePageChange(currentPage - 1)}
-            disabled={currentPage === 1}
-            className="gap-1"
-          >
-            <ChevronDown className="w-3 h-3 rotate-90" />
-            <span>Previous</span>
-          </Button>
-          <div className="flex items-center gap-1">
-            {getPageNumbers().map((page, idx) => {
-              if (page === '...') {
-                return (
-                  <span key={`ellipsis-${idx}`} className="px-2 text-sm sm:text-xs text-faint">
-                    ...
-                  </span>
-                );
-              }
-              const pageNum = page as number;
-              return (
-                <button
-                  key={pageNum}
-                  onClick={() => handlePageChange(pageNum)}
-                  className={`px-3 py-1.5 text-sm sm:text-xs font-semibold rounded-lg transition-colors ${
-                    currentPage === pageNum
-                      ? 'bg-burgundy/20 dark:bg-white/20 text-primary'
-                      : 'text-secondary hover:text-primary hover:bg-active-highlight'
-                  }`}
-                >
-                  {pageNum}
-                </button>
-              );
-            })}
-          </div>
-          <Button
-            variant="secondary"
-            size="xs"
-            onClick={() => handlePageChange(currentPage + 1)}
-            disabled={currentPage === totalPages}
-            className="gap-1"
-          >
-            <span>Next</span>
-            <ChevronDown className="w-3 h-3 -rotate-90" />
-          </Button>
-        </div>
+        <Pagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onPageChange={handlePageChange}
+        />
       </div>
     </div>
   );

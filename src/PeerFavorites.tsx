@@ -11,6 +11,7 @@ import Spinner from "@/components/ui/Spinner";
 import Arrow from "@/components/ui/Arrow";
 import { Button } from "@/components/ui/Button";
 import { Select } from "@/components/ui/Select";
+import { Pagination } from "@/components/ui/Pagination";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import Modal from "@/components/ui/Modal";
 
@@ -128,7 +129,7 @@ function FavoritePeerItem({ favorite, peerRecord, peerRow, onDelete, onNavigate,
         <div className="flex flex-row md:flex-col gap-2 flex-shrink-0 md:mt-0 mt-4 pt-4 md:pt-0 border-t md:border-t-0 border-subtle">
           {isSeen && (
             <Button
-              variant="secondary"
+              variant="subtle"
               size="xs"
               onClick={() => onNavigate(favorite.peerId)}
               className="flex-1 md:flex-none gap-1"
@@ -140,7 +141,7 @@ function FavoritePeerItem({ favorite, peerRecord, peerRow, onDelete, onNavigate,
             </Button>
           )}
           <Button
-            variant="secondary"
+            variant="subtle"
             size="xs"
             onClick={() => onEdit(favorite.peerId)}
             className="flex-1 md:flex-none gap-1"
@@ -563,7 +564,7 @@ export default function PeerFavorites() {
           </div>
         )}
 
-        <section className="mb-10 rounded-3xl border border-subtle bg-surface p-8 text-burgundy shadow-xl dark:text-white">
+        <section className="mb-10 rounded-3xl border border-subtle bg-surface p-5 xs:p-8 text-burgundy shadow-xl dark:text-white">
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
             <h2 className="text-2xl font-semibold">Peer Favorites</h2>
             {/* Import/Export buttons - shown on mobile, hidden on desktop */}
@@ -644,39 +645,11 @@ export default function PeerFavorites() {
                   <div className="text-sm sm:text-xs text-muted">
                     Showing {startIndex + 1}–{Math.min(endIndex, favorites.length)} of {favorites.length}
                   </div>
-                  <div className="flex items-center gap-2">
-                    <Button
-                      variant="secondary"
-                      size="xs"
-                      onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
-                      disabled={currentPage === 1}
-                    >
-                      Previous
-                    </Button>
-                    <div className="flex items-center gap-1">
-                      {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-                        <button
-                          key={page}
-                          onClick={() => setCurrentPage(page)}
-                          className={`px-3 py-1.5 text-sm sm:text-xs font-semibold rounded-lg transition-colors ${
-                            currentPage === page
-                              ? "bg-burgundy/20 dark:bg-white/20 text-primary"
-                              : "text-secondary hover:text-primary hover:bg-active-highlight"
-                          }`}
-                        >
-                          {page}
-                        </button>
-                      ))}
-                    </div>
-                    <Button
-                      variant="secondary"
-                      size="xs"
-                      onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
-                      disabled={currentPage === totalPages}
-                    >
-                      Next
-                    </Button>
-                  </div>
+                  <Pagination
+                    currentPage={currentPage}
+                    totalPages={totalPages}
+                    onPageChange={setCurrentPage}
+                  />
                 </div>
               )}
             </>
