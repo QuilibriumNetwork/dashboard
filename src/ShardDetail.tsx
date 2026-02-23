@@ -6,6 +6,7 @@ import { ProverCard } from "@/components/ProverCard";
 import { HoverableCopyText } from "@/components/HoverableCopyText";
 import Spinner from "@/components/ui/Spinner";
 import { CollapsiblePanel } from "@/components/ui/CollapsiblePanel";
+import Callout from "@/components/ui/Callout";
 
 interface CoverageState {
   label: string;
@@ -178,9 +179,9 @@ export default function ShardDetail() {
               </div>
             </div>
 
-            <div className="rounded-2xl border border-default bg-white/70 px-4 py-3 text-sm sm:text-xs text-secondary dark:bg-surface-raised/80">
+            <Callout type="beige" radius="2xl" padding="lg">
               <strong>Seniority note:</strong> provers with existing seniority that have not confirmed a join yet will report a seniority of 0 until a confirmation occurs.
-            </div>
+            </Callout>
 
             {loading ? (
               <div className="flex justify-center py-16">

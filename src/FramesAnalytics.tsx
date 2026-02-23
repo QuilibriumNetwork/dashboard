@@ -1273,15 +1273,15 @@ export default function FramesAnalytics() {
         </div>
 
         {error && (
-          <div className="mb-6 rounded-2xl border border-pink/30 bg-light-pink/40 p-4 text-sm text-pink">
+          <Callout type="error" radius="2xl" padding="lg" className="mb-6">
             {error}
-          </div>
+          </Callout>
         )}
 
         {loadingFromCache && (
-          <div className="mb-6 rounded-2xl border border-green/30 bg-light-green/40 p-4 text-sm text-green dark:border-green/30 dark:bg-green/15 dark:text-green">
+          <Callout type="success" radius="2xl" padding="lg" className="mb-6">
             Loading from cache... Fetching missing frames in background.
-          </div>
+          </Callout>
         )}
 
         {/* Statistics Cards */}

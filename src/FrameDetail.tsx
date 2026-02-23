@@ -13,6 +13,7 @@ import {
 import Spinner from "@/components/ui/Spinner";
 import Icon from "@/components/ui/Icons";
 import ChevronDown from "@/components/ui/ChevronDown";
+import Callout from "@/components/ui/Callout";
 import { HoverableCopyText } from "@/components/HoverableCopyText";
 import { IconCopy, IconCopyCheck } from "@tabler/icons-react";
 
@@ -134,9 +135,9 @@ export default function FrameDetail() {
         </div>
 
         {error && (
-          <div className="mt-6 rounded-2xl border border-pink/30 bg-light-pink/40 p-4 text-sm text-pink">
+          <Callout type="error" radius="2xl" padding="lg" className="mt-6">
             {error}
-          </div>
+          </Callout>
         )}
 
         <section className="section-glow-a mt-6 rounded-3xl border border-subtle bg-surface p-5 xs:p-8 text-burgundy shadow-xl dark:text-white">

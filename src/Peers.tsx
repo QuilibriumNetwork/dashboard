@@ -12,6 +12,7 @@ import {
   ResponsiveContainer,
 } from "recharts";
 import { explorerApi, type PeerRecord } from "@/lib/api";
+import Callout from "@/components/ui/Callout";
 import {
   formatPeerRows,
   type PeerRow,
@@ -245,9 +246,9 @@ export default function Peers() {
         </div>
 
         {error && (
-          <div className="mb-6 rounded-2xl border border-pink/30 bg-light-pink/40 p-4 text-sm text-pink">
+          <Callout type="error" radius="2xl" padding="lg" className="mb-6">
             {error}
-          </div>
+          </Callout>
         )}
 
         {/* Total Peers Overview */}
