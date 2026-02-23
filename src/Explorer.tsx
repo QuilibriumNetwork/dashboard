@@ -3,6 +3,14 @@ import { useNavigate, useSearchParams, useLocation, Link } from "react-router-do
 import { PageLayout } from "@/components/PageLayout";
 import { Select } from "@/components/ui/Select";
 import { SectionTitle } from "@/components/ui/SectionTitle";
+import {
+  StatCardsSkeleton,
+  DetailCardsSkeleton,
+  FrameTableSkeleton,
+  PeerDirectorySkeleton,
+  ShardTableSkeleton,
+  GossipSkeleton,
+} from "@/components/ui/Skeleton";
 
 import {
   CertifiedProposal,
@@ -1110,80 +1118,88 @@ export default function Explorer() {
                 </div>
               </div>
 
-              {/* Add this new section */}
-              <div className="grid gap-6 md:grid-cols-3">
-                <div className="rounded-2xl border border-default bg-surface-raised p-6 dark:text-white">
-                  <div className="label-text">Frame Number</div>
-                  <div className="mt-2 text-3xl font-semibold text-primary">
-                    {latestHeader?.frameNumber?.toLocaleString() ?? "–"}
-                  </div>
-                  <div className="text-sm text-secondary">
-                    Difficulty {latestHeader?.difficulty ?? "–"}
-                  </div>
-                </div>
-                <div className="rounded-2xl border border-default bg-surface-raised p-6 dark:text-white">
-                  <div className="label-text">Prover</div>
-                  {latestHeader?.prover && (() => {
-                    const displayValue = formatBase64Bytes(latestHeader.prover);
-                    const copyValue = base64ToHex(latestHeader.prover);
-                    const finalCopyValue = displayValue.startsWith("0x") && copyValue && !copyValue.startsWith("0x")
-                      ? `0x${copyValue}`
-                      : copyValue ?? latestHeader.prover;
-                    return (
-                      <div className="mt-2 text-2xl font-semibold text-primary font-mono">
-                        <HoverableCopyText text={finalCopyValue}>
-                          {displayValue}
-                        </HoverableCopyText>
+              {latestHeader ? (
+                <>
+                  <div className="grid gap-6 md:grid-cols-3">
+                    <div className="rounded-2xl border border-default bg-surface-raised p-6 dark:text-white">
+                      <div className="label-text">Frame Number</div>
+                      <div className="mt-2 text-3xl font-semibold text-primary">
+                        {latestHeader.frameNumber?.toLocaleString() ?? "–"}
                       </div>
-                    );
-                  })()}
-                </div>
-                <div className="rounded-2xl border border-default bg-surface-raised p-6 dark:text-white">
-                  <div className="label-text">Peers</div>
-                  <div className="mt-2 text-3xl font-semibold text-primary">
-                    {formattedPeerCount}
-                  </div>
-                  <div className="text-sm text-secondary">
-                    Active nodes reporting reachability
-                  </div>
-                </div>
-              </div>
-              <div className="grid gap-4 text-sm md:grid-cols-2">
-                <div className="rounded-2xl border border-default bg-white px-4 py-4 text-burgundy dark:bg-surface-raised dark:text-white">
-                  <div className="label-text">Requests root</div>
-                  {latestHeader?.requestsRoot && (() => {
-                    const displayValue = formatBase64Bytes(latestHeader.requestsRoot);
-                    const copyValue = base64ToHex(latestHeader.requestsRoot);
-                    const finalCopyValue = displayValue.startsWith("0x") && copyValue && !copyValue.startsWith("0x")
-                      ? `0x${copyValue}`
-                      : copyValue ?? latestHeader.requestsRoot;
-                    return (
-                      <div className="text-lg font-semibold font-mono">
-                        <HoverableCopyText text={finalCopyValue}>
-                          {displayValue}
-                        </HoverableCopyText>
+                      <div className="text-sm text-secondary">
+                        Difficulty {latestHeader.difficulty ?? "–"}
                       </div>
-                    );
-                  })()}
-                </div>
-                <div className="rounded-2xl border border-default bg-white px-4 py-4 text-burgundy dark:bg-surface-raised dark:text-white">
-                  <div className="label-text">Parent selector</div>
-                  {latestHeader?.parentSelector && (() => {
-                    const displayValue = formatBase64Bytes(latestHeader.parentSelector);
-                    const copyValue = base64ToHex(latestHeader.parentSelector);
-                    const finalCopyValue = displayValue.startsWith("0x") && copyValue && !copyValue.startsWith("0x")
-                      ? `0x${copyValue}`
-                      : copyValue ?? latestHeader.parentSelector;
-                    return (
-                      <div className="text-lg font-semibold font-mono">
-                        <HoverableCopyText text={finalCopyValue}>
-                          {displayValue}
-                        </HoverableCopyText>
+                    </div>
+                    <div className="rounded-2xl border border-default bg-surface-raised p-6 dark:text-white">
+                      <div className="label-text">Prover</div>
+                      {latestHeader.prover && (() => {
+                        const displayValue = formatBase64Bytes(latestHeader.prover);
+                        const copyValue = base64ToHex(latestHeader.prover);
+                        const finalCopyValue = displayValue.startsWith("0x") && copyValue && !copyValue.startsWith("0x")
+                          ? `0x${copyValue}`
+                          : copyValue ?? latestHeader.prover;
+                        return (
+                          <div className="mt-2 text-2xl font-semibold text-primary font-mono">
+                            <HoverableCopyText text={finalCopyValue}>
+                              {displayValue}
+                            </HoverableCopyText>
+                          </div>
+                        );
+                      })()}
+                    </div>
+                    <div className="rounded-2xl border border-default bg-surface-raised p-6 dark:text-white">
+                      <div className="label-text">Peers</div>
+                      <div className="mt-2 text-3xl font-semibold text-primary">
+                        {formattedPeerCount}
                       </div>
-                    );
-                  })()}
-                </div>
-              </div>
+                      <div className="text-sm text-secondary">
+                        Active nodes reporting reachability
+                      </div>
+                    </div>
+                  </div>
+                  <div className="grid gap-4 text-sm md:grid-cols-2">
+                    <div className="rounded-2xl border border-default bg-white px-4 py-4 text-burgundy dark:bg-surface-raised dark:text-white">
+                      <div className="label-text">Requests root</div>
+                      {latestHeader.requestsRoot && (() => {
+                        const displayValue = formatBase64Bytes(latestHeader.requestsRoot);
+                        const copyValue = base64ToHex(latestHeader.requestsRoot);
+                        const finalCopyValue = displayValue.startsWith("0x") && copyValue && !copyValue.startsWith("0x")
+                          ? `0x${copyValue}`
+                          : copyValue ?? latestHeader.requestsRoot;
+                        return (
+                          <div className="text-lg font-semibold font-mono">
+                            <HoverableCopyText text={finalCopyValue}>
+                              {displayValue}
+                            </HoverableCopyText>
+                          </div>
+                        );
+                      })()}
+                    </div>
+                    <div className="rounded-2xl border border-default bg-white px-4 py-4 text-burgundy dark:bg-surface-raised dark:text-white">
+                      <div className="label-text">Parent selector</div>
+                      {latestHeader.parentSelector && (() => {
+                        const displayValue = formatBase64Bytes(latestHeader.parentSelector);
+                        const copyValue = base64ToHex(latestHeader.parentSelector);
+                        const finalCopyValue = displayValue.startsWith("0x") && copyValue && !copyValue.startsWith("0x")
+                          ? `0x${copyValue}`
+                          : copyValue ?? latestHeader.parentSelector;
+                        return (
+                          <div className="text-lg font-semibold font-mono">
+                            <HoverableCopyText text={finalCopyValue}>
+                              {displayValue}
+                            </HoverableCopyText>
+                          </div>
+                        );
+                      })()}
+                    </div>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <StatCardsSkeleton />
+                  <DetailCardsSkeleton />
+                </>
+              )}
             </div>
           </section>
 
@@ -1236,50 +1252,56 @@ export default function Explorer() {
                 filters={frameFilters}
               />
 
-              {/* Mobile/Tablet Card Layout */}
-              <div className="space-y-4 md:hidden">
-                {filteredFrameRows.map((row) => (
-                  <FrameDataCard
-                    key={row.frameNumber}
-                    frameNumber={row.frameNumber}
-                    requests={row.requests}
-                    prover={row.prover}
-                    selector={row.selector}
-                    timestamp={row.timestamp}
-                    onNavigate={() => navigate(`/frames/${row.frameNumber}`)}
-                  />
-                ))}
-              </div>
-              {/* Desktop Table Layout */}
-              <div className="hidden md:block overflow-x-auto">
-                <div className="max-h-[520px] overflow-y-auto">
-                  <table className="min-w-full divide-y divide-subtle text-left text-sm text-primary">
-                    <thead className="sticky top-0 z-10 bg-surface label-text">
-                      <tr>
-                        <th className="py-3 pr-6">Frame</th>
-                        <th className="py-3 pr-6">Requests</th>
-                        <th className="py-3 pr-6">Prover</th>
-                        <th className="py-3 pr-6">Selector</th>
-                        <th className="py-3 pr-6">Timestamp</th>
-                        <th className="py-3 pr-6"></th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-subtle">
-                      {filteredFrameRows.map((row) => (
-                        <FrameDataRow
-                          key={row.frameNumber}
-                          frameNumber={row.frameNumber}
-                          requests={row.requests}
-                          prover={row.prover}
-                          selector={row.selector}
-                          timestamp={row.timestamp}
-                          onNavigate={() => navigate(`/frames/${row.frameNumber}`)}
-                        />
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              </div>
+              {filteredFrameRows.length === 0 && loading ? (
+                <FrameTableSkeleton rows={frameCount} />
+              ) : (
+                <>
+                  {/* Mobile/Tablet Card Layout */}
+                  <div className="space-y-4 md:hidden">
+                    {filteredFrameRows.map((row) => (
+                      <FrameDataCard
+                        key={row.frameNumber}
+                        frameNumber={row.frameNumber}
+                        requests={row.requests}
+                        prover={row.prover}
+                        selector={row.selector}
+                        timestamp={row.timestamp}
+                        onNavigate={() => navigate(`/frames/${row.frameNumber}`)}
+                      />
+                    ))}
+                  </div>
+                  {/* Desktop Table Layout */}
+                  <div className="hidden md:block overflow-x-auto">
+                    <div className="max-h-[520px] overflow-y-auto">
+                      <table className="min-w-full divide-y divide-subtle text-left text-sm text-primary">
+                        <thead className="sticky top-0 z-10 bg-surface label-text">
+                          <tr>
+                            <th className="py-3 pr-6">Frame</th>
+                            <th className="py-3 pr-6">Requests</th>
+                            <th className="py-3 pr-6">Prover</th>
+                            <th className="py-3 pr-6">Selector</th>
+                            <th className="py-3 pr-6">Timestamp</th>
+                            <th className="py-3 pr-6"></th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-subtle">
+                          {filteredFrameRows.map((row) => (
+                            <FrameDataRow
+                              key={row.frameNumber}
+                              frameNumber={row.frameNumber}
+                              requests={row.requests}
+                              prover={row.prover}
+                              selector={row.selector}
+                              timestamp={row.timestamp}
+                              onNavigate={() => navigate(`/frames/${row.frameNumber}`)}
+                            />
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                </>
+              )}
             </div>
           </section>
 {/*
@@ -1356,7 +1378,11 @@ export default function Explorer() {
                 filters={filters}
               />
 
-              <PeerDirectory peers={filteredPeerRows} />
+              {peerRows.length === 0 && loading ? (
+                <PeerDirectorySkeleton />
+              ) : (
+                <PeerDirectory peers={filteredPeerRows} />
+              )}
             </div>
           </section>
 
@@ -1387,7 +1413,9 @@ export default function Explorer() {
                 </div>
               )}
 
-              {shardRows.length === 0 ? (
+              {shardRows.length === 0 && loading ? (
+                <ShardTableSkeleton />
+              ) : shardRows.length === 0 ? (
                 <p className="text-sm text-secondary">
                   No shard filters reported yet.
                 </p>
@@ -1464,29 +1492,33 @@ export default function Explorer() {
           <section id="consensus-gossip" className="section-glow-b mt-14 relative overflow-hidden rounded-3xl border border-subtle bg-surface p-5 xs:p-10 text-burgundy shadow-xl backdrop-blur-lg dark:text-white">
             <div className="relative space-y-6">
               <SectionTitle icon="chatbubbletypingoval">Consensus gossip</SectionTitle>
-              <div className="space-y-4">
-                {messages.map((message) => {
-                  const isExpanded = expandedMessages.has(message.seqno);
-                  return (
-                    <CollapsibleMessage
-                      key={message.seqno}
-                      message={message}
-                      isExpanded={isExpanded}
-                      onToggle={() => {
-                        setExpandedMessages((prev) => {
-                          const next = new Set(prev);
-                          if (isExpanded) {
-                            next.delete(message.seqno);
-                          } else {
-                            next.add(message.seqno);
-                          }
-                          return next;
-                        });
-                      }}
-                    />
-                  );
-                })}
-              </div>
+              {messages.length === 0 && loading ? (
+                <GossipSkeleton />
+              ) : (
+                <div className="space-y-4">
+                  {messages.map((message) => {
+                    const isExpanded = expandedMessages.has(message.seqno);
+                    return (
+                      <CollapsibleMessage
+                        key={message.seqno}
+                        message={message}
+                        isExpanded={isExpanded}
+                        onToggle={() => {
+                          setExpandedMessages((prev) => {
+                            const next = new Set(prev);
+                            if (isExpanded) {
+                              next.delete(message.seqno);
+                            } else {
+                              next.add(message.seqno);
+                            }
+                            return next;
+                          });
+                        }}
+                      />
+                    );
+                  })}
+                </div>
+              )}
             </div>
           </section>
         </div>
