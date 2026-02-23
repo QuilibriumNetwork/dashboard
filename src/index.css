@@ -379,6 +379,179 @@ html.dark::-webkit-scrollbar-thumb:hover,
     @apply mx-auto lg:max-w-[1440px] px-4 sm:px-6 lg:px-20;
   }
 
+  /* Section ambient glow patterns — 3 variants cycled across sections.
+     Fixed-size ellipses so the glow stays consistent regardless of section height. */
+  .section-glow-a {
+    background-image: radial-gradient(400px 350px at 95% 0%, rgba(255, 5, 109, 0.12), transparent 70%),
+                      radial-gradient(600px 500px at 0% 95%, rgba(231, 221, 255, 0.25), transparent 70%);
+  }
+  .dark .section-glow-a {
+    background-image: radial-gradient(400px 350px at 95% 0%, rgba(255, 5, 109, 0.12), transparent 70%),
+                      radial-gradient(600px 500px at 0% 95%, rgba(99, 48, 202, 0.18), transparent 70%);
+  }
+
+  .section-glow-b {
+    background-image: radial-gradient(400px 350px at 5% 0%, rgba(255, 160, 60, 0.22), transparent 70%),
+                      radial-gradient(600px 500px at 100% 95%, rgba(255, 96, 0, 0.14), transparent 70%);
+  }
+  .dark .section-glow-b {
+    background-image: radial-gradient(400px 350px at 5% 0%, rgba(255, 140, 0, 0.12), transparent 70%),
+                      radial-gradient(600px 500px at 100% 95%, rgba(255, 96, 0, 0.12), transparent 70%);
+  }
+
+  .section-glow-c {
+    background-image: radial-gradient(400px 350px at 95% 0%, rgba(147, 112, 219, 0.2), transparent 70%),
+                      radial-gradient(600px 500px at 5% 95%, rgba(147, 112, 219, 0.16), transparent 70%);
+  }
+  .dark .section-glow-c {
+    background-image: radial-gradient(400px 350px at 95% 0%, rgba(120, 80, 255, 0.18), transparent 70%),
+                      radial-gradient(600px 500px at 5% 95%, rgba(120, 80, 255, 0.14), transparent 70%);
+  }
+
+  .gradient-sweep {
+    display: block;
+    background-size: 200% auto;
+    background-clip: text;
+    -webkit-background-clip: text;
+    color: transparent;
+    -webkit-text-fill-color: transparent;
+    animation: gradient-sweep 10s linear infinite;
+    background-image: linear-gradient(
+      120deg,
+      var(--pink) 0%,
+      var(--burgundy) 50%,
+      var(--pink) 100%
+    );
+  }
+
+  .dark .gradient-sweep {
+    background-image: linear-gradient(
+      120deg,
+      var(--white) 0%,
+      var(--pink) 50%,
+      var(--white) 100%
+    );
+  }
+
+  @keyframes gradient-sweep {
+    0% {
+      background-position: 200% center;
+    }
+    100% {
+      background-position: -200% center;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .gradient-sweep {
+      animation: none;
+    }
+  }
+
+  @keyframes spinner-animation {
+    0%,
+    100% {
+      transform: scale(0.9);
+      opacity: 0.3;
+    }
+    50% {
+      transform: scale(1.1);
+      opacity: 1;
+    }
+  }
+
+  .spinner-animation {
+    animation: spinner-animation 3s ease-in-out infinite;
+  }
+}
+
+/* -------------------------------------------------- */
+/* Components (shared background colors) */
+/* -------------------------------------------------- */
+
+@layer components {
+  .bg-pink {
+    background-color: var(--pink);
+  }
+  .bg-burgundy {
+    background-color: var(--burgundy);
+  }
+  .bg-dark-grey {
+    background-color: var(--dark-grey);
+  }
+  .bg-beige {
+    background-color: var(--beige);
+  }
+  .bg-light-grey {
+    background-color: var(--light-grey);
+  }
+  .bg-light-pink {
+    background-color: var(--light-pink);
+  }
+  .bg-light-blue {
+    background-color: var(--light-blue);
+  }
+  .bg-light-purple {
+    background-color: var(--light-purple);
+  }
+  .bg-light-green {
+    background-color: var(--light-green);
+  }
+  .bg-light-orange {
+    background-color: var(--light-orange);
+  }
+
+  /* Number input spinner styling */
+  input[type="number"] {
+    -moz-appearance: textfield;
+  }
+
+  input[type="number"]::-webkit-inner-spin-button,
+  input[type="number"]::-webkit-outer-spin-button {
+    opacity: 1;
+    height: 100%;
+    width: 20px;
+    cursor: pointer;
+    padding: 0 4px;
+  }
+
+  input[type="number"]::-webkit-inner-spin-button {
+    background: transparent;
+    border-left: 1px solid rgba(64, 0, 27, 0.2);
+    margin-left: 4px;
+  }
+
+  input[type="number"]::-webkit-outer-spin-button {
+    background: transparent;
+  }
+
+  input[type="number"]:hover::-webkit-inner-spin-button {
+    border-left-color: rgba(64, 0, 27, 0.4);
+  }
+
+  input[type="number"]:focus::-webkit-inner-spin-button {
+    border-left-color: rgba(64, 0, 27, 0.6);
+  }
+
+  html.dark input[type="number"]::-webkit-inner-spin-button {
+    border-left-color: rgba(255, 255, 255, 0.2);
+  }
+
+  html.dark input[type="number"]:hover::-webkit-inner-spin-button {
+    border-left-color: rgba(255, 255, 255, 0.4);
+  }
+
+  html.dark input[type="number"]:focus::-webkit-inner-spin-button {
+    border-left-color: rgba(255, 255, 255, 0.6);
+  }
+}
+
+/* ================================================== */
+/* OLD CSS — currently unused, kept for _reference/   */
+/* Remove this section when _reference/ is deleted.   */
+/* ================================================== */
+
+@layer utilities {
   .container-lg {
     @apply container mx-auto lg:max-w-[1440px] px-4 sm:px-6 lg:px-10;
   }
@@ -430,51 +603,6 @@ html.dark::-webkit-scrollbar-thumb:hover,
     );
   }
 
-  /* Section ambient glow patterns — 3 variants cycled across sections.
-     Fixed-size ellipses so the glow stays consistent regardless of section height. */
-  .section-glow-a {
-    background-image: radial-gradient(400px 350px at 95% 0%, rgba(255, 5, 109, 0.12), transparent 70%),
-                      radial-gradient(600px 500px at 0% 95%, rgba(231, 221, 255, 0.25), transparent 70%);
-  }
-  .dark .section-glow-a {
-    background-image: radial-gradient(400px 350px at 95% 0%, rgba(255, 5, 109, 0.12), transparent 70%),
-                      radial-gradient(600px 500px at 0% 95%, rgba(99, 48, 202, 0.18), transparent 70%);
-  }
-
-  .section-glow-b {
-    background-image: radial-gradient(400px 350px at 5% 0%, rgba(255, 160, 60, 0.22), transparent 70%),
-                      radial-gradient(600px 500px at 100% 95%, rgba(255, 96, 0, 0.14), transparent 70%);
-  }
-  .dark .section-glow-b {
-    background-image: radial-gradient(400px 350px at 5% 0%, rgba(255, 140, 0, 0.12), transparent 70%),
-                      radial-gradient(600px 500px at 100% 95%, rgba(255, 96, 0, 0.12), transparent 70%);
-  }
-
-  .section-glow-c {
-    background-image: radial-gradient(400px 350px at 95% 0%, rgba(147, 112, 219, 0.2), transparent 70%),
-                      radial-gradient(600px 500px at 5% 95%, rgba(147, 112, 219, 0.16), transparent 70%);
-  }
-  .dark .section-glow-c {
-    background-image: radial-gradient(400px 350px at 95% 0%, rgba(120, 80, 255, 0.18), transparent 70%),
-                      radial-gradient(600px 500px at 5% 95%, rgba(120, 80, 255, 0.14), transparent 70%);
-  }
-
-  .gradient-sweep {
-    display: block;
-    background-size: 200% auto;
-    background-clip: text;
-    -webkit-background-clip: text;
-    color: transparent;
-    -webkit-text-fill-color: transparent;
-    animation: gradient-sweep 10s linear infinite;
-    background-image: linear-gradient(
-      120deg,
-      var(--pink) 0%,
-      var(--burgundy) 50%,
-      var(--pink) 100%
-    );
-  }
-
   .gradient-sweep--dark {
     display: block;
     background-size: 200% auto;
@@ -491,42 +619,12 @@ html.dark::-webkit-scrollbar-thumb:hover,
     );
   }
 
-  @keyframes gradient-sweep {
-    0% {
-      background-position: 200% center;
-    }
-    100% {
-      background-position: -200% center;
-    }
-  }
-
   @media (prefers-reduced-motion: reduce) {
-    .gradient-sweep,
     .gradient-sweep--dark {
       animation: none;
     }
   }
-
-  @keyframes spinner-animation {
-    0%,
-    100% {
-      transform: scale(0.9);
-      opacity: 0.3;
-    }
-    50% {
-      transform: scale(1.1);
-      opacity: 1;
-    }
-  }
-
-  .spinner-animation {
-    animation: spinner-animation 3s ease-in-out infinite;
-  }
 }
-
-/* -------------------------------------------------- */
-/* Components (shared background colors) */
-/* -------------------------------------------------- */
 
 @layer components {
   .text-link {
@@ -547,38 +645,6 @@ html.dark::-webkit-scrollbar-thumb:hover,
     background-color: var(--purple);
   }
 
-  .bg-pink {
-    background-color: var(--pink);
-  }
-  .bg-burgundy {
-    background-color: var(--burgundy);
-  }
-  .bg-dark-grey {
-    background-color: var(--dark-grey);
-  }
-  .bg-beige {
-    background-color: var(--beige);
-  }
-  .bg-light-grey {
-    background-color: var(--light-grey);
-  }
-  .bg-light-pink {
-    background-color: var(--light-pink);
-  }
-  .bg-light-blue {
-    background-color: var(--light-blue);
-  }
-  .bg-light-purple {
-    background-color: var(--light-purple);
-  }
-  .bg-light-green {
-    background-color: var(--light-green);
-  }
-  .bg-light-orange {
-    background-color: var(--light-orange);
-  }
-
-  /*lists custom styles for bullets*/
   .ul-default {
     @apply list-disc pl-5;
   }
@@ -599,54 +665,7 @@ html.dark::-webkit-scrollbar-thumb:hover,
     @apply w-full max-w-full rounded-lg bg-surface-inset border text-sm p-4 font-mono break-words overflow-x-auto;
   }
 
-  /*mainly used in Bridge.tsx*/
   .input-base {
     @apply w-full border px-4 py-2 text-sm mb-4 rounded-xl focus:outline-none focus:ring-4 focus:ring-pink/20 focus:ring-offset-0 transition-colors;
   }
-
-  /* Number input spinner styling */
-  input[type="number"] {
-    -moz-appearance: textfield;
-  }
-
-  input[type="number"]::-webkit-inner-spin-button,
-  input[type="number"]::-webkit-outer-spin-button {
-    opacity: 1;
-    height: 100%;
-    width: 20px;
-    cursor: pointer;
-    padding: 0 4px;
-  }
-
-  input[type="number"]::-webkit-inner-spin-button {
-    background: transparent;
-    border-left: 1px solid rgba(64, 0, 27, 0.2);
-    margin-left: 4px;
-  }
-
-  input[type="number"]::-webkit-outer-spin-button {
-    background: transparent;
-  }
-
-  input[type="number"]:hover::-webkit-inner-spin-button {
-    border-left-color: rgba(64, 0, 27, 0.4);
-  }
-
-  input[type="number"]:focus::-webkit-inner-spin-button {
-    border-left-color: rgba(64, 0, 27, 0.6);
-  }
-
-  html.dark input[type="number"]::-webkit-inner-spin-button {
-    border-left-color: rgba(255, 255, 255, 0.2);
-  }
-
-  html.dark input[type="number"]:hover::-webkit-inner-spin-button {
-    border-left-color: rgba(255, 255, 255, 0.4);
-  }
-
-  html.dark input[type="number"]:focus::-webkit-inner-spin-button {
-    border-left-color: rgba(255, 255, 255, 0.6);
-  }
-
 }
-
