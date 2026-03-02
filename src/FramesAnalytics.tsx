@@ -1180,14 +1180,14 @@ export default function FramesAnalytics() {
   return (
     <PageLayout title="Frames Analytics • Quilibrium Explorer">
       <div className="relative mx-auto max-w-7xl px-6">
-        <div className="flex items-center justify-between gap-4 mb-6">
+        <div className="flex flex-wrap items-start gap-x-4 gap-y-2 mb-6">
           <Link
             to="/"
-            className="text-sm action-text"
+            className="text-sm action-text self-center"
           >
             ← Back
           </Link>
-          <div className="flex items-center gap-4">
+          <div className="flex flex-wrap items-center gap-x-4 gap-y-1">
             {storageUsage && (
               <div className="text-sm sm:text-xs text-muted">
                 Cache: {formatStorageSize(storageUsage.sizeBytes)} ({storageUsage.frameCount.toLocaleString()} frames)
@@ -1202,75 +1202,73 @@ export default function FramesAnalytics() {
               </button>
             )}
           </div>
-          <div className="flex flex-col gap-2">
-            <div className="flex items-center gap-3">
-              <span className="text-sm sm:text-xs text-muted">
-                Analyze last
-              </span>
-              <div className="flex items-center gap-2">
-                {FRAME_COUNT_OPTIONS.map((count, index) => (
-                  <span key={count} className="flex items-center">
-                    <button
-                      onClick={() => {
-                        if (!loading && !calculatingAnalytics) {
-                          setFrameCount(count);
-                          // Save to localStorage
-                          if (typeof window !== "undefined") {
-                            localStorage.setItem(FRAME_COUNT_STORAGE_KEY, String(count));
-                          }
+          <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
+            <span className="text-sm sm:text-xs text-muted">
+              Analyze last
+            </span>
+            <div className="flex items-center gap-2">
+              {FRAME_COUNT_OPTIONS.map((count, index) => (
+                <span key={count} className="flex items-center">
+                  <button
+                    onClick={() => {
+                      if (!loading && !calculatingAnalytics) {
+                        setFrameCount(count);
+                        // Save to localStorage
+                        if (typeof window !== "undefined") {
+                          localStorage.setItem(FRAME_COUNT_STORAGE_KEY, String(count));
                         }
-                      }}
-                      disabled={loading || calculatingAnalytics}
-                      title={loading ? "Loading frames..." : calculatingAnalytics ? "Calculating analytics..." : ""}
-                      className={`text-sm sm:text-xs font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${
-                        frameCount === count
-                          ? "text-primary font-bold"
-                          : "text-muted hover:text-burgundy dark:hover:text-white"
-                      }`}
-                    >
-                      {count.toLocaleString()}
-                    </button>
-                    {index < FRAME_COUNT_OPTIONS.length - 1 && (
-                      <span className="mx-1 text-faint">|</span>
-                    )}
-                  </span>
-                ))}
-              </div>
-              <span className="text-sm sm:text-xs text-muted">
-                frames
-              </span>
-            </div>
-            {(showProgressBar || calculatingAnalytics) && (
-              <div className="flex items-center gap-3 w-full max-w-2xl">
-                <span className="text-sm sm:text-xs text-muted whitespace-nowrap">
-                  {progress.phase === "analytics" || calculatingAnalytics
-                    ? "Calculating analytics"
-                    : "Downloading frames"}
-                </span>
-                <div className="flex-1 bg-burgundy/10 dark:bg-white/10 rounded-full h-1.5 overflow-hidden min-w-[200px]">
-                  <div
-                    className="h-full bg-burgundy dark:bg-white transition-all duration-300 ease-out rounded-full"
-                    style={{
-                      width: `${progress.total > 0 ? (progress.current / progress.total) * 100 : 0}%`,
+                      }
                     }}
-                  />
-                </div>
-                <div className="text-sm sm:text-xs text-muted min-w-[3rem] text-right whitespace-nowrap">
-                  {progress.current} / {progress.total}
-                </div>
-              </div>
-            )}
-            {(frameCount === 500 || frameCount === 1000) && (loading || calculatingAnalytics) && (
-              <Callout type="warning">
-                <div className="font-semibold mb-1">Large dataset warning</div>
-                <div>
-                  Loading {frameCount.toLocaleString()} frames will use approximately{" "}
-                  <strong>{frameCount === 1000 ? "200-400MB" : "100-200MB"}</strong> of storage space.
-                </div>
-              </Callout>
-            )}
+                    disabled={loading || calculatingAnalytics}
+                    title={loading ? "Loading frames..." : calculatingAnalytics ? "Calculating analytics..." : ""}
+                    className={`text-sm sm:text-xs font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${
+                      frameCount === count
+                        ? "text-primary font-bold"
+                        : "text-muted hover:text-burgundy dark:hover:text-white"
+                    }`}
+                  >
+                    {count.toLocaleString()}
+                  </button>
+                  {index < FRAME_COUNT_OPTIONS.length - 1 && (
+                    <span className="mx-1 text-faint">|</span>
+                  )}
+                </span>
+              ))}
+            </div>
+            <span className="text-sm sm:text-xs text-muted">
+              frames
+            </span>
           </div>
         </div>
+        {(showProgressBar || calculatingAnalytics) && (
+          <div className="flex items-center gap-3 mb-4">
+            <span className="text-sm sm:text-xs text-muted whitespace-nowrap">
+              {progress.phase === "analytics" || calculatingAnalytics
+                ? "Calculating analytics"
+                : "Downloading frames"}
+            </span>
+            <div className="flex-1 bg-burgundy/10 dark:bg-white/10 rounded-full h-1.5 overflow-hidden">
+              <div
+                className="h-full bg-burgundy dark:bg-white transition-all duration-300 ease-out rounded-full"
+                style={{
+                  width: `${progress.total > 0 ? (progress.current / progress.total) * 100 : 0}%`,
+                }}
+              />
+            </div>
+            <div className="text-sm sm:text-xs text-muted min-w-[3rem] text-right whitespace-nowrap">
+              {progress.current} / {progress.total}
+            </div>
+          </div>
+        )}
+        {(frameCount === 500 || frameCount === 1000) && (loading || calculatingAnalytics) && (
+          <Callout type="warning" className="mb-4">
+            <div className="font-semibold mb-1">Large dataset warning</div>
+            <div>
+              Loading {frameCount.toLocaleString()} frames will use approximately{" "}
+              <strong>{frameCount === 1000 ? "200-400MB" : "100-200MB"}</strong> of storage space.
+            </div>
+          </Callout>
+        )}
 
         {error && (
           <Callout type="error" radius="2xl" padding="lg" className="mb-6">
@@ -1420,8 +1418,8 @@ export default function FramesAnalytics() {
             Prover Distribution (Top 10 by Frame Count)
           </h2>
           <div className="flex flex-col md:flex-row items-center md:items-start gap-6">
-            <div className="md:w-1/2 flex items-center justify-center min-h-[400px]">
-              <ResponsiveContainer width="100%" height={400}>
+            <div className="w-full md:w-1/2 h-[300px] md:h-[400px]">
+              <ResponsiveContainer width="100%" height="100%">
               <PieChart>
               <Pie
                 data={proverDistribution}
