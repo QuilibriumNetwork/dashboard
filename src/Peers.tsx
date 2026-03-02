@@ -361,8 +361,8 @@ export default function Peers() {
           <section className="mb-10 rounded-3xl border border-subtle bg-surface p-5 xs:p-8 shadow-xl dark:text-white">
             <h2 className="mb-6 text-2xl font-semibold">Version Distribution</h2>
             <div className="flex flex-col md:flex-row items-center md:items-start gap-6">
-              <div className="md:w-1/2 flex items-center justify-center min-h-[400px]">
-                <ResponsiveContainer width="100%" height={400}>
+              <div className="w-full md:w-1/2 h-[300px] md:h-[400px]">
+                <ResponsiveContainer width="100%" height="100%">
                   <PieChart>
                     <Pie
                       data={versionDistribution}
