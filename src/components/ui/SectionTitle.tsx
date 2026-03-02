@@ -17,11 +17,7 @@ export function SectionTitle({ icon, children, className }: SectionTitleProps) {
     >
       <Icon
         name={icon}
-        className="shrink-0 text-primary opacity-70"
-        style={{
-          width: "0.9em",
-          height: "0.9em",
-        }}
+        className="shrink-0 text-primary opacity-70 w-6 h-6 md:w-7 md:h-7"
       />
       <span>{children}</span>
     </h2>

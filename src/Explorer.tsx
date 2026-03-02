@@ -55,6 +55,7 @@ import {
 import { formatProvers } from "@/lib/provers";
 import { ProverCard } from "@/components/ProverCard";
 import { Button } from "@/components/ui/Button";
+import { Pagination } from "@/components/ui/Pagination";
 import { IconCopy, IconCopyCheck } from "@tabler/icons-react";
 
 const SHARD_STATUS_COLUMNS = [
@@ -630,6 +631,8 @@ export default function Explorer() {
   const [peers, setPeers] = useState<PeerRecord[]>([]);
   const [provers, setProvers] = useState<ProverRecord[]>([]);
   const [shardSummaries, setShardSummaries] = useState<ProverShardSummary[]>([]);
+  const [shardCardPage, setShardCardPage] = useState(1);
+  const SHARD_CARDS_PER_PAGE = 20;
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [expandedMessages, setExpandedMessages] = useState<Set<string>>(new Set());
@@ -808,6 +811,7 @@ export default function Explorer() {
         setPeers(peerList);
         setProvers(proversList);
         setShardSummaries(shardList);
+        setShardCardPage(1);
         // Don't call hydrateFrameFeed here - let the frameCount effect handle it
       } catch (err) {
         if (mounted) {
@@ -1422,9 +1426,16 @@ export default function Explorer() {
               ) : (
                 <>
                   <div className="space-y-4 md:hidden">
-                    {shardRows.map((summary) => (
-                      <ShardSummaryCard key={summary.filter} summary={summary} />
-                    ))}
+                    {shardRows
+                      .slice((shardCardPage - 1) * SHARD_CARDS_PER_PAGE, shardCardPage * SHARD_CARDS_PER_PAGE)
+                      .map((summary) => (
+                        <ShardSummaryCard key={summary.filter} summary={summary} />
+                      ))}
+                    <Pagination
+                      currentPage={shardCardPage}
+                      totalPages={Math.ceil(shardRows.length / SHARD_CARDS_PER_PAGE)}
+                      onPageChange={setShardCardPage}
+                    />
                   </div>
                   <div className="hidden md:block overflow-x-auto">
                     <div className="max-h-[420px] overflow-y-auto">

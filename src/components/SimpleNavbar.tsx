@@ -209,7 +209,7 @@ export function SimpleNavbar() {
 
               {/* Theme Toggle */}
               <div
-                className={`pt-3 mt-2 border-t border-subtle transition-all duration-300 ease-out ${
+                className={`pt-3 mt-4 border-t border-subtle transition-all duration-300 ease-out ${
                   mobileMenuOpen ? "opacity-100 translate-x-0" : "opacity-0 -translate-x-4"
                 }`}
                 style={{ transitionDelay: mobileMenuOpen ? "300ms" : "0ms" }}
