@@ -20,6 +20,10 @@ import {
   PeerRecord,
   ProverRecord,
   ProverShardSummary,
+  NetworkStats,
+  EvictionRiskEntry,
+  SeniorityEntry,
+  KickedEntry,
   explorerApi,
 } from "@/lib/api";
 import {
@@ -29,6 +33,7 @@ import {
   formatRelative,
   coerceTimestamp,
   convertBase64ToHex,
+  formatByteSize,
 } from "@/lib/format";
 import {
   formatPeerRows,
@@ -429,6 +434,16 @@ function ShardSummaryCard({ summary }: { summary: ProverShardSummary }) {
             {tone === "safe" ? "healthy" : tone === "warn" ? "warning" : "risk"}
           </span>
         </div>
+        <div className="mt-3 grid grid-cols-2 gap-2 text-sm sm:text-xs">
+          <div className="rounded-xl border border-default bg-surface px-3 py-2">
+            <div className="label-text">Data size</div>
+            <div className="mt-0.5 font-semibold text-primary">{formatByteSize(summary.size_bytes)}</div>
+          </div>
+          <div className="rounded-xl border border-default bg-surface px-3 py-2">
+            <div className="label-text">Data shards</div>
+            <div className="mt-0.5 font-semibold text-primary">{(summary.data_shards ?? 0).toLocaleString()}</div>
+          </div>
+        </div>
         <div className="mt-3 text-sm sm:text-xs text-secondary space-y-1">
           {orderedStatuses.map((status) => {
             const value = counts[status];
@@ -443,6 +458,77 @@ function ShardSummaryCard({ summary }: { summary: ProverShardSummary }) {
         </div>
       </div>
     </Link>
+  );
+}
+
+function riskToneForRatio(ratio: number) {
+  if (ratio >= 1) return "risk";
+  if (ratio >= 0.5) return "warn";
+  return "safe";
+}
+
+const proverStatusBadgeClasses: Record<string, string> = {
+  active: "bg-green/10 text-green dark:bg-green/20 dark:text-light-green",
+  joining: "bg-green/10 text-green dark:bg-green/20 dark:text-light-green",
+  paused: "bg-warning-subtle text-warning",
+  leaving: "bg-warning-subtle text-warning",
+  rejected: "bg-danger-subtle text-danger",
+  kicked: "bg-danger-subtle text-danger",
+};
+
+function StatusBadge({ status }: { status: string }) {
+  const badgeClass = proverStatusBadgeClasses[status] ?? "bg-light-grey text-secondary dark:bg-surface-subtle";
+  return (
+    <span className={`inline-flex text-xs font-semibold uppercase tracking-label rounded-full px-3 py-1 ${badgeClass}`}>
+      {status}
+    </span>
+  );
+}
+
+function StatTile({ label, value, tone = "default" }: { label: string; value: React.ReactNode; tone?: "default" | "safe" | "warn" | "risk" }) {
+  const toneClass = {
+    default: "text-primary",
+    safe: "text-green dark:text-light-green",
+    warn: "text-warning",
+    risk: "text-danger",
+  }[tone];
+  return (
+    <div className="rounded-2xl border border-default bg-surface-raised p-4">
+      <div className="label-text">{label}</div>
+      <div className={`mt-1 text-2xl font-semibold ${toneClass}`}>{value}</div>
+    </div>
+  );
+}
+
+function EvictionRiskCard({ entry }: { entry: EvictionRiskEntry }) {
+  const tone = entry.eviction_pending ? "risk" : riskToneForRatio(entry.risk_ratio);
+  const badgeClass = coverageBadgeClasses[tone] ?? "";
+  return (
+    <div className="rounded-2xl border border-default bg-surface-raised p-4 text-sm text-burgundy dark:text-white">
+      <div className="flex items-center justify-between gap-2">
+        <div className="label-text">Prover</div>
+        <span className={`text-xs font-semibold uppercase tracking-label rounded-full px-3 py-1 ${badgeClass}`}>
+          {entry.eviction_pending ? "eviction pending" : `${Math.round(entry.risk_ratio * 100)}% risk`}
+        </span>
+      </div>
+      <div className="mt-1 font-mono text-sm sm:text-xs break-all">
+        <HoverableCopyText text={entry.address}>{truncateFilter(entry.address)}</HoverableCopyText>
+      </div>
+      <div className="mt-2 text-sm sm:text-xs text-muted">Shard filter</div>
+      <div className="font-mono text-sm sm:text-xs break-all">
+        <HoverableCopyText text={entry.filter}>{truncateFilter(entry.filter)}</HoverableCopyText>
+      </div>
+      <div className="mt-3 grid grid-cols-2 gap-y-1 text-sm sm:text-xs text-secondary">
+        <span>Runway</span>
+        <span className="text-right font-semibold text-primary">{entry.frames_until_eviction.toLocaleString()} frames</span>
+        <span>Inactive for</span>
+        <span className="text-right font-semibold text-primary">{entry.effective_inactive.toLocaleString()} frames</span>
+        <span>Last active</span>
+        <span className="text-right font-semibold text-primary">{entry.last_active_frame_number.toLocaleString()}</span>
+        <span>Seniority</span>
+        <span className="text-right font-semibold text-primary">{entry.seniority.toLocaleString()}</span>
+      </div>
+    </div>
   );
 }
 
@@ -632,6 +718,10 @@ export default function Explorer() {
   const [provers, setProvers] = useState<ProverRecord[]>([]);
   const [shardSummaries, setShardSummaries] = useState<ProverShardSummary[]>([]);
   const [shardCardPage, setShardCardPage] = useState(1);
+  const [stats, setStats] = useState<NetworkStats | null>(null);
+  const [evictionRisk, setEvictionRisk] = useState<EvictionRiskEntry[]>([]);
+  const [seniority, setSeniority] = useState<SeniorityEntry[]>([]);
+  const [kicked, setKicked] = useState<KickedEntry[]>([]);
   const SHARD_CARDS_PER_PAGE = 20;
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -794,13 +884,17 @@ export default function Explorer() {
       setLoading(true);
       setError(null);
       try {
-        const [frame, proposal, gossip, peerList, proversList, shardList] = await Promise.all([
+        const [frame, proposal, gossip, peerList, proversList, shardList, statsData, evictionList, seniorityList, kickedList] = await Promise.all([
           explorerApi.getLatestFrame(),
           explorerApi.getLatestCertified().catch(() => null),
           explorerApi.getMessages(20).catch(() => []),
           explorerApi.getPeers().catch(() => []),
           explorerApi.getProvers().catch(() => []),
           explorerApi.getProverShardSummaries().catch(() => []),
+          explorerApi.getStats().catch(() => null),
+          explorerApi.getEvictionRisk().catch(() => []),
+          explorerApi.getSeniority(100).catch(() => []),
+          explorerApi.getKicked().catch(() => []),
         ]);
         if (!mounted) {
           return;
@@ -811,6 +905,10 @@ export default function Explorer() {
         setPeers(peerList);
         setProvers(proversList);
         setShardSummaries(shardList);
+        setStats(statsData);
+        setEvictionRisk(evictionList);
+        setSeniority(seniorityList);
+        setKicked(kickedList);
         setShardCardPage(1);
         // Don't call hydrateFrameFeed here - let the frameCount effect handle it
       } catch (err) {
@@ -1005,13 +1103,17 @@ export default function Explorer() {
   const shardCoverageStats = useMemo(() => {
     let risk = 0;
     let warn = 0;
+    let totalBytes = 0;
+    let totalDataShards = 0;
     shardRows.forEach((summary) => {
       const activeCount = getShardStatusCount(summary, "active");
       const tone = getCoverageToneForActive(activeCount);
       if (tone === "risk") risk += 1;
       else if (tone === "warn") warn += 1;
+      totalBytes += Number(summary.size_bytes ?? 0) || 0;
+      totalDataShards += summary.data_shards ?? 0;
     });
-    return { risk, warn };
+    return { risk, warn, totalBytes, totalDataShards };
   }, [shardRows]);
   const proverRows = useMemo(() => formatProvers(provers), [provers]);
 
@@ -1207,6 +1309,47 @@ export default function Explorer() {
             </div>
           </section>
 
+          <section id="network-stats" className="section-glow-b mt-14 relative overflow-hidden rounded-3xl border border-subtle bg-surface p-5 xs:p-10 text-burgundy shadow-xl backdrop-blur-lg dark:text-white">
+            <div className="relative space-y-6">
+              <div className="flex flex-wrap items-start justify-between gap-3">
+                <SectionTitle icon="piechart">Network health</SectionTitle>
+                {stats && (
+                  <div className="text-sm sm:text-xs font-semibold uppercase tracking-label text-secondary">
+                    Frame {stats.current_frame.toLocaleString()}
+                  </div>
+                )}
+              </div>
+              {!stats && loading ? (
+                <StatCardsSkeleton />
+              ) : !stats ? (
+                <p className="text-sm text-secondary">Network stats unavailable.</p>
+              ) : (
+                <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
+                  <StatTile label="Total provers" value={stats.total_provers.toLocaleString()} />
+                  <StatTile label="Active" value={(stats.by_status.active ?? 0).toLocaleString()} tone="safe" />
+                  <StatTile label="Joining" value={(stats.by_status.joining ?? 0).toLocaleString()} />
+                  <StatTile label="Paused" value={(stats.by_status.paused ?? 0).toLocaleString()} />
+                  <StatTile
+                    label="At risk"
+                    value={stats.at_risk.toLocaleString()}
+                    tone={stats.at_risk > 0 ? "warn" : "default"}
+                  />
+                  <StatTile
+                    label="Eviction pending"
+                    value={stats.eviction_pending.toLocaleString()}
+                    tone={stats.eviction_pending > 0 ? "risk" : "default"}
+                  />
+                  <StatTile
+                    label="Halted shards"
+                    value={stats.halted_shards.toLocaleString()}
+                    tone={stats.halted_shards > 0 ? "warn" : "default"}
+                  />
+                  <StatTile label="Total seniority" value={stats.total_seniority.toLocaleString()} />
+                </div>
+              )}
+            </div>
+          </section>
+
           <section id="frame-feed" className="section-glow-b mt-14 relative overflow-hidden rounded-3xl border border-subtle bg-surface p-5 xs:p-10 text-burgundy shadow-xl backdrop-blur-lg dark:text-white">
             <div className="relative space-y-6">
               <div className="flex flex-wrap items-center justify-between gap-4">
@@ -1395,7 +1538,7 @@ export default function Explorer() {
               <div className="flex flex-wrap items-start justify-between gap-3">
                 <SectionTitle icon="modulepuzzle2">Shard coverage</SectionTitle>
                 <div className="text-sm sm:text-xs font-semibold uppercase tracking-label text-secondary">
-                  {shardRows.length.toLocaleString()}/4096 Shards
+                  {shardRows.length.toLocaleString()} Shards
                 </div>
               </div>
               {shardRows.length > 0 && (
@@ -1413,6 +1556,14 @@ export default function Explorer() {
                     <span className="ml-1 font-semibold text-success">
                       {(shardRows.length - shardCoverageStats.risk - shardCoverageStats.warn).toLocaleString()}
                     </span>
+                  </div>
+                  <div>
+                    Total data:
+                    <span className="ml-1 font-semibold text-primary">{formatByteSize(shardCoverageStats.totalBytes)}</span>
+                  </div>
+                  <div>
+                    Data shards:
+                    <span className="ml-1 font-semibold text-primary">{shardCoverageStats.totalDataShards.toLocaleString()}</span>
                   </div>
                 </div>
               )}
@@ -1449,6 +1600,8 @@ export default function Explorer() {
                             ))}
                             <th className="py-3 px-4">Other</th>
                             <th className="py-3 px-4">Total</th>
+                            <th className="py-3 px-4">Data size</th>
+                            <th className="py-3 px-4">Data shards</th>
                           </tr>
                         </thead>
                         <tbody className="divide-y divide-subtle">
@@ -1488,6 +1641,8 @@ export default function Explorer() {
                                 ))}
                                 <td className="py-3 px-4 text-sm sm:text-xs align-top">{otherCount.toLocaleString()}</td>
                                 <td className="py-3 px-4 text-sm sm:text-xs align-top font-semibold">{total.toLocaleString()}</td>
+                                <td className="py-3 px-4 text-sm sm:text-xs align-top whitespace-nowrap">{formatByteSize(summary.size_bytes)}</td>
+                                <td className="py-3 px-4 text-sm sm:text-xs align-top">{(summary.data_shards ?? 0).toLocaleString()}</td>
                               </tr>
                             );
                           })}
@@ -1496,6 +1651,172 @@ export default function Explorer() {
                     </div>
                   </div>
                 </>
+              )}
+            </div>
+          </section>
+
+          <section id="eviction-risk" className="section-glow-c mt-14 relative overflow-hidden rounded-3xl border border-subtle bg-surface p-5 xs:p-10 text-burgundy shadow-xl backdrop-blur-lg dark:text-white">
+            <div className="relative space-y-6">
+              <div className="flex flex-wrap items-start justify-between gap-3">
+                <SectionTitle icon="warningshield">Eviction risk</SectionTitle>
+                <div className="text-sm sm:text-xs font-semibold uppercase tracking-label text-secondary">
+                  {evictionRisk.length.toLocaleString()} at risk
+                </div>
+              </div>
+              <p className="text-sm text-secondary">
+                Active provers accruing inactivity toward eviction, most-at-risk first. Runway is the number of
+                frames of continued inactivity before the evictor removes the allocation.
+              </p>
+              {evictionRisk.length === 0 && loading ? (
+                <ShardTableSkeleton />
+              ) : evictionRisk.length === 0 ? (
+                <p className="text-sm text-secondary">No provers are currently at risk of eviction.</p>
+              ) : (
+                <>
+                  <div className="space-y-4 md:hidden">
+                    {evictionRisk.map((entry, i) => (
+                      <EvictionRiskCard key={`${entry.address}-${entry.filter}-${i}`} entry={entry} />
+                    ))}
+                  </div>
+                  <div className="hidden md:block overflow-x-auto">
+                    <div className="max-h-[420px] overflow-y-auto">
+                      <table className="min-w-full divide-y divide-subtle text-left text-sm text-primary">
+                        <thead className="sticky top-0 z-10 bg-surface label-text">
+                          <tr>
+                            <th className="py-3 px-4">Prover</th>
+                            <th className="py-3 px-4">Shard filter</th>
+                            <th className="py-3 px-4">Runway</th>
+                            <th className="py-3 px-4">Inactive</th>
+                            <th className="py-3 px-4">Last active</th>
+                            <th className="py-3 px-4">Risk</th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-subtle">
+                          {evictionRisk.map((entry, i) => {
+                            const tone = entry.eviction_pending ? "risk" : riskToneForRatio(entry.risk_ratio);
+                            const rowToneClasses = {
+                              risk: "bg-danger-subtle",
+                              warn: "bg-warning-subtle",
+                              safe: "",
+                            } as const;
+                            return (
+                              <tr key={`${entry.address}-${entry.filter}-${i}`} className={rowToneClasses[tone] ?? ""}>
+                                <td className="py-3 px-4 font-mono text-sm sm:text-xs break-all align-top">
+                                  <HoverableCopyText text={entry.address}>{truncateFilter(entry.address)}</HoverableCopyText>
+                                </td>
+                                <td className="py-3 px-4 font-mono text-sm sm:text-xs break-all align-top">
+                                  <HoverableCopyText text={entry.filter}>{truncateFilter(entry.filter)}</HoverableCopyText>
+                                </td>
+                                <td className="py-3 px-4 text-sm sm:text-xs align-top font-semibold">
+                                  {entry.frames_until_eviction.toLocaleString()}
+                                </td>
+                                <td className="py-3 px-4 text-sm sm:text-xs align-top">
+                                  {entry.effective_inactive.toLocaleString()}
+                                </td>
+                                <td className="py-3 px-4 text-sm sm:text-xs align-top">
+                                  {entry.last_active_frame_number.toLocaleString()}
+                                </td>
+                                <td className="py-3 px-4 text-sm sm:text-xs align-top font-semibold">
+                                  {entry.eviction_pending ? "Pending" : `${Math.round(entry.risk_ratio * 100)}%`}
+                                </td>
+                              </tr>
+                            );
+                          })}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                </>
+              )}
+            </div>
+          </section>
+
+          <section id="seniority" className="section-glow-a mt-14 relative overflow-hidden rounded-3xl border border-subtle bg-surface p-5 xs:p-10 text-burgundy shadow-xl backdrop-blur-lg dark:text-white">
+            <div className="relative space-y-6">
+              <div className="flex flex-wrap items-start justify-between gap-3">
+                <SectionTitle icon="starbadge">Seniority leaderboard</SectionTitle>
+                <div className="text-sm sm:text-xs font-semibold uppercase tracking-label text-secondary">
+                  Top {seniority.length.toLocaleString()}
+                </div>
+              </div>
+              {seniority.length === 0 && loading ? (
+                <ShardTableSkeleton />
+              ) : seniority.length === 0 ? (
+                <p className="text-sm text-secondary">No provers reported yet.</p>
+              ) : (
+                <div className="overflow-x-auto">
+                  <div className="max-h-[480px] overflow-y-auto">
+                    <table className="min-w-full divide-y divide-subtle text-left text-sm text-primary">
+                      <thead className="sticky top-0 z-10 bg-surface label-text">
+                        <tr>
+                          <th className="py-3 px-4">Rank</th>
+                          <th className="py-3 px-4">Address</th>
+                          <th className="py-3 px-4">Seniority</th>
+                          <th className="py-3 px-4">Status</th>
+                          <th className="py-3 px-4">Active shards</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-subtle">
+                        {seniority.map((entry) => (
+                          <tr key={entry.address}>
+                            <td className="py-3 px-4 text-sm sm:text-xs align-top font-semibold">#{entry.rank.toLocaleString()}</td>
+                            <td className="py-3 px-4 font-mono text-sm sm:text-xs break-all align-top">
+                              <HoverableCopyText text={entry.address}>{truncateFilter(entry.address)}</HoverableCopyText>
+                            </td>
+                            <td className="py-3 px-4 text-sm sm:text-xs align-top font-semibold">{entry.seniority.toLocaleString()}</td>
+                            <td className="py-3 px-4 align-top"><StatusBadge status={entry.status} /></td>
+                            <td className="py-3 px-4 text-sm sm:text-xs align-top">{entry.active_shards.toLocaleString()}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              )}
+            </div>
+          </section>
+
+          <section id="kicked-provers" className="section-glow-b mt-14 relative overflow-hidden rounded-3xl border border-subtle bg-surface p-5 xs:p-10 text-burgundy shadow-xl backdrop-blur-lg dark:text-white">
+            <div className="relative space-y-6">
+              <div className="flex flex-wrap items-start justify-between gap-3">
+                <SectionTitle icon="swordattack">Kicked provers</SectionTitle>
+                <div className="text-sm sm:text-xs font-semibold uppercase tracking-label text-secondary">
+                  {kicked.length.toLocaleString()} kicked
+                </div>
+              </div>
+              {kicked.length === 0 && loading ? (
+                <ShardTableSkeleton />
+              ) : kicked.length === 0 ? (
+                <p className="text-sm text-secondary">No provers have been kicked.</p>
+              ) : (
+                <div className="overflow-x-auto">
+                  <div className="max-h-[420px] overflow-y-auto">
+                    <table className="min-w-full divide-y divide-subtle text-left text-sm text-primary">
+                      <thead className="sticky top-0 z-10 bg-surface label-text">
+                        <tr>
+                          <th className="py-3 px-4">Address</th>
+                          <th className="py-3 px-4">Public key</th>
+                          <th className="py-3 px-4">Kick frame</th>
+                          <th className="py-3 px-4">Seniority</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-subtle">
+                        {kicked.map((entry) => (
+                          <tr key={entry.address}>
+                            <td className="py-3 px-4 font-mono text-sm sm:text-xs break-all align-top">
+                              <HoverableCopyText text={entry.address}>{truncateFilter(entry.address)}</HoverableCopyText>
+                            </td>
+                            <td className="py-3 px-4 font-mono text-sm sm:text-xs break-all align-top">
+                              <HoverableCopyText text={entry.public_key}>{truncateFilter(entry.public_key)}</HoverableCopyText>
+                            </td>
+                            <td className="py-3 px-4 text-sm sm:text-xs align-top font-semibold">{entry.kick_frame_number.toLocaleString()}</td>
+                            <td className="py-3 px-4 text-sm sm:text-xs align-top">{entry.seniority.toLocaleString()}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
               )}
             </div>
           </section>

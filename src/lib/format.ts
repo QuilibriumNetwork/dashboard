@@ -4,6 +4,25 @@ export function formatBytesLike(hex: string | undefined) {
   return `${hex.slice(0, 8)}…${hex.slice(-6)}`;
 }
 
+/**
+ * Formats a byte count (possibly delivered as a decimal string, since shard
+ * sizes can exceed Number.MAX_SAFE_INTEGER) into a human-readable size.
+ */
+export function formatByteSize(input: string | number | undefined) {
+  if (input === undefined || input === "") return "–";
+  const value = typeof input === "number" ? input : Number(input);
+  if (!Number.isFinite(value) || value <= 0) return "0 B";
+  const units = ["B", "KB", "MB", "GB", "TB", "PB", "EB"];
+  let size = value;
+  let unit = 0;
+  while (size >= 1024 && unit < units.length - 1) {
+    size /= 1024;
+    unit += 1;
+  }
+  const decimals = size >= 100 || unit === 0 ? 0 : size >= 10 ? 1 : 2;
+  return `${size.toFixed(decimals)} ${units[unit]}`;
+}
+
 export function base64ToHex(value: string) {
   try {
     const normalized = value.replace(/-/g, "+").replace(/_/g, "/");

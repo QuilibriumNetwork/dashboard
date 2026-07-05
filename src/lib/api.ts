@@ -75,6 +75,53 @@ export interface ProverRecord {
 export interface ProverShardSummary {
   filter: string;
   counts: Record<string, number>;
+  size_bytes?: string;
+  active_workers?: number;
+  data_shards?: number;
+}
+
+export interface NetworkStats {
+  current_frame: number;
+  eviction_threshold: number;
+  total_provers: number;
+  by_status: Record<string, number>;
+  total_seniority: number;
+  eviction_pending: number;
+  at_risk: number;
+  halted_shards: number;
+}
+
+export interface EvictionRiskEntry {
+  address: string;
+  public_key: string;
+  seniority: number;
+  filter: string;
+  last_active_frame_number: number;
+  current_frame: number;
+  shard_halt_duration: number;
+  frames_inactive: number;
+  effective_inactive: number;
+  eviction_threshold: number;
+  frames_until_eviction: number;
+  risk_ratio: number;
+  eviction_pending: boolean;
+}
+
+export interface SeniorityEntry {
+  rank: number;
+  address: string;
+  public_key: string;
+  seniority: number;
+  status: string;
+  active_shards: number;
+}
+
+export interface KickedEntry {
+  address: string;
+  public_key: string;
+  status: string;
+  kick_frame_number: number;
+  seniority: number;
 }
 
 export interface PeerReachability {
@@ -210,4 +257,14 @@ export const explorerApi = {
   getProverShardSummaries: () => request<ProverShardSummary[]>("/provers/shards"),
   getShardProvers: (filter: string) => request<ProverRecord[]>(`/provers/shards/${filter}`),
   getKeyRegistry: (hexIdentity: string) => request<KeyRegistry>(`/keys/identity/${hexIdentity}`),
+  getStats: () => request<NetworkStats>("/stats"),
+  getEvictionRisk: (minRatio?: number) => {
+    const suffix = minRatio && minRatio > 0 ? `?min_ratio=${minRatio}` : "";
+    return request<EvictionRiskEntry[]>(`/provers/eviction-risk${suffix}`);
+  },
+  getSeniority: (limit?: number) => {
+    const suffix = limit && limit > 0 ? `?limit=${limit}` : "";
+    return request<SeniorityEntry[]>(`/provers/seniority${suffix}`);
+  },
+  getKicked: () => request<KickedEntry[]>("/provers/kicked"),
 };
