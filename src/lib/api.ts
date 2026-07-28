@@ -33,6 +33,17 @@ export interface GlobalFrame {
     feeMultiplierVote?: number;
   };
   requests: FrameRequestBundle[];
+  /** Per-bundle materialization outcome, aligned by index to `requests`.
+   * Absent/empty until the frame has materialized. */
+  requestOutcomes?: RequestOutcome[];
+}
+
+export type RequestStatus = "succeeded" | "rejected" | "failed" | "skipped";
+
+export interface RequestOutcome {
+  status: RequestStatus;
+  /** Short reason for `rejected`/`failed`; empty otherwise. */
+  error: string;
 }
 
 export interface FrameRequestBundle {
