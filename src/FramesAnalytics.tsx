@@ -37,7 +37,7 @@ import {
   saveFramesToCache,
   pruneCache,
   isCacheStale,
-  getCachedFrames,
+  getLatestCachedFrameNumber,
   getFramesByNumbers,
   estimateStorageUsage,
   deleteFramesKeepingLast,
@@ -165,8 +165,7 @@ export default function FramesAnalytics() {
 
       try {
         // Step 1: Check cache metadata first (NO API CALL)
-        const cachedData = await getCachedFrames();
-        const cachedLatestFrameNumber = cachedData?.metadata.latestFrameNumber ?? null;
+        const cachedLatestFrameNumber = await getLatestCachedFrameNumber();
 
         let latestNumber: number;
 

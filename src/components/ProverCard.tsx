@@ -1,28 +1,17 @@
 import { HoverableCopyText } from "@/components/HoverableCopyText";
+import { ProverLink, ShardLink } from "@/components/HexLink";
 import type { FormattedProver } from "@/lib/provers";
 
 interface ProverCardProps {
   prover: FormattedProver;
 }
 
-function formatDisplayAddress(address: string) {
-  if (!address) return "–";
-  const hasPrefix = address.startsWith("0x");
-  const prefix = hasPrefix ? "0x" : "";
-  const value = hasPrefix ? address.slice(2) : address;
-  if (value.length <= 16) {
-    return address;
-  }
-  return `${prefix}${value.slice(0, 8)}…${value.slice(-6)}`;
-}
-
 export function ProverCard({ prover }: ProverCardProps) {
-  const displayAddress = formatDisplayAddress(prover.address);
   return (
     <div className="rounded-2xl border border-default bg-surface-raised p-4 text-sm text-burgundy dark:text-white">
       <div className="label-text">Address</div>
       <div className="mt-1 font-mono text-sm sm:text-xs">
-        <HoverableCopyText text={prover.address}>{displayAddress}</HoverableCopyText>
+        {prover.address && prover.address !== "–" ? <ProverLink address={prover.address} /> : "–"}
       </div>
       <div className="mt-2 text-sm sm:text-xs text-secondary flex flex-wrap gap-3">
         <span>Status: {prover.status}</span>
@@ -46,12 +35,12 @@ export function ProverCard({ prover }: ProverCardProps) {
               </div>
               {alloc.confirmation && (
                 <div className="text-secondary break-all">
-                  Confirm filter: <HoverableCopyText text={alloc.confirmation}>{alloc.confirmation}</HoverableCopyText>
+                  Confirm filter: <ShardLink filter={alloc.confirmation} />
                 </div>
               )}
               {alloc.rejection && (
                 <div className="text-secondary break-all">
-                  Reject filter: <HoverableCopyText text={alloc.rejection}>{alloc.rejection}</HoverableCopyText>
+                  Reject filter: <ShardLink filter={alloc.rejection} />
                 </div>
               )}
             </div>

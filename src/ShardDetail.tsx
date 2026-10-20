@@ -1,8 +1,17 @@
 import { useEffect, useMemo, useState } from "react";
 import { useParams, Link } from "react-router-dom";
-import { explorerApi, ProverRecord } from "@/lib/api";
+import {
+  explorerApi,
+  ProverRecord,
+  type EvictionRiskPage,
+  type ShardProductionResponse,
+} from "@/lib/api";
 import { formatProvers, type FormattedProver, prefixHex } from "@/lib/provers";
 import { ProverCard } from "@/components/ProverCard";
+import { ProverLink } from "@/components/HexLink";
+import { SectionTitle } from "@/components/ui/SectionTitle";
+import { ShardProductionPanel } from "@/components/ShardProduction";
+import { EvictionRiskList } from "@/components/EvictionRiskList";
 import { HoverableCopyText } from "@/components/HoverableCopyText";
 import Spinner from "@/components/ui/Spinner";
 import { CollapsiblePanel } from "@/components/ui/CollapsiblePanel";
@@ -55,6 +64,9 @@ export default function ShardDetail() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [expandedStatuses, setExpandedStatuses] = useState<Set<string>>(new Set());
+  const [production, setProduction] = useState<ShardProductionResponse | null>(null);
+  const [productionError, setProductionError] = useState<string | null>(null);
+  const [evictionRisk, setEvictionRisk] = useState<EvictionRiskPage | null>(null);
 
   useEffect(() => {
     let mounted = true;
@@ -85,6 +97,35 @@ export default function ShardDetail() {
       mounted = false;
     };
   }, [normalizedFilter]);
+
+  useEffect(() => {
+    let mounted = true;
+    setProduction(null);
+    setProductionError(null);
+    setEvictionRisk(null);
+    if (!normalizedFilter) return;
+    explorerApi
+      .getShardProduction({ filter: normalizedFilter })
+      .then((data) => {
+        if (mounted) setProduction(data);
+      })
+      .catch((err) => {
+        if (mounted) setProductionError(err instanceof Error ? err.message : "Failed to load shard production");
+      });
+    explorerApi
+      .getEvictionRisk({ filter: normalizedFilter })
+      .then((page) => {
+        if (mounted) setEvictionRisk(page);
+      })
+      .catch(() => {
+        if (mounted) setEvictionRisk({ entries: [], total: 0 });
+      });
+    return () => {
+      mounted = false;
+    };
+  }, [normalizedFilter]);
+
+  const shardProduction = production?.shards[0] ?? null;
 
   const activeCount = useMemo(() => {
     return provers.filter((prover) => prover.status.toLowerCase() === "active").length;
@@ -220,8 +261,8 @@ export default function ShardDetail() {
                           <tbody className="divide-y divide-subtle">
                             {entries.map((prover) => (
                               <tr key={prover.id}>
-                                <td className="py-3 px-4 font-mono text-sm sm:text-xs break-all align-top">
-                                  <HoverableCopyText text={prover.address}>{prover.address}</HoverableCopyText>
+                                <td className="py-3 px-4 text-sm sm:text-xs align-top">
+                                  <ProverLink address={prover.address} />
                                 </td>
                                 <td className="py-3 px-4 font-mono text-sm sm:text-xs break-all align-top">
                                   {prover.publicKey ? (
@@ -253,6 +294,45 @@ export default function ShardDetail() {
                   </CollapsiblePanel>
                 ))}
               </div>
+            )}
+          </div>
+        </section>
+
+        <section className="section-glow-b mt-14 relative overflow-hidden rounded-3xl border border-subtle bg-surface p-5 xs:p-10 text-burgundy shadow-xl backdrop-blur-lg dark:text-white">
+          <div className="relative space-y-6">
+            <SectionTitle icon="layers1">Production</SectionTitle>
+            {productionError ? (
+              <p className="text-sm text-secondary">Shard production unavailable: {productionError}</p>
+            ) : !production ? (
+              <div className="flex justify-center py-8">
+                <Spinner size="30" />
+              </div>
+            ) : shardProduction ? (
+              <ShardProductionPanel shard={shardProduction} window={production} />
+            ) : (
+              <p className="text-sm text-secondary">This filter is not in the live shard set.</p>
+            )}
+          </div>
+        </section>
+
+        <section className="section-glow-c mt-14 relative overflow-hidden rounded-3xl border border-subtle bg-surface p-5 xs:p-10 text-burgundy shadow-xl backdrop-blur-lg dark:text-white">
+          <div className="relative space-y-6">
+            <div className="flex flex-wrap items-start justify-between gap-3">
+              <SectionTitle icon="warningshield">Eviction risk</SectionTitle>
+              {evictionRisk && (
+                <div className="text-sm sm:text-xs font-semibold uppercase tracking-label text-secondary">
+                  {evictionRisk.total.toLocaleString()} accruing
+                </div>
+              )}
+            </div>
+            {!evictionRisk ? (
+              <div className="flex justify-center py-8">
+                <Spinner size="30" />
+              </div>
+            ) : evictionRisk.entries.length === 0 ? (
+              <p className="text-sm text-secondary">No allocations on this shard are accruing inactivity.</p>
+            ) : (
+              <EvictionRiskList entries={evictionRisk.entries} showFilter={false} />
             )}
           </div>
         </section>

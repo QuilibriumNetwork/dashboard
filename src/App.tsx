@@ -18,6 +18,7 @@ const Peers = lazy(() => import("@/Peers"));
 const FramesAnalytics = lazy(() => import("@/FramesAnalytics"));
 const PeerFavorites = lazy(() => import("@/PeerFavorites"));
 const ShardDetail = lazy(() => import("@/ShardDetail"));
+const ProverDetail = lazy(() => import("@/ProverDetail"));
 
 const withSuspense = (
   Component: React.LazyExoticComponent<() => JSX.Element>
@@ -50,6 +51,7 @@ export default function App() {
               <Route path="/peers/:peerId" element={withSuspense(PeerDetail)} />
               <Route path="/peer-favorites" element={withSuspense(PeerFavorites)} />
               <Route path="/provers/shards/:filter" element={withSuspense(ShardDetail)} />
+              <Route path="/provers/:address" element={withSuspense(ProverDetail)} />
               <Route path="*" element={withSuspense(NotFound)} />
             </Routes>
           </main>

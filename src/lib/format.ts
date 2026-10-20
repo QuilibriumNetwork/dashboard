@@ -264,3 +264,46 @@ export function truncateMiddle(text: string, maxLength: number = 30): string {
   const end = text.length - (Math.floor(maxLength / 2) - 2);
   return `${text.slice(0, start)}....${text.slice(end)}`;
 }
+
+/** Lowercase hex without a 0x prefix, as the API serves addresses and filters. */
+export function normalizeHex(value: string): string {
+  const trimmed = value.trim();
+  return (trimmed.startsWith("0x") || trimmed.startsWith("0X") ? trimmed.slice(2) : trimmed).toLowerCase();
+}
+
+/** Whether the value is a 32-byte hex address (with or without 0x). */
+export function isHex32(value: string): boolean {
+  return /^[0-9a-f]{64}$/.test(normalizeHex(value));
+}
+
+/** First 8 and last 6 hex digits of a long hex value. */
+export function truncateHex(value: string): string {
+  if (!value) return "–";
+  const prefix = value.startsWith("0x") ? "0x" : "";
+  const digits = prefix ? value.slice(2) : value;
+  if (digits.length <= 16) return value;
+  return `${prefix}${digits.slice(0, 8)}…${digits.slice(-6)}`;
+}
+
+/** A decimal QUIL string from the API, grouped, with at most `decimals` places. */
+export function formatQuil(value: string | undefined | null, decimals = 4): string {
+  if (!value) return "–";
+  const [whole, fraction = ""] = value.split(".");
+  let grouped: string;
+  try {
+    grouped = BigInt(whole || "0").toLocaleString();
+  } catch {
+    return value;
+  }
+  const shown = fraction.slice(0, decimals).replace(/0+$/, "");
+  return shown ? `${grouped}.${shown}` : grouped;
+}
+
+/** Wall-clock length of `frames` frames at the median interval, e.g. "≈ 40 min". */
+export function formatFrameSpan(frames: number, medianIntervalMs: number | null | undefined): string | null {
+  if (!medianIntervalMs || medianIntervalMs <= 0) return null;
+  const minutes = (frames * medianIntervalMs) / 60_000;
+  if (minutes < 1) return `≈ ${Math.round(minutes * 60)} s`;
+  if (minutes < 120) return `≈ ${Math.round(minutes)} min`;
+  return `≈ ${(minutes / 60).toFixed(1)} h`;
+}

@@ -5,12 +5,18 @@ const DB_VERSION = 1;
 const FRAMES_STORE = "frames";
 const METADATA_STORE = "metadata";
 const MAX_CACHE_SIZE = 2000; // Keep more than requested to allow for gaps
+const SIZE_SAMPLE_FRAMES = 20; // Newest frames measured by estimateStorageUsage
 
 interface CacheMetadata {
   version: number;
   latestFrameNumber: number;
   cachedAt: number;
   frameNumbers: number[];
+}
+
+interface CachedFrameRecord {
+  frameNumber: number | string;
+  frame: GlobalFrame;
 }
 
 let dbPromise: Promise<IDBDatabase> | null = null;
@@ -49,46 +55,103 @@ function openDatabase(): Promise<IDBDatabase> {
   return dbPromise;
 }
 
+function requestResult<T>(request: IDBRequest<T>): Promise<T> {
+  return new Promise((resolve, reject) => {
+    request.onsuccess = () => resolve(request.result);
+    request.onerror = () => reject(request.error);
+  });
+}
+
+/**
+ * Run `body` in one transaction over both stores and resolve once it commits.
+ * The completion listeners are attached before any request is made, so the
+ * commit cannot be missed. `body` may only await requests of this
+ * transaction: awaiting anything else lets it auto-commit.
+ */
+async function inTransaction<T>(
+  mode: IDBTransactionMode,
+  body: (frames: IDBObjectStore, metadata: IDBObjectStore) => Promise<T>
+): Promise<T> {
+  const db = await openDatabase();
+  const transaction = db.transaction([FRAMES_STORE, METADATA_STORE], mode);
+  const committed = new Promise<void>((resolve, reject) => {
+    transaction.oncomplete = () => resolve();
+    transaction.onabort = () => reject(transaction.error ?? new Error("Transaction aborted"));
+  });
+
+  try {
+    const result = await body(
+      transaction.objectStore(FRAMES_STORE),
+      transaction.objectStore(METADATA_STORE)
+    );
+    await committed;
+    return result;
+  } catch (err) {
+    committed.catch(() => {}); // The failed request's error is the one reported
+    throw err;
+  }
+}
+
+/** Every frame number key; frames have only ever been stored under numbers. */
+function frameNumberKeys(): IDBKeyRange {
+  return IDBKeyRange.upperBound(Infinity);
+}
+
+/** Frame numbers arrive from the API as strings despite their declared type. */
+function toFrameNumber(value: number | string): number {
+  return typeof value === "string" ? parseInt(value, 10) : value;
+}
+
+function normalizeRecord(item: CachedFrameRecord): [number, GlobalFrame] {
+  return [
+    toFrameNumber(item.frameNumber),
+    {
+      ...item.frame,
+      header: {
+        ...item.frame.header,
+        frameNumber: toFrameNumber(item.frame.header.frameNumber),
+      },
+    },
+  ];
+}
+
+/** Rewrite the metadata from the stored keys. */
+async function refreshMetadata(frames: IDBObjectStore, metadata: IDBObjectStore): Promise<void> {
+  const frameNumbers = (await requestResult(frames.getAllKeys(frameNumberKeys()))) as number[];
+  const entry: CacheMetadata = {
+    version: 1,
+    latestFrameNumber: frameNumbers.length > 0 ? frameNumbers[frameNumbers.length - 1] : 0,
+    cachedAt: Date.now(),
+    frameNumbers, // Ascending, as keys are returned
+  };
+  await requestResult(metadata.put({ id: "cache", metadata: entry }));
+}
+
+/**
+ * Delete all but the newest `keepCount` frames by key range, without reading
+ * any frame. Returns whether anything was deleted.
+ */
+async function trimToNewest(frames: IDBObjectStore, keepCount: number): Promise<boolean> {
+  const excess = (await requestResult(frames.count(frameNumberKeys()))) - keepCount;
+  if (excess <= 0) return false;
+
+  const oldest = (await requestResult(frames.getAllKeys(frameNumberKeys(), excess))) as number[];
+  await requestResult(frames.delete(IDBKeyRange.upperBound(oldest[oldest.length - 1])));
+  return true;
+}
+
 /**
  * Get cached metadata
  */
 async function getCacheMetadata(): Promise<CacheMetadata | null> {
   try {
-    const db = await openDatabase();
-    const transaction = db.transaction([METADATA_STORE], "readonly");
-    const store = transaction.objectStore(METADATA_STORE);
-    const request = store.get("cache");
-
-    return new Promise((resolve, reject) => {
-      request.onsuccess = () => {
-        const result = request.result;
-        if (!result) {
-          resolve(null);
-          return;
-        }
-        resolve(result.metadata);
-      };
-      request.onerror = () => {
-        reject(request.error);
-      };
+    return await inTransaction("readonly", async (_, metadata) => {
+      const result = await requestResult(metadata.get("cache"));
+      return result ? (result.metadata as CacheMetadata) : null;
     });
   } catch (err) {
     console.warn("Failed to read cache metadata:", err);
     return null;
-  }
-}
-
-/**
- * Save cache metadata
- */
-async function saveCacheMetadata(metadata: CacheMetadata): Promise<void> {
-  try {
-    const db = await openDatabase();
-    const transaction = db.transaction([METADATA_STORE], "readwrite");
-    const store = transaction.objectStore(METADATA_STORE);
-    store.put({ id: "cache", metadata });
-  } catch (err) {
-    console.warn("Failed to save cache metadata:", err);
   }
 }
 
@@ -101,41 +164,18 @@ export async function getLatestCachedFrameNumber(): Promise<number | null> {
 }
 
 /**
- * Get cached frames from IndexedDB
+ * Get every cached frame from IndexedDB. This reads the whole cache (up to
+ * MAX_CACHE_SIZE frames of ~200 KB each): prefer getFramesByNumbers,
+ * getCachedFramesInRange or getLatestCachedFrameNumber.
  */
 export async function getCachedFrames(): Promise<{ metadata: CacheMetadata; frames: Map<number, GlobalFrame> } | null> {
   try {
-    const metadata = await getCacheMetadata();
-    if (!metadata) return null;
+    return await inTransaction("readonly", async (framesStore, metadataStore) => {
+      const result = await requestResult(metadataStore.get("cache"));
+      if (!result) return null;
 
-    const db = await openDatabase();
-    const transaction = db.transaction([FRAMES_STORE], "readonly");
-    const store = transaction.objectStore(FRAMES_STORE);
-    const request = store.getAll();
-
-    return new Promise((resolve, reject) => {
-      request.onsuccess = () => {
-        const frames = new Map<number, GlobalFrame>();
-        request.result.forEach((item: { frameNumber: number | string; frame: GlobalFrame }) => {
-          // Ensure frameNumber is always a number
-          const num = typeof item.frameNumber === 'string' ? parseInt(item.frameNumber, 10) : item.frameNumber;
-          // Also ensure the frame's header.frameNumber is a number (not a string)
-          const normalizedFrame: GlobalFrame = {
-            ...item.frame,
-            header: {
-              ...item.frame.header,
-              frameNumber: typeof item.frame.header.frameNumber === 'string'
-                ? parseInt(item.frame.header.frameNumber, 10)
-                : item.frame.header.frameNumber,
-            },
-          };
-          frames.set(num, normalizedFrame);
-        });
-        resolve({ metadata, frames });
-      };
-      request.onerror = () => {
-        reject(request.error);
-      };
+      const items = (await requestResult(framesStore.getAll(frameNumberKeys()))) as CachedFrameRecord[];
+      return { metadata: result.metadata as CacheMetadata, frames: new Map(items.map(normalizeRecord)) };
     });
   } catch (err) {
     console.warn("Failed to read frame cache:", err);
@@ -144,87 +184,35 @@ export async function getCachedFrames(): Promise<{ metadata: CacheMetadata; fram
 }
 
 /**
- * Save frames to cache (IndexedDB)
+ * Save frames to cache (IndexedDB). Only frames not already cached are
+ * written; the cache is then trimmed to the newest MAX_CACHE_SIZE frames.
  */
 export async function saveFramesToCache(frames: GlobalFrame[]): Promise<void> {
+  if (frames.length === 0) return;
+
   try {
-    const existing = await getCachedFrames();
-    const frameMap = new Map<number, GlobalFrame>(existing?.frames || []);
-
-    // Merge new frames
-    frames.forEach((frame) => {
-      frameMap.set(frame.header.frameNumber, frame);
-    });
-
-    // Get all frame numbers and sort
-    const frameNumbers = Array.from(frameMap.keys()).sort((a, b) => b - a); // Descending
-
-    // Prune old frames if cache is too large
-    if (frameNumbers.length > MAX_CACHE_SIZE) {
-      const toKeep = frameNumbers.slice(0, MAX_CACHE_SIZE);
-      const toRemove = frameNumbers.slice(MAX_CACHE_SIZE);
-
-      toRemove.forEach((num) => {
-        frameMap.delete(num);
+    await inTransaction("readwrite", async (framesStore, metadataStore) => {
+      const incoming = new Map<number, GlobalFrame>();
+      frames.forEach((frame) => {
+        incoming.set(toFrameNumber(frame.header.frameNumber), frame);
       });
 
-      frameNumbers.splice(MAX_CACHE_SIZE);
-    }
+      const numbers = Array.from(incoming.keys());
+      const range = IDBKeyRange.bound(Math.min(...numbers), Math.max(...numbers));
+      const stored = new Set((await requestResult(framesStore.getAllKeys(range))) as number[]);
 
-    const latestFrameNumber = frameNumbers.length > 0 ? frameNumbers[0] : 0;
-
-    const metadata: CacheMetadata = {
-      version: 1,
-      latestFrameNumber,
-      cachedAt: Date.now(),
-      frameNumbers: frameNumbers.sort((a, b) => a - b), // Ascending for easier gap detection
-    };
-
-    // Save metadata
-    await saveCacheMetadata(metadata);
-
-    // Save frames in batches to avoid quota issues
-    const db = await openDatabase();
-    const transaction = db.transaction([FRAMES_STORE], "readwrite");
-    const store = transaction.objectStore(FRAMES_STORE);
-
-    // Save frames in chunks
-    const batchSize = 100;
-    const frameArray = Array.from(frameMap.entries());
-
-    for (let i = 0; i < frameArray.length; i += batchSize) {
-      const batch = frameArray.slice(i, i + batchSize);
-      await new Promise<void>((resolve, reject) => {
-        const batchTransaction = db.transaction([FRAMES_STORE], "readwrite");
-        const batchStore = batchTransaction.objectStore(FRAMES_STORE);
-
-        let completed = 0;
-        let hasError = false;
-
-        batch.forEach(([frameNumber, frame]) => {
-          // Ensure frameNumber is always a number (not a string)
-          const numFrameNumber = typeof frameNumber === 'string' ? parseInt(frameNumber, 10) : frameNumber;
-          const request = batchStore.put({ frameNumber: numFrameNumber, frame });
-          request.onsuccess = () => {
-            completed++;
-            if (completed === batch.length && !hasError) {
-              resolve();
-            }
-          };
-          request.onerror = () => {
-            if (!hasError) {
-              hasError = true;
-              reject(request.error);
-            }
-          };
-        });
+      let written = 0;
+      incoming.forEach((frame, frameNumber) => {
+        if (!stored.has(frameNumber)) {
+          framesStore.put({ frameNumber, frame });
+          written++;
+        }
       });
-    }
 
-    // Wait for transaction to complete
-    await new Promise<void>((resolve) => {
-      transaction.oncomplete = () => resolve();
-      transaction.onerror = () => resolve(); // Resolve anyway to not block
+      const trimmed = await trimToNewest(framesStore, MAX_CACHE_SIZE);
+      if (written > 0 || trimmed) {
+        await refreshMetadata(framesStore, metadataStore);
+      }
     });
   } catch (err) {
     console.warn("[frameCache] Failed to save frame cache:", err);
@@ -246,67 +234,16 @@ export async function getFramesByNumbers(frameNumbers: number[]): Promise<Map<nu
   if (frameNumbers.length === 0) return result;
 
   try {
-    const db = await openDatabase();
-    const transaction = db.transaction([FRAMES_STORE], "readonly");
-    const store = transaction.objectStore(FRAMES_STORE);
-
-    await Promise.all(
-      frameNumbers.map(
-        (frameNumber) =>
-          new Promise<void>((resolve) => {
-            // Try both number and string key since IndexedDB might have stored it as string
-            // First try as number (correct way)
-            const request = store.get(frameNumber);
-            request.onsuccess = () => {
-              const item = request.result as { frameNumber: number | string; frame: GlobalFrame } | undefined;
-              if (item) {
-                // Ensure frameNumber is a number
-                const num = typeof item.frameNumber === 'string' ? parseInt(item.frameNumber, 10) : item.frameNumber;
-                // Also ensure the frame's header.frameNumber is a number (not a string)
-                const normalizedFrame: GlobalFrame = {
-                  ...item.frame,
-                  header: {
-                    ...item.frame.header,
-                    frameNumber: typeof item.frame.header.frameNumber === 'string'
-                      ? parseInt(item.frame.header.frameNumber, 10)
-                      : item.frame.header.frameNumber,
-                  },
-                };
-                result.set(num, normalizedFrame);
-                resolve();
-              } else {
-                // Try as string if number didn't work (for backwards compatibility with old data)
-                const stringRequest = store.get(String(frameNumber));
-                stringRequest.onsuccess = () => {
-                  const stringItem = stringRequest.result as { frameNumber: number | string; frame: GlobalFrame } | undefined;
-                  if (stringItem) {
-                    const num = typeof stringItem.frameNumber === 'string' ? parseInt(stringItem.frameNumber, 10) : stringItem.frameNumber;
-                    // Also ensure the frame's header.frameNumber is a number (not a string)
-                    const normalizedFrame: GlobalFrame = {
-                      ...stringItem.frame,
-                      header: {
-                        ...stringItem.frame.header,
-                        frameNumber: typeof stringItem.frame.header.frameNumber === 'string'
-                          ? parseInt(stringItem.frame.header.frameNumber, 10)
-                          : stringItem.frame.header.frameNumber,
-                      },
-                    };
-                    result.set(num, normalizedFrame);
-                  }
-                  resolve();
-                };
-                stringRequest.onerror = () => resolve();
-              }
-            };
-            request.onerror = () => resolve();
-          })
-      )
-    );
-
-    // Wait for transaction to complete
-    await new Promise<void>((resolve) => {
-      transaction.oncomplete = () => resolve();
-      transaction.onerror = () => resolve(); // Resolve anyway to not block
+    await inTransaction("readonly", async (framesStore) => {
+      const items = await Promise.all(
+        frameNumbers.map((frameNumber) => requestResult(framesStore.get(frameNumber)))
+      );
+      items.forEach((item: CachedFrameRecord | undefined) => {
+        if (item) {
+          const [num, frame] = normalizeRecord(item);
+          result.set(num, frame);
+        }
+      });
     });
   } catch (err) {
     console.warn("[frameCache] Failed to get frames from IndexedDB:", err);
@@ -322,11 +259,20 @@ export async function getCachedFramesInRange(
   latestFrameNumber: number,
   count: number
 ): Promise<GlobalFrame[]> {
-  const startNumber = Math.max(1, latestFrameNumber - count + 1);
-  const frameNumbers = Array.from({ length: count }, (_, i) => startNumber + i);
+  const latest = toFrameNumber(latestFrameNumber);
+  const startNumber = Math.max(1, latest - count + 1);
+  if (startNumber > latest) return [];
 
-  const framesMap = await getFramesByNumbers(frameNumbers);
-  return Array.from(framesMap.values()).sort((a, b) => a.header.frameNumber - b.header.frameNumber);
+  try {
+    return await inTransaction("readonly", async (framesStore) => {
+      const range = IDBKeyRange.bound(startNumber, latest);
+      const items = (await requestResult(framesStore.getAll(range))) as CachedFrameRecord[];
+      return items.map((item) => normalizeRecord(item)[1]); // Ascending, as keys are returned
+    });
+  } catch (err) {
+    console.warn("[frameCache] Failed to get frames from IndexedDB:", err);
+    return [];
+  }
 }
 
 /**
@@ -336,18 +282,23 @@ export async function findGapsInCache(
   latestFrameNumber: number,
   count: number
 ): Promise<number[]> {
-  const cache = await getCachedFrames();
-  if (!cache) {
-    // If no cache, all frames are gaps
-    const startNumber = Math.max(1, latestFrameNumber - count + 1);
-    return Array.from({ length: count }, (_, i) => latestFrameNumber - i).reverse();
+  const latest = toFrameNumber(latestFrameNumber);
+  const startNumber = Math.max(1, latest - count + 1);
+  if (startNumber > latest) return [];
+
+  let cached = new Set<number>();
+  try {
+    cached = await inTransaction("readonly", async (framesStore) => {
+      const range = IDBKeyRange.bound(startNumber, latest);
+      return new Set((await requestResult(framesStore.getAllKeys(range))) as number[]);
+    });
+  } catch (err) {
+    console.warn("[frameCache] Failed to read cached frame numbers:", err);
   }
 
-  const startNumber = Math.max(1, latestFrameNumber - count + 1);
   const gaps: number[] = [];
-
-  for (let i = startNumber; i <= latestFrameNumber; i++) {
-    if (!cache.frames.has(i)) {
+  for (let i = startNumber; i <= latest; i++) {
+    if (!cached.has(i)) {
       gaps.push(i);
     }
   }
@@ -370,51 +321,22 @@ export async function isCacheStale(maxAgeMs = 5 * 60 * 1000): Promise<boolean> {
  * Prune cache to keep only frames within a range
  */
 export async function pruneCache(latestFrameNumber: number, keepCount: number): Promise<void> {
-  const cache = await getCachedFrames();
-  if (!cache) return;
+  const latest = toFrameNumber(latestFrameNumber);
+  const startNumber = Math.max(1, latest - keepCount + 1);
 
-  const startNumber = Math.max(1, latestFrameNumber - keepCount + 1);
-  const framesToRemove: number[] = [];
-
-  // Find frames to remove
-  cache.frames.forEach((_, frameNumber) => {
-    if (frameNumber < startNumber || frameNumber > latestFrameNumber) {
-      framesToRemove.push(frameNumber);
-    }
-  });
-
-  if (framesToRemove.length === 0) return;
-
-  // Remove frames from IndexedDB
   try {
-    const db = await openDatabase();
-    const transaction = db.transaction([FRAMES_STORE], "readwrite");
-    const store = transaction.objectStore(FRAMES_STORE);
+    await inTransaction("readwrite", async (framesStore, metadataStore) => {
+      const older = IDBKeyRange.upperBound(startNumber, true);
+      const newer = IDBKeyRange.lowerBound(latest, true);
+      const outside =
+        (await requestResult(framesStore.count(older))) +
+        (await requestResult(framesStore.count(newer)));
+      if (outside === 0) return;
 
-    await Promise.all(
-      framesToRemove.map(
-        (frameNumber) =>
-          new Promise<void>((resolve, reject) => {
-            const request = store.delete(frameNumber);
-            request.onsuccess = () => resolve();
-            request.onerror = () => reject(request.error);
-          })
-      )
-    );
-
-    // Update metadata
-    const remainingFrames = Array.from(cache.frames.keys())
-      .filter((num) => !framesToRemove.includes(num))
-      .sort((a, b) => a - b);
-
-    const metadata: CacheMetadata = {
-      version: 1,
-      latestFrameNumber: remainingFrames.length > 0 ? Math.max(...remainingFrames) : 0,
-      cachedAt: Date.now(),
-      frameNumbers: remainingFrames,
-    };
-
-    await saveCacheMetadata(metadata);
+      framesStore.delete(older);
+      framesStore.delete(newer);
+      await refreshMetadata(framesStore, metadataStore);
+    });
   } catch (err) {
     console.warn("Failed to prune cache:", err);
   }
@@ -425,51 +347,43 @@ export async function pruneCache(latestFrameNumber: number, keepCount: number): 
  */
 export async function clearFrameCache(): Promise<void> {
   try {
-    const db = await openDatabase();
-    const transaction = db.transaction([FRAMES_STORE, METADATA_STORE], "readwrite");
-    transaction.objectStore(FRAMES_STORE).clear();
-    transaction.objectStore(METADATA_STORE).clear();
+    await inTransaction("readwrite", async (framesStore, metadataStore) => {
+      framesStore.clear();
+      metadataStore.clear();
+    });
   } catch (err) {
     console.warn("Failed to clear frame cache:", err);
   }
 }
 
 /**
- * Estimate storage usage of frame cache
+ * Estimate storage usage of frame cache from the size of the newest frames,
+ * rather than reading every frame.
  */
 export async function estimateStorageUsage(): Promise<{ sizeBytes: number; frameCount: number }> {
   try {
-    const db = await openDatabase();
-    const transaction = db.transaction([FRAMES_STORE], "readonly");
-    const store = transaction.objectStore(FRAMES_STORE);
-    const request = store.getAll();
+    return await inTransaction("readonly", async (framesStore) => {
+      const frameCount = await requestResult(framesStore.count());
+      const keys = (await requestResult(framesStore.getAllKeys(frameNumberKeys()))) as number[];
+      if (frameCount === 0 || keys.length === 0) {
+        return { sizeBytes: 0, frameCount };
+      }
 
-    return new Promise((resolve, reject) => {
-      request.onsuccess = () => {
-        const frames = request.result as Array<{ frameNumber: number; frame: GlobalFrame }>;
-        let totalSize = 0;
+      const newest = IDBKeyRange.bound(keys[Math.max(0, keys.length - SIZE_SAMPLE_FRAMES)], keys[keys.length - 1]);
+      const sample = (await requestResult(framesStore.getAll(newest))) as CachedFrameRecord[];
+      let sampleSize = 0;
+      sample.forEach((item) => {
+        try {
+          // UTF-8 byte length of the JSON form; an approximation of the stored size
+          sampleSize += new Blob([JSON.stringify(item)]).size;
+        } catch {
+          sampleSize += 10000; // Rough estimate per frame
+        }
+      });
 
-        // Estimate size by serializing each frame
-        frames.forEach((item) => {
-          try {
-            const serialized = JSON.stringify(item);
-            // Each character in UTF-16 is 2 bytes, but JSON uses UTF-8 which is 1 byte per ASCII char
-            // This is an approximation
-            totalSize += new Blob([serialized]).size;
-          } catch (err) {
-            // If serialization fails, estimate based on frame number
-            totalSize += 10000; // Rough estimate per frame
-          }
-        });
-
-        resolve({
-          sizeBytes: totalSize,
-          frameCount: frames.length,
-        });
-      };
-
-      request.onerror = () => {
-        reject(request.error);
+      return {
+        sizeBytes: Math.round((sampleSize / sample.length) * frameCount),
+        frameCount,
       };
     });
   } catch (err) {
@@ -483,47 +397,11 @@ export async function estimateStorageUsage(): Promise<{ sizeBytes: number; frame
  */
 export async function deleteFramesKeepingLast(keepCount: number): Promise<void> {
   try {
-    const cache = await getCachedFrames();
-    if (!cache || cache.frames.size === 0) {
-      return;
-    }
-
-    const frameNumbers = Array.from(cache.frames.keys()).sort((a, b) => b - a); // Descending
-    const framesToKeep = frameNumbers.slice(0, keepCount);
-    const framesToDelete = frameNumbers.slice(keepCount);
-
-    if (framesToDelete.length === 0) {
-      return;
-    }
-
-    const db = await openDatabase();
-    const transaction = db.transaction([FRAMES_STORE], "readwrite");
-    const store = transaction.objectStore(FRAMES_STORE);
-
-    // Delete frames
-    await Promise.all(
-      framesToDelete.map(
-        (frameNumber) =>
-          new Promise<void>((resolve, reject) => {
-            const request = store.delete(frameNumber);
-            request.onsuccess = () => resolve();
-            request.onerror = () => reject(request.error);
-          })
-      )
-    );
-
-    // Update metadata
-    const remainingFrames = framesToKeep.sort((a, b) => a - b);
-    const latestFrameNumber = remainingFrames.length > 0 ? Math.max(...remainingFrames) : 0;
-
-    const metadata: CacheMetadata = {
-      version: 1,
-      latestFrameNumber,
-      cachedAt: Date.now(),
-      frameNumbers: remainingFrames,
-    };
-
-    await saveCacheMetadata(metadata);
+    await inTransaction("readwrite", async (framesStore, metadataStore) => {
+      if (await trimToNewest(framesStore, keepCount)) {
+        await refreshMetadata(framesStore, metadataStore);
+      }
+    });
   } catch (err) {
     console.warn("Failed to delete frames:", err);
     throw err;

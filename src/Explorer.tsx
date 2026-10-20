@@ -24,6 +24,8 @@ import {
   EvictionRiskEntry,
   SeniorityEntry,
   KickedEntry,
+  ProductionClass,
+  ShardProductionResponse,
   explorerApi,
 } from "@/lib/api";
 import {
@@ -52,12 +54,20 @@ import { PeerDirectory } from "@/components/PeerDirectory";
 import { FrameFeedFilters, type FrameFilterState } from "@/components/FrameFeedFilters";
 import { FrameFeedExport } from "@/components/FrameFeedExport";
 import {
-  getCachedFrames,
   getFramesByNumbers,
   saveFramesToCache,
   pruneCache,
 } from "@/lib/frameCache";
 import { formatProvers } from "@/lib/provers";
+import { StatTile } from "@/components/ui/StatTile";
+import { EvictionRiskList } from "@/components/EvictionRiskList";
+import { ProverLink } from "@/components/HexLink";
+import {
+  ProductionClassFilter,
+  ProductionSummaryTiles,
+  ProductionWindowNote,
+  ShardProductionTable,
+} from "@/components/ShardProduction";
 import { ProverCard } from "@/components/ProverCard";
 import { Button } from "@/components/ui/Button";
 import { Pagination } from "@/components/ui/Pagination";
@@ -73,6 +83,9 @@ const SHARD_STATUS_COLUMNS = [
 ];
 
 const FRAME_COUNT_STORAGE_KEY = "explorer-frame-count";
+// Matches /stats `at_risk`: past half the eviction threshold.
+const EVICTION_RISK_MIN_RATIO = 0.5;
+const EVICTION_RISK_LIMIT = 100;
 const VALID_FRAME_COUNTS = [10, 25, 50] as const;
 
 function getShardTotal(summary: ProverShardSummary) {
@@ -461,12 +474,6 @@ function ShardSummaryCard({ summary }: { summary: ProverShardSummary }) {
   );
 }
 
-function riskToneForRatio(ratio: number) {
-  if (ratio >= 1) return "risk";
-  if (ratio >= 0.5) return "warn";
-  return "safe";
-}
-
 const proverStatusBadgeClasses: Record<string, string> = {
   active: "bg-green/10 text-green dark:bg-green/20 dark:text-light-green",
   joining: "bg-green/10 text-green dark:bg-green/20 dark:text-light-green",
@@ -482,53 +489,6 @@ function StatusBadge({ status }: { status: string }) {
     <span className={`inline-flex text-xs font-semibold uppercase tracking-label rounded-full px-3 py-1 ${badgeClass}`}>
       {status}
     </span>
-  );
-}
-
-function StatTile({ label, value, tone = "default" }: { label: string; value: React.ReactNode; tone?: "default" | "safe" | "warn" | "risk" }) {
-  const toneClass = {
-    default: "text-primary",
-    safe: "text-green dark:text-light-green",
-    warn: "text-warning",
-    risk: "text-danger",
-  }[tone];
-  return (
-    <div className="rounded-2xl border border-default bg-surface-raised p-4">
-      <div className="label-text">{label}</div>
-      <div className={`mt-1 text-2xl font-semibold ${toneClass}`}>{value}</div>
-    </div>
-  );
-}
-
-function EvictionRiskCard({ entry }: { entry: EvictionRiskEntry }) {
-  const tone = entry.eviction_pending ? "risk" : riskToneForRatio(entry.risk_ratio);
-  const badgeClass = coverageBadgeClasses[tone] ?? "";
-  return (
-    <div className="rounded-2xl border border-default bg-surface-raised p-4 text-sm text-burgundy dark:text-white">
-      <div className="flex items-center justify-between gap-2">
-        <div className="label-text">Prover</div>
-        <span className={`text-xs font-semibold uppercase tracking-label rounded-full px-3 py-1 ${badgeClass}`}>
-          {entry.eviction_pending ? "eviction pending" : `${Math.round(entry.risk_ratio * 100)}% risk`}
-        </span>
-      </div>
-      <div className="mt-1 font-mono text-sm sm:text-xs break-all">
-        <HoverableCopyText text={entry.address}>{truncateFilter(entry.address)}</HoverableCopyText>
-      </div>
-      <div className="mt-2 text-sm sm:text-xs text-muted">Shard filter</div>
-      <div className="font-mono text-sm sm:text-xs break-all">
-        <HoverableCopyText text={entry.filter}>{truncateFilter(entry.filter)}</HoverableCopyText>
-      </div>
-      <div className="mt-3 grid grid-cols-2 gap-y-1 text-sm sm:text-xs text-secondary">
-        <span>Runway</span>
-        <span className="text-right font-semibold text-primary">{entry.frames_until_eviction.toLocaleString()} frames</span>
-        <span>Inactive for</span>
-        <span className="text-right font-semibold text-primary">{entry.effective_inactive.toLocaleString()} frames</span>
-        <span>Last active</span>
-        <span className="text-right font-semibold text-primary">{entry.last_active_frame_number.toLocaleString()}</span>
-        <span>Seniority</span>
-        <span className="text-right font-semibold text-primary">{entry.seniority.toLocaleString()}</span>
-      </div>
-    </div>
   );
 }
 
@@ -720,6 +680,9 @@ export default function Explorer() {
   const [shardCardPage, setShardCardPage] = useState(1);
   const [stats, setStats] = useState<NetworkStats | null>(null);
   const [evictionRisk, setEvictionRisk] = useState<EvictionRiskEntry[]>([]);
+  const [evictionRiskTotal, setEvictionRiskTotal] = useState(0);
+  const [production, setProduction] = useState<ShardProductionResponse | null>(null);
+  const [productionClass, setProductionClass] = useState<ProductionClass | null>(null);
   const [seniority, setSeniority] = useState<SeniorityEntry[]>([]);
   const [kicked, setKicked] = useState<KickedEntry[]>([]);
   const SHARD_CARDS_PER_PAGE = 20;
@@ -752,7 +715,8 @@ export default function Explorer() {
 
   // Function to hydrate frame feed with caching
   const hydrateFrameFeed = useCallback(async (baseFrame: GlobalFrame, count: number) => {
-    const latestNumber = baseFrame.header.frameNumber;
+    // The API sends frame numbers as strings
+    const latestNumber = Number(baseFrame.header.frameNumber);
     const startNumber = Math.max(1, latestNumber - count + 1);
     const neededFrameNumbers = Array.from(
       { length: latestNumber - startNumber + 1 },
@@ -884,7 +848,7 @@ export default function Explorer() {
       setLoading(true);
       setError(null);
       try {
-        const [frame, proposal, gossip, peerList, proversList, shardList, statsData, evictionList, seniorityList, kickedList] = await Promise.all([
+        const [frame, proposal, gossip, peerList, proversList, shardList, statsData, evictionPage, seniorityList, kickedList, productionData] = await Promise.all([
           explorerApi.getLatestFrame(),
           explorerApi.getLatestCertified().catch(() => null),
           explorerApi.getMessages(20).catch(() => []),
@@ -892,9 +856,12 @@ export default function Explorer() {
           explorerApi.getProvers().catch(() => []),
           explorerApi.getProverShardSummaries().catch(() => []),
           explorerApi.getStats().catch(() => null),
-          explorerApi.getEvictionRisk().catch(() => []),
+          explorerApi
+            .getEvictionRisk({ minRatio: EVICTION_RISK_MIN_RATIO, limit: EVICTION_RISK_LIMIT })
+            .catch(() => ({ entries: [], total: 0 })),
           explorerApi.getSeniority(100).catch(() => []),
           explorerApi.getKicked().catch(() => []),
+          explorerApi.getShardProduction().catch(() => null),
         ]);
         if (!mounted) {
           return;
@@ -906,7 +873,9 @@ export default function Explorer() {
         setProvers(proversList);
         setShardSummaries(shardList);
         setStats(statsData);
-        setEvictionRisk(evictionList);
+        setEvictionRisk(evictionPage.entries);
+        setEvictionRiskTotal(evictionPage.total);
+        setProduction(productionData);
         setSeniority(seniorityList);
         setKicked(kickedList);
         setShardCardPage(1);
@@ -1116,6 +1085,10 @@ export default function Explorer() {
     return { risk, warn, totalBytes, totalDataShards };
   }, [shardRows]);
   const proverRows = useMemo(() => formatProvers(provers), [provers]);
+  const productionShards = useMemo(() => {
+    const shards = production?.shards ?? [];
+    return productionClass ? shards.filter((shard) => shard.class === productionClass) : shards;
+  }, [production, productionClass]);
 
   // Use the peer filters hook
   const {
@@ -1345,6 +1318,17 @@ export default function Explorer() {
                     tone={stats.halted_shards > 0 ? "warn" : "default"}
                   />
                   <StatTile label="Total seniority" value={stats.total_seniority.toLocaleString()} />
+                </div>
+              )}
+              {stats?.app_shards && (
+                <div className="space-y-3">
+                  <div className="flex flex-wrap items-baseline justify-between gap-2">
+                    <div className="label-text">App shards</div>
+                    <div className="text-sm sm:text-xs text-muted">
+                      <ProductionWindowNote window={stats.app_shards} />
+                    </div>
+                  </div>
+                  <ProductionSummaryTiles stats={stats.app_shards} />
                 </div>
               )}
             </div>
@@ -1655,78 +1639,93 @@ export default function Explorer() {
             </div>
           </section>
 
+          <section id="shard-production" className="section-glow-b mt-14 relative overflow-hidden rounded-3xl border border-subtle bg-surface p-5 xs:p-10 text-burgundy shadow-xl backdrop-blur-lg dark:text-white">
+            <div className="relative space-y-6">
+              <div className="flex flex-wrap items-start justify-between gap-3">
+                <SectionTitle icon="layers1">Shard production</SectionTitle>
+                {production && (
+                  <div className="text-sm sm:text-xs font-semibold uppercase tracking-label text-secondary">
+                    {production.summary.classes.producing.toLocaleString()} / {production.summary.live_shards.toLocaleString()} producing
+                  </div>
+                )}
+              </div>
+              <p className="text-sm text-secondary">
+                Whether GLOBAL applied each live shard&apos;s app frames over the window.{" "}
+                {production && <ProductionWindowNote window={production} />}
+              </p>
+              {!production && loading ? (
+                <ShardTableSkeleton />
+              ) : !production ? (
+                <p className="text-sm text-secondary">Shard production is unavailable until the node builds its first index.</p>
+              ) : (
+                <>
+                  <ProductionClassFilter
+                    counts={production.summary.classes}
+                    total={production.shards.length}
+                    selected={productionClass}
+                    onSelect={setProductionClass}
+                  />
+                  {productionShards.length === 0 ? (
+                    <p className="text-sm text-secondary">No shards in this class.</p>
+                  ) : (
+                    <ShardProductionTable key={productionClass ?? "all"} shards={productionShards} />
+                  )}
+                  <div className="flex flex-wrap gap-4 text-sm sm:text-xs text-secondary">
+                    <div>
+                      Headers included:
+                      <span className="ml-1 font-semibold text-primary">{production.summary.inclusions_in_window.toLocaleString()}</span>
+                    </div>
+                    <div>
+                      Not applied:
+                      <span className="ml-1 font-semibold text-primary">{production.summary.not_applied_in_window.toLocaleString()}</span>
+                    </div>
+                    <div>
+                      Unknown outcome:
+                      <span className="ml-1 font-semibold text-primary">{production.summary.unknown_outcome_in_window.toLocaleString()}</span>
+                    </div>
+                    <div>
+                      Drained in handoffs:
+                      <span className="ml-1 font-semibold text-primary">{production.summary.drained_in_window.toLocaleString()}</span>
+                    </div>
+                    {production.summary.grid_shards !== null && (
+                      <div>
+                        Grid:
+                        <span className="ml-1 font-semibold text-primary">
+                          {production.summary.grid_shards.toLocaleString()} rows · {production.summary.grid_digest}
+                        </span>
+                      </div>
+                    )}
+                    {production.summary.grid_unavailable && (
+                      <div className="text-warning">Grid unavailable: {production.summary.grid_unavailable}</div>
+                    )}
+                  </div>
+                </>
+              )}
+            </div>
+          </section>
+
           <section id="eviction-risk" className="section-glow-c mt-14 relative overflow-hidden rounded-3xl border border-subtle bg-surface p-5 xs:p-10 text-burgundy shadow-xl backdrop-blur-lg dark:text-white">
             <div className="relative space-y-6">
               <div className="flex flex-wrap items-start justify-between gap-3">
                 <SectionTitle icon="warningshield">Eviction risk</SectionTitle>
                 <div className="text-sm sm:text-xs font-semibold uppercase tracking-label text-secondary">
-                  {evictionRisk.length.toLocaleString()} at risk
+                  {evictionRiskTotal.toLocaleString()} {evictionRiskTotal === 1 ? "allocation" : "allocations"} at risk
                 </div>
               </div>
               <p className="text-sm text-secondary">
-                Active provers accruing inactivity toward eviction, most-at-risk first. Runway is the number of
-                frames of continued inactivity before the evictor removes the allocation.
+                Active allocations past half the eviction threshold, most at risk first. Runway is the number of
+                frames of continued inactivity before the evictor removes the allocation. Allocations on a stalled
+                shard are exempt.
+                {evictionRiskTotal > evictionRisk.length && (
+                  <> Showing the top {evictionRisk.length.toLocaleString()}.</>
+                )}
               </p>
               {evictionRisk.length === 0 && loading ? (
                 <ShardTableSkeleton />
               ) : evictionRisk.length === 0 ? (
                 <p className="text-sm text-secondary">No provers are currently at risk of eviction.</p>
               ) : (
-                <>
-                  <div className="space-y-4 md:hidden">
-                    {evictionRisk.map((entry, i) => (
-                      <EvictionRiskCard key={`${entry.address}-${entry.filter}-${i}`} entry={entry} />
-                    ))}
-                  </div>
-                  <div className="hidden md:block overflow-x-auto">
-                    <div className="max-h-[420px] overflow-y-auto">
-                      <table className="min-w-full divide-y divide-subtle text-left text-sm text-primary">
-                        <thead className="sticky top-0 z-10 bg-surface label-text">
-                          <tr>
-                            <th className="py-3 px-4">Prover</th>
-                            <th className="py-3 px-4">Shard filter</th>
-                            <th className="py-3 px-4">Runway</th>
-                            <th className="py-3 px-4">Inactive</th>
-                            <th className="py-3 px-4">Last active</th>
-                            <th className="py-3 px-4">Risk</th>
-                          </tr>
-                        </thead>
-                        <tbody className="divide-y divide-subtle">
-                          {evictionRisk.map((entry, i) => {
-                            const tone = entry.eviction_pending ? "risk" : riskToneForRatio(entry.risk_ratio);
-                            const rowToneClasses = {
-                              risk: "bg-danger-subtle",
-                              warn: "bg-warning-subtle",
-                              safe: "",
-                            } as const;
-                            return (
-                              <tr key={`${entry.address}-${entry.filter}-${i}`} className={rowToneClasses[tone] ?? ""}>
-                                <td className="py-3 px-4 font-mono text-sm sm:text-xs break-all align-top">
-                                  <HoverableCopyText text={entry.address}>{truncateFilter(entry.address)}</HoverableCopyText>
-                                </td>
-                                <td className="py-3 px-4 font-mono text-sm sm:text-xs break-all align-top">
-                                  <HoverableCopyText text={entry.filter}>{truncateFilter(entry.filter)}</HoverableCopyText>
-                                </td>
-                                <td className="py-3 px-4 text-sm sm:text-xs align-top font-semibold">
-                                  {entry.frames_until_eviction.toLocaleString()}
-                                </td>
-                                <td className="py-3 px-4 text-sm sm:text-xs align-top">
-                                  {entry.effective_inactive.toLocaleString()}
-                                </td>
-                                <td className="py-3 px-4 text-sm sm:text-xs align-top">
-                                  {entry.last_active_frame_number.toLocaleString()}
-                                </td>
-                                <td className="py-3 px-4 text-sm sm:text-xs align-top font-semibold">
-                                  {entry.eviction_pending ? "Pending" : `${Math.round(entry.risk_ratio * 100)}%`}
-                                </td>
-                              </tr>
-                            );
-                          })}
-                        </tbody>
-                      </table>
-                    </div>
-                  </div>
-                </>
+                <EvictionRiskList entries={evictionRisk} />
               )}
             </div>
           </section>
@@ -1760,8 +1759,8 @@ export default function Explorer() {
                         {seniority.map((entry) => (
                           <tr key={entry.address}>
                             <td className="py-3 px-4 text-sm sm:text-xs align-top font-semibold">#{entry.rank.toLocaleString()}</td>
-                            <td className="py-3 px-4 font-mono text-sm sm:text-xs break-all align-top">
-                              <HoverableCopyText text={entry.address}>{truncateFilter(entry.address)}</HoverableCopyText>
+                            <td className="py-3 px-4 text-sm sm:text-xs align-top">
+                              <ProverLink address={entry.address} />
                             </td>
                             <td className="py-3 px-4 text-sm sm:text-xs align-top font-semibold">{entry.seniority.toLocaleString()}</td>
                             <td className="py-3 px-4 align-top"><StatusBadge status={entry.status} /></td>
@@ -1803,8 +1802,8 @@ export default function Explorer() {
                       <tbody className="divide-y divide-subtle">
                         {kicked.map((entry) => (
                           <tr key={entry.address}>
-                            <td className="py-3 px-4 font-mono text-sm sm:text-xs break-all align-top">
-                              <HoverableCopyText text={entry.address}>{truncateFilter(entry.address)}</HoverableCopyText>
+                            <td className="py-3 px-4 text-sm sm:text-xs align-top">
+                              <ProverLink address={entry.address} />
                             </td>
                             <td className="py-3 px-4 font-mono text-sm sm:text-xs break-all align-top">
                               <HoverableCopyText text={entry.public_key}>{truncateFilter(entry.public_key)}</HoverableCopyText>

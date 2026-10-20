@@ -1,19 +1,27 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { explorerApi, PeerRecord } from "@/lib/api";
+import { explorerApi } from "@/lib/api";
 import { formatPeerRows, matchesSearch, PeerRow } from "@/lib/peers";
-import { truncateMiddle } from "@/lib/format";
+import { isHex32, normalizeHex, truncateHex, truncateMiddle } from "@/lib/format";
 import Magnifyingglass from "@/assets/icons/iconset/Magnifyingglass";
 import { usePeerFavorites } from "@/components/helpers/PeerFavoritesContext";
 import { IconStarFilled } from "@tabler/icons-react";
 
 interface SearchResult {
-  type: "peer" | "frame";
+  type: "peer" | "frame" | "prover";
   peer?: PeerRow;
   frameNumber?: number;
+  /** Where an address result navigates. */
+  path?: string;
   displayText: string;
   subtitle?: string;
 }
+
+const RESULT_TYPE_LABELS: Record<SearchResult["type"], string> = {
+  peer: "PEER",
+  frame: "FRAME",
+  prover: "PROVER",
+};
 
 interface HeaderSearchProps {
   fullWidth?: boolean;
@@ -87,8 +95,21 @@ export function HeaderSearch({ fullWidth = false }: HeaderSearchProps) {
     // Check if query looks like an IP address (contains dots or colons)
     const looksLikeIP = trimmedQuery.includes(".") || trimmedQuery.includes(":");
 
-    // Only check for frame numbers if it doesn't look like an IP address
-    if (!looksLikeIP) {
+    // A 32-byte hex value is offered as a prover address, without querying the API
+    const looksLikeAddress = isHex32(trimmedQuery);
+    if (looksLikeAddress) {
+      const hex = normalizeHex(trimmedQuery);
+      const display = truncateHex(`0x${hex}`);
+      results.push({
+        type: "prover",
+        path: `/provers/${hex}`,
+        displayText: `Prover ${display}`,
+        subtitle: "View prover details",
+      });
+    }
+
+    // Only check for frame numbers if it doesn't look like an IP address or an address
+    if (!looksLikeIP && !looksLikeAddress) {
       const frameNum = parseInt(trimmedQuery, 10);
       if (!isNaN(frameNum) && frameNum > 0) {
         results.push({
@@ -151,6 +172,8 @@ export function HeaderSearch({ fullWidth = false }: HeaderSearchProps) {
       navigate(`/peers/${result.peer.peerId}`);
     } else if (result.type === "frame" && result.frameNumber !== undefined) {
       navigate(`/frames/${result.frameNumber}`);
+    } else if (result.path) {
+      navigate(result.path);
     }
     setQuery("");
     setShowDropdown(false);
@@ -241,7 +264,7 @@ export function HeaderSearch({ fullWidth = false }: HeaderSearchProps) {
             setIsFocused(false);
           }}
           onKeyDown={handleKeyDown}
-          placeholder="Search IP, peer, or frame..."
+          placeholder="Search IP, peer, frame, or address..."
           className="w-full rounded-lg border border-default bg-white/50 px-10 py-2 text-sm text-burgundy placeholder:text-burgundy/40 focus:border-strong focus:bg-white focus:outline-none focus:ring-2 focus:ring-brand/20 dark:border-white/20 dark:bg-white/[0.08] dark:text-white dark:placeholder:text-white/40 dark:focus:border-white/30 dark:focus:bg-overlay"
         />
         {query && (
@@ -297,7 +320,7 @@ export function HeaderSearch({ fullWidth = false }: HeaderSearchProps) {
                   {result.type === "peer" && result.peer && isFavorite(result.peer.peerId) && (
                     <IconStarFilled className="w-3.5 h-3.5 text-pink flex-shrink-0" />
                   )}
-                  <span>{result.type === "peer" ? "PEER" : "FRAME"}</span>
+                  <span>{RESULT_TYPE_LABELS[result.type]}</span>
                 </div>
               </div>
             </button>
